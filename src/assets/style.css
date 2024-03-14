@@ -1,0 +1,451 @@
+.content {
+    /* background: linear-gradient(-45deg, #224c8e, #3b9fff, #193161); */
+    background: linear-gradient(-45deg, #293B5F, #294B8E, #0E1626);
+    background-size: 400% 400%;
+    animation: gradient 10s ease infinite;
+    width: 100%;
+    height: 100%;
+    vertical-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+}
+
+button,
+input {
+    border: none;
+}
+
+input {
+    outline: none;
+}
+
+button {
+    cursor: pointer;
+    padding: 0;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* side navigation */
+
+.wrapper {
+    position: relative;
+    overflow-x: hidden;
+    height: 100vh;
+}
+
+.sidenav {
+    height: 100%;
+    width: 14%;
+    position: fixed;
+    z-index: 99;
+    top: 0;
+    left: 0;
+    background-color: #F8F6F4;
+    transition: 0.5s;
+    transform: translateX(0%);
+    box-shadow: 8px 0 16px 0 rgba(41, 59, 95, 0.08);
+}
+
+.side-menu__btn {
+    position: absolute;
+    top: 14px;
+    right: -58px;
+}
+
+.icon-burger {
+    padding: 15px 15px;
+    cursor: pointer;
+    width: 30px;
+    background-position: center;
+    background-image: url(../public/img/sidenav/burger.svg);
+    background-repeat: no-repeat;
+}
+
+.sidenav__top-block {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.sidenav__block {
+    display: flex;
+    flex-direction: column;
+    margin-top: 16px;
+    padding: 20px;
+}
+
+.sidenav__block p {
+    padding: 16px;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 16px;
+    text-transform: uppercase;
+    color: #1976D2;
+    transition: 0.3s;
+}
+
+.sidenav__block button {
+    display: flex;
+    font-size: 14px;
+    line-height: 129%;
+    text-align: left;
+    background-color: inherit;
+    border-radius: 8px;
+    height: 48px;
+    color: #293b5f;
+    padding: 0px;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 4px;
+}
+
+.sidenav__block button:hover,
+.sidebtn_active {
+    background-color: #293B5F !important;
+    color: #F8F6F4 !important;
+}
+
+.page-content {
+    transition: 0.5s;
+    width: 86%;
+    position: relative;
+    z-index: 0;
+    margin: 0 0 0 auto;
+    z-index: 0;
+    background-color: #EEEEEE;
+    height: 100%;
+}
+
+/* top-menu */
+
+.top-menu {
+    height: 56px;
+    align-items: center;
+    padding: 0 0 0 16px;
+    box-shadow: 0 8px 16px 0 rgba(41, 59, 95, 0.08);
+    background-color: #F8F6F4;
+    display: flex;
+    position: relative;
+}
+
+.delta-block {
+    padding: 22px 20px 25px 20px;
+}
+
+.delta {
+    background-image: url(../public/img/delta.svg);
+    background-repeat: no-repeat;
+    width: 12px;
+    height: 8px;
+}
+
+.inverted_delta {
+    background-image: url(../public/img/delta-inverted.svg);
+}
+
+.white_delta {
+    background-image: url(../public/img/white_delta.svg);
+}
+
+.inverted_white_delta {
+    background-image: url(../public/img/inverted_white_delta.svg);
+}
+
+.menu__user-name {
+    padding-top: 4px;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 112%;
+    text-align: right;
+    color: #293b5f;
+    margin: 0;
+}
+
+.menu__user-role {
+    font-weight: 400;
+    font-size: 10px;
+    text-align: right;
+    color: rgba(41, 59, 95, 0.72);
+    margin: 0;
+}
+
+.top-menu__item i {
+    padding-right: 16px;
+    width: 20px;
+    width: 20px;
+    height: 20px;
+    background-repeat: no-repeat;
+}
+
+.top-menu__item {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    cursor: pointer;
+    position: relative;
+    height: 100%;
+    margin: 0 0 0 auto;
+    padding-left: 32px;
+}
+
+.top-menu__item-name {
+    min-width: 132px;
+}
+
+.top-menu__item-options {
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    position: absolute;
+    top: 55px;
+    right: 0px;
+    z-index: 1;
+    border-radius: 0 0 0 8px;
+    width: 100%;
+    height: 94px;
+    background: #f8f6f4;
+    box-shadow: 0 8px 16px 0 rgba(41, 59, 95, 0.08);
+}
+
+.display_flex {
+    display: flex;
+}
+
+.top-menu__item-options button {
+    height: 48px;
+    padding: 0 0 0 32px;
+    align-items: center;
+    font-size: 14px;
+    display: flex;
+    white-space: nowrap;
+    width: 100%;
+    background-color: #F8F6F4;
+    color: #293B5F;
+}
+
+.top-menu__item-options button:hover {
+    background-color: #293B5F;
+    color: #F8F6F4;
+}
+
+.top-menu__item-options button:last-child {
+    border-radius: 0 0 0 8px;
+}
+
+.icon-personal-area,
+.icon-logout {
+    font-size: 24px;
+}
+
+.device-table__wrap {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.device-table__top {
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.project__desc {
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 28px;
+    display: flex;
+}
+
+.map__desc {
+    position: relative;
+    cursor: pointer;
+}
+
+.map__desc:hover {
+    display: flex;
+}
+
+.map-content {
+    padding: 16px;
+    height: 620px;
+    display: flex;
+    justify-content: space-between;
+    /* если список слева */
+}
+
+.sidenav_hidden {
+    transform: translateX(-100%) !important;
+}
+
+.content_compressed {
+    width: 100% !important;
+}
+
+.sidenav__block div {
+    height: 20px;
+    width: 20px;
+    background-repeat: no-repeat;
+    margin: 0 16px 0 24px;
+    background-position: center;
+}
+
+.icon-map {
+    background-image: url(../public/img/sidenav/icon-map.svg);
+}
+
+#sidenav__map:hover .icon-map,
+.iconmap_active {
+    background-image: url(../public/img/sidenav/icon-map-hover.svg) !important;
+}
+
+.icon-control {
+    background-image: url(../public/img/sidenav/icon-control.svg);
+}
+
+#sidenav__control:hover .icon-control,
+.iconcontrol_active {
+    background-image: url(../public/img/sidenav/icon-control-hover.svg) !important;
+}
+
+.icon-project {
+    background-image: url(../public/img/sidenav/icon-project.svg);
+}
+
+#sidenav__project:hover .icon-project,
+.iconproj_active {
+    background-image: url(../public/img/sidenav/icon-project-hover.svg) !important;
+}
+
+.icon-list {
+    background-image: url(../public/img/sidenav/icon-list.svg);
+}
+
+#sidenav__list:hover .icon-list,
+.iconlist_active {
+    background-image: url(../public/img/sidenav/icon-list-hover.svg) !important;
+}
+
+.icon-subscription {
+    background-image: url(../public/img/sidenav/icon-subscription.svg);
+}
+
+#sidenav__subscription:hover .icon-subscription,
+.iconsub_active {
+    background-image: url(../public/img/sidenav/icon-subscription-hover.svg) !important;
+}
+
+.icon-events {
+    background-image: url(../public/img/sidenav/icon-events.svg);
+}
+
+#sidenav__events:hover .icon-events,
+.iconevents_active {
+    background-image: url(../public/img/sidenav/icon-events-hover.svg) !important;
+}
+
+.icon-commands {
+    background-image: url(../public/img/sidenav/icon-commands.svg);
+}
+
+#sidenav__commands:hover .icon-commands,
+.iconcom_active {
+    background-image: url(../public/img/sidenav/icon-commands-hover.svg) !important;
+}
+
+.icon-reports {
+    background-image: url(../public/img/sidenav/icon-reports.svg);
+}
+
+#sidenav__reports:hover .icon-reports,
+.iconreports_active {
+    background-image: url(../public/img/sidenav/icon-reports-hover.svg);
+}
+
+.separator {
+    width: 85% !important;
+    height: 1.5px !important;
+    background-color: #A5ABB8;
+    border-radius: 8px;
+    margin: 16px !important;
+}
+
+.window-container {
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(14, 22, 38, 0.7);
+    z-index: 10000;
+    position: absolute;
+    top: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.display_none {
+    display: none;
+}
+
+.dropdown__list_visible {
+    display: block !important;
+}
+
+.opened_button {
+    border-radius: 8px 8px 0 0 !important;
+}
+
+@media (max-width: 1840px) {
+    .sidenav {
+        width: 16%;
+    }
+
+    .page-content {
+        width: 84%;
+    }
+}
+
+@media (max-width: 1600px) {
+    .sidenav {
+        width: 18%;
+    }
+
+    .page-content {
+        width: 82%;
+    }
+}
+
+@media (max-width: 1420px) {
+    .sidenav__block {
+        padding: 16px;
+    }
+
+    .sidenav__block div {
+        margin: 0 16px 0 16px;
+    }
+}
+
+@media (max-width: 1360px) {
+    .sidenav__block button {
+        font-size: 12px;
+    }
+}
