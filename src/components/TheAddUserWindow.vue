@@ -36,7 +36,7 @@
             </div>
         </div>
         <div class="window" v-if="userAddedError">
-            <h3>Ошибка</h3>
+            <h3>{{ addErrorText }}</h3>
             <div class="btn-container">
                 <button className="cancel-btn" @click="closeAddWindow">Выход</button>
             </div>
@@ -62,7 +62,9 @@ export default {
             // result
 
             resultNewUserEmail: '',
-            resultNewUserPass: ''
+            resultNewUserPass: '',
+
+            addErrorText: 'Ошибка'
         }
     },
     props: {
@@ -143,6 +145,7 @@ export default {
                 }
             }).catch((error) => {
                 console.log(error);
+                this.addErrorText = error.request.responseText;
                 this.errorWindow();
             });
         },

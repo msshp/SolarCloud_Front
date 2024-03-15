@@ -4,7 +4,7 @@
             <p>Личный кабинет</p>
             <div></div>
         </div>
-        <div class="account__number-users">
+        <div v-if="access" class="account__number-users">
             <div class="role-block">
                 <div class="role-block__admin"></div>
                 <div>
@@ -27,8 +27,9 @@
                 </div>
             </div>
         </div>
-        <button class="account__add-users" @click="addUser()"><span>+</span> Добавить пользователя</button>
-        <div class="account-separator"></div>
+        <button v-if="access" class="account__add-users" @click="addUser()"><span>+</span> Добавить
+            пользователя</button>
+        <div v-if="access" class="account-separator"></div>
         <table>
             <thead>
                 <tr>
@@ -72,7 +73,7 @@
                         <!-- <button class="basket"></button><button class="settings"></button> -->
                     </td>
                 </tr>
-                <TheAccountLine :usersList="usersList" />
+                <TheAccountLine :usersList="usersList" @deleteUserFromMainUserList="deleteUserFromMainUserList" />
             </tbody>
         </table>
     </div>
@@ -94,14 +95,15 @@ export default {
         TheAddUserWindow
     },
     props: {
-        saveUserData: Object
+        saveUserData: Object,
+        access: Boolean,
     },
     data() {
         return {
             addUserWindowVis: false,
 
             usersList: [],
-            numAdmin: 0,
+            numAdmin: 1,
             numModer: 0,
             numObserver: 0,
 
@@ -112,14 +114,37 @@ export default {
         }
     },
     methods: {
+        deleteUserFromMainUserList(id) {
+            this.usersList = this.usersList.filter((user) => user.id !== id);
+            this.userRecalculation();
+        },
         addUser() {
             this.addUserWindowVis = true;
+        },
+        userRecalculation() {
+            this.numModer = 0;
+            this.numObserver = 0;
+
+            this.usersList.forEach((el) => {
+                console.log(el)
+                if (el.profile.role === 'User' || el.profile.role === 'наблюдатель') {
+                    el.profile.role = 'наблюдатель';
+                    this.numObserver++;
+                } else if (el.profile.role === 'Admin' || el.profile.role === 'администратор') {
+                    el.profile.role = 'администратор';
+                    this.numAdmin++;
+                } else if (el.profile.role === 'Moderator' || el.profile.role === 'модератор') {
+                    el.profile.role = 'модератор';
+                    this.numModer++;
+                }
+            })
         },
         closeAddWindow(data) {
             this.addUserWindowVis = data; // закрытие окна «Добавление пользователя»
         },
         addNewUserToList(data) {
             this.usersList.push(data);
+            this.userRecalculation();
         },
         searchUser() { // поиск пользователя по ID
             let list = document.querySelectorAll('tbody tr');
@@ -261,22 +286,19 @@ export default {
                 // обработка успешного запроса
                 this.usersList = response.data.results;
 
+                this.usersList = response.data.results.filter((user) => user.id !== this.saveUserData.id);
+
+                // удаление запятой в датах
                 this.usersList.forEach((el) => {
-                    if (el.profile.role === 'User') {
-                        el.profile.role = 'наблюдатель';
-                        this.numObserver++;
-                    } else if (el.profile.role === 'Admin') {
-                        el.profile.role = 'администратор';
-                        this.numAdmin++;
-                    } else if (el.profile.role === 'Moderator') {
-                        el.profile.role = 'модератор';
-                        this.numModer++;
-                    }
+                    el.profile.created = el.profile.created.replace(',', ' ');
+                    el.profile.updated = el.profile.updated.replace(',', ' ');
                 })
 
-                if (this.saveUserData.profile.role === 'администратор') {
+                if (this.saveUserData.profile.role === 'администратор' || this.saveUserData.profile.role === 'Admin') {
                     this.usersList.shift(); // удаление первого пользователя в списке (дублируется строка) - только у админа
                 }
+
+                this.userRecalculation();
 
             }).catch((error) => {
                 // обработка ошибки
@@ -287,27 +309,6 @@ export default {
 </script>
 
 <style>
-.page-content__container {
-    padding: 40px 48px;
-}
-
-.page-content__title p {
-    margin: 0 0 32px 0;
-    font-weight: 600;
-    font-size: 18px;
-    line-height: 125%;
-    letter-spacing: -0.02em;
-    color: #0e1626;
-}
-
-.page-content__title div,
-.account-separator {
-    /* width: 1559px; */
-    height: 1px;
-    background: rgba(0, 0, 0, 0.1);
-    margin-bottom: 24px;
-}
-
 .account-separator {
     margin-bottom: 16px !important;
 }
@@ -342,11 +343,11 @@ export default {
 }
 
 .role-block__admin {
-    background-image: url(../public/img/account/admin.jpg);
+    background-image: url(../img/account/admin.jpg);
 }
 
 .role-block__moder {
-    background-image: url(../public/img/account/moder.jpg);
+    background-image: url(../img/account/moder.jpg);
 }
 
 .role-name {
@@ -452,32 +453,6 @@ td p {
     background-repeat: no-repeat;
 }
 
-.basket {
-    background-image: url(../public/img/account/basket.svg);
-    margin-right: 8px;
-}
-
-.settings {
-    background-image: url(../public/img/account/settings.svg);
-}
-
-.tr-name {
-    margin: 16px 0 6px;
-    font-weight: 500;
-}
-
-.tr-email {
-    margin-bottom: 16px;
-}
-
-.tr-id {
-    width: 40px;
-}
-
-.tr-id input {
-    width: 70%;
-}
-
 .select_role {
     position: relative;
     display: flex;
@@ -491,7 +466,7 @@ td p {
     top: 32px;
     list-style-type: none;
     background: #294b8e;
-    border-radius: 0 0 8px 8px;
+    border-radius: 2px 2px 8px 8px;
     width: 100%;
     padding: 4px 0;
     margin: 0;
@@ -526,5 +501,9 @@ td p {
     color: rgba(14, 22, 38, 0.5);
     text-align: left;
     padding-left: 16px;
+}
+
+tr th input {
+    margin-left: 12px;
 }
 </style>

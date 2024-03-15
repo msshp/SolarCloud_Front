@@ -6,11 +6,12 @@
         <td>{{ user.profile.role }}</td>
         <td>{{ user.profile.created }}</td>
         <td>{{ user.profile.updated }}</td>
-        <td class="tr-btns"><button @click="showDeleteWindow(user.id)" class="basket"></button><button
-                class="settings"></button></td>
+        <td class="tr-btns"><button @click="showDeleteWindow(user.id)" class="basket"></button>
+            <!-- <button class="settings"></button> -->
+        </td>
     </tr>
-    <TheDeleteUser v-if="deleteUserVis" @closeDeleteWindow="closeDeleteWindow" />
-    <!-- to do -->
+    <TheDeleteUser v-if="deleteUserVis" @closeDeleteWindow="closeDeleteWindow" :userIdDel="userIdDel"
+        @deleteUserFromUserList="deleteUserFromUserList" />
 </template>
 
 <script>
@@ -23,7 +24,8 @@ export default {
     },
     data() {
         return {
-            deleteUserVis: false
+            deleteUserVis: false,
+            userIdDel: ''
         }
     },
     props: {
@@ -31,12 +33,16 @@ export default {
     },
     methods: {
         showDeleteWindow(id) {
-            console.log(id);
             this.deleteUserVis = true;
+            this.userIdDel = id;
         },
         closeDeleteWindow(data) {
             this.deleteUserVis = data; // закрытие окна «Добавление пользователя»
         },
+        deleteUserFromUserList(idUser) {
+            // удаление пользователя из списка
+            this.$emit('deleteUserFromMainUserList', idUser);
+        }
     }
 }
 </script>

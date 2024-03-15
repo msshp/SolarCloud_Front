@@ -1,5 +1,5 @@
 <template>
-    <div class="window-container">
+    <div class="window-container window-delete">
         <div class="window" v-if="deleteWindow">
             <h3>Удалить пользователя?</h3>
             <div class="btn-container">
@@ -7,14 +7,8 @@
                 <button className="cancel-btn" @click="closeDeleteWindow">Отмена</button>
             </div>
         </div>
-        <div class="window" v-if="userDeleteSuccessfully">
-            <h3>Пользователь удалён</h3>
-            <div class="btn-container">
-                <button className="cancel-btn" @click="closeDeleteWindow">Выход</button>
-            </div>
-        </div>
         <div class="window" v-if="userDeleteError">
-            <h3>Ошибка</h3>
+            <h3>{{ deleteErrorText }}</h3>
             <div class="btn-container">
                 <button className="cancel-btn" @click="closeDeleteWindow">Выход</button>
             </div>
@@ -23,89 +17,51 @@
 </template>
 
 <script>
-// import axios from 'axios';
+import axios from 'axios';
 
 export default {
+    props: {
+        userIdDel: Text
+    },
     data() {
         return {
-
             // v-if
-            userDeleteSuccessfully: false,
             deleteWindow: true,
             userDeleteError: false,
+
+            deleteErrorText: 'Ошибка'
         }
     },
     methods: {
         deleteUserReq() {
-            console.log('удаление пользователя');
+            axios.delete(`http://cloud.io-tech.ru/api/users/${this.userIdDel}/`, {
+                headers: {
+                    'Authorization': `Token ${sessionStorage.getItem('token')}`
+                }
+            }).then((response) => {
+                if (response.status === 204) { // пользователь успешно удалён
+                    console.log('204')
+                    // сообщение об успешном удалении
+                    this.deleteErrorText = 'Пользователь удалён';
+                    this.errorWindow();
+                    this.$emit('deleteUserFromUserList', this.userIdDel); // удалить объект в usersList
 
-            // axios.delete(`http://cloud.io-tech.ru/api/users/${oneUser.id}/`, {
-            //     headers: {
-            //         'Authorization': `Token ${sessionStorage.getItem('token')}`
-            //     }
-            // }).then(response => {
-            //     console.log(response);
-            // }).catch(error => {
-            //     console.log(error);
-            // })
-
-            // axios.post('http://cloud.io-tech.ru/api/users/',
-            //     {
-            //         "email": this.newUserEmail,
-            //         "username": this.newUserLogin,
-            //         "first_name": this.newFirstName,
-            //         "last_name": this.newLastName,
-            //         "password": this.newUserPass,
-            //         "profile": {
-            //             "role": this.engSelectorContent,
-            //             "account": this.saveUserData.profile.account,
-            //             "telegram_chat_id": null
-            //         }
-            //     }, {
-            //     headers: {
-            //         'Authorization': `Token ${sessionStorage.getItem('token')}`,
-            //         'Content-Type': 'application/json; charset=utf-8'
-            //     }
-            // }).then((response) => { // обработка ошибок
-            //     if (response.status === 201) { // пользователь успешно создан
-
-            //         this.$emit('newUserLine', response.data)
-
-            //         this.resultNewUserEmail = this.newUserEmail; // вывод email и пароль в итоговом окне
-            //         this.resultNewUserPass = this.newUserPass;
-
-            //         this.newUserEmail = '';
-            //         this.newUserLogin = '';
-            //         this.newFirstName = '';
-            //         this.newLastName = '';
-            //         this.newUserPass = '';
-            //         this.engSelectorContent = 'User';
-            //         this.selectorContent = 'Уровень доступа';
-
-            //         this.selectorVisible = false;
-
-            //         // сообщение об успешном выводе
-
-            //         this.userDeleteSuccessfully = true;
-            //         this.deleteWindow = false;
-
-            //     } else if (response.status === 400) { // окно с ошибкой
-            //         console.log(response);
-            //         this.errorWindow();
-            //     } else if (response.status === 401) {
-            //         this.errorWindow();
-            //         console.log(response);
-            //     } else if (response.status === 403) {
-            //         console.log(response);
-            //         this.errorWindow();
-            //     } else {
-            //         console.log(response);
-            //         this.errorWindow();
-            //     }
-            // }).catch((error) => {
-            //     console.log(error);
-            //     this.errorWindow();
-            // });
+                } else if (response.status === 401) { // окно с ошибкой
+                    this.deleteErrorText = 'Пользователь не авторизован';
+                    this.errorWindow();
+                } else if (response.status === 403) {
+                    this.deleteErrorText = 'Недостаточно прав';
+                    this.errorWindow();
+                } else if (response.status === 404) {
+                    this.deleteErrorText = 'Объект не найден';
+                    this.errorWindow();
+                } else {
+                    this.errorWindow();
+                }
+            }).catch((error) => {
+                console.log(error);
+                this.errorWindow();
+            })
         },
         errorWindow() {
             this.userDeleteError = true;
@@ -113,13 +69,11 @@ export default {
         },
         closeDeleteWindow() {
             this.$emit('closeDeleteWindow', false);
-            // очистить поля все
             this.userDeleteError = false;
-        },
-        openDeleteWindow() {
-            this.userDeleteSuccessfully = false;
-            this.deleteWindow = true;
         }
+    },
+    mounted() {
+        console.log('mount');
     }
 }
 </script>
@@ -265,5 +219,10 @@ ul div {
     background-color: transparent;
     color: #294b8e;
     border: 1px solid #294b8e;
+}
+
+.window-delete {
+    left: 0;
+    background-color: rgb(14 22 38 / 25%) !important;
 }
 </style>

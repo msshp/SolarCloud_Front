@@ -78,7 +78,7 @@ button {
     cursor: pointer;
     width: 30px;
     background-position: center;
-    background-image: url(../public/img/sidenav/burger.svg);
+    background-image: url(../img/sidenav/burger.svg);
     background-repeat: no-repeat;
 }
 
@@ -153,22 +153,22 @@ button {
 }
 
 .delta {
-    background-image: url(../public/img/delta.svg);
+    background-image: url(../img/delta.svg);
     background-repeat: no-repeat;
     width: 12px;
     height: 8px;
 }
 
 .inverted_delta {
-    background-image: url(../public/img/delta-inverted.svg);
+    background-image: url(../img/delta-inverted.svg);
 }
 
 .white_delta {
-    background-image: url(../public/img/white_delta.svg);
+    background-image: url(../img/white_delta.svg);
 }
 
 .inverted_white_delta {
-    background-image: url(../public/img/inverted_white_delta.svg);
+    background-image: url(../img/inverted_white_delta.svg);
 }
 
 .menu__user-name {
@@ -311,75 +311,75 @@ button {
 }
 
 .icon-map {
-    background-image: url(../public/img/sidenav/icon-map.svg);
+    background-image: url(../img/sidenav/icon-map.svg);
 }
 
 #sidenav__map:hover .icon-map,
 .iconmap_active {
-    background-image: url(../public/img/sidenav/icon-map-hover.svg) !important;
+    background-image: url(../img/sidenav/icon-map-hover.svg) !important;
 }
 
 .icon-control {
-    background-image: url(../public/img/sidenav/icon-control.svg);
+    background-image: url(../img/sidenav/icon-control.svg);
 }
 
 #sidenav__control:hover .icon-control,
 .iconcontrol_active {
-    background-image: url(../public/img/sidenav/icon-control-hover.svg) !important;
+    background-image: url(../img/sidenav/icon-control-hover.svg) !important;
 }
 
 .icon-project {
-    background-image: url(../public/img/sidenav/icon-project.svg);
+    background-image: url(../img/sidenav/icon-project.svg);
 }
 
 #sidenav__project:hover .icon-project,
 .iconproj_active {
-    background-image: url(../public/img/sidenav/icon-project-hover.svg) !important;
+    background-image: url(../img/sidenav/icon-project-hover.svg) !important;
 }
 
 .icon-list {
-    background-image: url(../public/img/sidenav/icon-list.svg);
+    background-image: url(../img/sidenav/icon-list.svg);
 }
 
 #sidenav__list:hover .icon-list,
 .iconlist_active {
-    background-image: url(../public/img/sidenav/icon-list-hover.svg) !important;
+    background-image: url(../img/sidenav/icon-list-hover.svg) !important;
 }
 
 .icon-subscription {
-    background-image: url(../public/img/sidenav/icon-subscription.svg);
+    background-image: url(../img/sidenav/icon-subscription.svg);
 }
 
 #sidenav__subscription:hover .icon-subscription,
 .iconsub_active {
-    background-image: url(../public/img/sidenav/icon-subscription-hover.svg) !important;
+    background-image: url(../img/sidenav/icon-subscription-hover.svg) !important;
 }
 
 .icon-events {
-    background-image: url(../public/img/sidenav/icon-events.svg);
+    background-image: url(../img/sidenav/icon-events.svg);
 }
 
 #sidenav__events:hover .icon-events,
 .iconevents_active {
-    background-image: url(../public/img/sidenav/icon-events-hover.svg) !important;
+    background-image: url(../img/sidenav/icon-events-hover.svg) !important;
 }
 
 .icon-commands {
-    background-image: url(../public/img/sidenav/icon-commands.svg);
+    background-image: url(../img/sidenav/icon-commands.svg);
 }
 
 #sidenav__commands:hover .icon-commands,
 .iconcom_active {
-    background-image: url(../public/img/sidenav/icon-commands-hover.svg) !important;
+    background-image: url(../img/sidenav/icon-commands-hover.svg) !important;
 }
 
 .icon-reports {
-    background-image: url(../public/img/sidenav/icon-reports.svg);
+    background-image: url(../img/sidenav/icon-reports.svg);
 }
 
 #sidenav__reports:hover .icon-reports,
 .iconreports_active {
-    background-image: url(../public/img/sidenav/icon-reports-hover.svg);
+    background-image: url(../img/sidenav/icon-reports-hover.svg);
 }
 
 .separator {

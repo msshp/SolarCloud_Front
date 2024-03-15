@@ -2,7 +2,7 @@
     <div v-if="loginPageVisibility" class="content"
         style="width: 100%;height: 100%; vertical-align: center; position: fixed;">
         <div v-if="loginFormVisibility" class="form">
-            <div className="logo-container"><img src="../public/img/logo.svg" alt="logo"></div>
+            <div className="logo-container"><img src="../public/img/logo.png" alt="logo"></div>
             <input type="email" v-model.trim="userEmail" v-bind:class="{ empty_input: userEmailIsEmpty }"
                 placeholder="Email">
             <input className="last-input" type="password" v-model.trim="userPass"
@@ -127,7 +127,8 @@
                 <TheProjectPage v-if="pages.projectPageVisibility" />
                 <TheMapPage v-if="pages.mapPageVisibility" />
                 <TheListPage v-if="pages.listPageVisibility" />
-                <TheAdministratorAccount v-if="pages.personalAreaPageVisibility" :saveUserData="saveUserData" />
+                <TheAdministratorAccount v-if="pages.personalAreaPageVisibility" :saveUserData="saveUserData"
+                    :access="access" />
                 <TheSubscriptionPage v-if="pages.subscriptionPageVisibility" />
                 <TheEventsPage v-if="pages.eventsPageVisibility" />
                 <TheCommandsPage v-if="pages.commandsPageVisibility" />
@@ -214,7 +215,8 @@ export default {
                     "updated": "",
                     "account": null
                 }
-            }
+            },
+            access: true
         };
     },
     methods: {
@@ -408,13 +410,20 @@ export default {
                     this.saveUserData = response.data;
 
                     if (this.saveUserData.profile.role === 'User') {
+                        this.access = false;
                         this.saveUserData.profile.role = 'наблюдатель'
                     } else if (this.saveUserData.profile.role === 'Admin') {
                         this.saveUserData.profile.role = 'администратор';
+                        this.access = true;
                     } else if (this.saveUserData.profile.role === 'Moderator') {
                         this.saveUserData.profile.role = 'модератор';
+                        this.access = false;
                     }
-                    console.log(this.saveUserData);
+
+                    // удаление запятой в датах
+                    this.saveUserData.profile.created = this.saveUserData.profile.created.replace(',', ' ');
+                    this.saveUserData.profile.updated = this.saveUserData.profile.updated.replace(',', ' ');
+
                 }).catch((error) => {
                     // обработка ошибки
                     console.log(error);
@@ -559,19 +568,19 @@ input::placeholder {
 }
 
 .icon-logout {
-    background-image: url(../public/img/logout.svg);
+    background-image: url(../img/logout.svg);
 }
 
 .icon-personal-area {
-    background-image: url(../public/img/pa.svg);
+    background-image: url(../img/pa.svg);
 }
 
 #button-logout:hover .icon-logout {
-    background-image: url(../public/img/logout-hover.svg);
+    background-image: url(../img/logout-hover.svg);
 }
 
 #button-pa:hover .icon-personal-area {
-    background-image: url(../public/img/pa-hover.svg);
+    background-image: url(../img/pa-hover.svg);
 }
 
 .reg-title {
@@ -579,5 +588,57 @@ input::placeholder {
     color: white;
     margin-bottom: 56px;
     font-size: 20px;
+}
+
+/* структура страниц */
+
+.page-content__container {
+    padding: 40px 48px;
+}
+
+.page-content__title p {
+    margin: 0 0 32px 0;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 125%;
+    letter-spacing: -0.02em;
+    color: #0e1626;
+}
+
+.page-content__title div,
+.account-separator {
+    /* width: 1559px; */
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+}
+
+/* table */
+
+.basket {
+    background-image: url(../img/account/basket.svg);
+    margin-right: 8px;
+}
+
+.settings {
+    background-image: url(../img/account/settings.svg);
+}
+
+.tr-name {
+    margin: 16px 0 6px;
+    font-weight: 500;
+}
+
+.tr-email {
+    margin-bottom: 16px;
+}
+
+.tr-id {
+    width: 40px;
+}
+
+.tr-id input {
+    width: 70%;
+    margin-left: 0px;
 }
 </style>
