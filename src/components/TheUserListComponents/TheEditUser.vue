@@ -1,7 +1,7 @@
 <template>
-    <div class="window-container">
-        <div class="window" v-if="addWindow">
-            <h3>Добавление пользователя</h3>
+    <div class="window-container window-delete">
+        <div class="window" v-if="editWindow">
+            <h3>Редактирование пользователя</h3>
             <div class="dropdown">
                 <button class="dropdown__button" @click="chooseAccessLevel()"
                     v-bind:class="{ opened_button: selectorVisible }">{{ selectorContent }}<i class="white_delta"
@@ -13,32 +13,25 @@
                     <li class="dropdown__list-item" @click="chooseNewAdmin()">Администратор</li>
                 </ul>
 
+                <p>Имя</p>
                 <input type="text" v-model.trim="newFirstName" placeholder="Имя">
+                <p>Фамилия</p>
                 <input type="text" v-model.trim="newLastName" placeholder="Фамилия">
+                <p>Email</p>
                 <input type="email" v-model.trim="newUserEmail" placeholder="Email">
+                <p>Логин</p>
                 <input type="text" v-model.trim="newUserLogin" placeholder="Логин">
-                <input type="password" v-model.trim="newUserPass" placeholder="Пароль">
+                <!-- <input type="password" v-model.trim="newUserPass" placeholder="Пароль"> -->
                 <div class="btn-container">
-                    <button className="save-btn" @click="sendNewUser()">Сохранить</button>
-                    <button className="cancel-btn" @click="closeAddWindow">Отменить</button>
+                    <button className="save-btn edit-save-btn" @click="sendNewUser()">Сохранить изменения</button>
+                    <button className="cancel-btn" @click="closeEditWindow">Отменить</button>
                 </div>
             </div>
         </div>
-        <div class="window" v-if="userAddedSuccessfully">
-            <h3>Пользователь добавлен</h3>
-            <div class="result_window">
-                <p>Email: {{ resultNewUserEmail }}</p>
-                <p>Пароль: {{ resultNewUserPass }}</p>
-            </div>
-            <div class="btn-container">
-                <button className="save-btn" @click="openAddWindow()">Добавить ещё</button>
-                <button className="cancel-btn" @click="closeAddWindow">Выход</button>
-            </div>
-        </div>
-        <div class="window" v-if="userAddedError">
+        <div class="window" v-if="userEditError">
             <h3>{{ addErrorText }}</h3>
             <div class="btn-container">
-                <button className="cancel-btn" @click="closeAddWindow">Выход</button>
+                <button className="cancel-btn" @click="closeEditWindow">Выход</button>
             </div>
         </div>
     </div>
@@ -51,24 +44,40 @@ export default {
     data() {
         return {
             selectorContent: 'Уровень доступа',
-            engSelectorContent: 'User',
+            engSelectorContent: '',
             selectorVisible: false,
 
             // v-if
-            userAddedSuccessfully: false,
-            addWindow: true,
-            userAddedError: false,
+            editWindow: true,
+            userEditError: false,
 
-            // result
+            addErrorText: 'Ошибка',
 
-            resultNewUserEmail: '',
-            resultNewUserPass: '',
+            // поля
+            newFirstName: '',
+            newLastName: '',
+            newUserEmail: '',
+            newUserLogin: '',
 
-            addErrorText: 'Ошибка'
+            editableUser: {
+                // "id": 1,
+                // "email": "example@mail.com",
+                // "username": "user_name",
+                // "first_name": "Имя",
+                // "last_name": "Фамилия",
+                // "profile": {
+                //     "id": 1,
+                //     "role": "User",
+                //     "telegram_chat_id": null,
+                //     "created": "17.01.2024,09:42:54",
+                //     "updated": "17.01.2024,09:42:54",
+                //     "account": 20
+                // }
+            }
         }
     },
     props: {
-        saveUserData: Object
+        userIdDel: Text
     },
     methods: {
         chooseAccessLevel() {
@@ -90,16 +99,30 @@ export default {
             this.selectorVisible = false;
         },
         sendNewUser() {
-            axios.post('http://cloud.io-tech.ru/api/users/',
+            // проверка полей на изменение to do
+
+            console.log({
+                "email": this.newUserEmail,
+                "username": this.newUserLogin,
+                "first_name": this.newFirstName,
+                "last_name": this.newLastName,
+                "profile": {
+                    "role": this.engSelectorContent,
+                    "account": this.editableUser.profile.account,
+                    "telegram_chat_id": null
+                }
+            })
+
+            // отправка новых данных
+            axios.patch(`http://cloud.io-tech.ru/api/users/${this.userIdDel}/`,
                 {
                     "email": this.newUserEmail,
                     "username": this.newUserLogin,
                     "first_name": this.newFirstName,
                     "last_name": this.newLastName,
-                    "password": this.newUserPass,
                     "profile": {
                         "role": this.engSelectorContent,
-                        "account": this.saveUserData.profile.account,
+                        "account": this.editableUser.profile.account,
                         "telegram_chat_id": null
                     }
                 }, {
@@ -108,39 +131,24 @@ export default {
                     'Content-Type': 'application/json; charset=utf-8'
                 }
             }).then((response) => { // обработка ошибок
-                if (response.status === 201) { // пользователь успешно создан
+                if (response.status === 200) { // данные обновлены
 
-                    this.$emit('newUserLine', response.data)
+                    console.log(response.data);
 
-                    this.resultNewUserEmail = this.newUserEmail; // вывод email и пароль в итоговом окне
-                    this.resultNewUserPass = this.newUserPass;
-
-                    this.newUserEmail = '';
-                    this.newUserLogin = '';
-                    this.newFirstName = '';
-                    this.newLastName = '';
-                    this.newUserPass = '';
-                    this.engSelectorContent = 'User';
-                    this.selectorContent = 'Уровень доступа';
-
-                    this.selectorVisible = false;
+                    this.$emit('editUserFromUserList', response.data); // изменить строку в таблице с пользователями
 
                     // сообщение об успешном выводе
-
-                    this.userAddedSuccessfully = true;
-                    this.addWindow = false;
-
-                } else if (response.status === 400) { // окно с ошибкой
-                    console.log(response);
+                    this.addErrorText = 'Данные успешно обновлены';
+                    console.log(this.addErrorText)
                     this.errorWindow();
-                } else if (response.status === 401) {
+
+                } else if (response.status === 401) { // окно с ошибкой
                     this.errorWindow();
-                    console.log(response);
                 } else if (response.status === 403) {
-                    console.log(response);
+                    this.errorWindow();
+                } else if (response.status === 404) {
                     this.errorWindow();
                 } else {
-                    console.log(response);
                     this.errorWindow();
                 }
             }).catch((error) => {
@@ -150,27 +158,41 @@ export default {
             });
         },
         errorWindow() {
-            this.userAddedError = true;
-            this.addWindow = false;
+            this.userEditError = true;
+            this.editWindow = false;
         },
-        closeAddWindow() {
-            this.$emit('closeAddWindow', false);
-            // очистить поля все
-            this.newUserEmail = '';
-            this.newUserLogin = '';
-            this.newFirstName = '';
-            this.newLastName = '';
-            this.newUserPass = '';
-            this.engSelectorContent = 'User';
-            this.selectorContent = 'Уровень доступа';
-
-            this.selectorVisible = false;
-            this.userAddedError = false;
-        },
-        openAddWindow() {
-            this.userAddedSuccessfully = false;
-            this.addWindow = true;
+        closeEditWindow() {
+            this.$emit('closeEditWindow', false);
         }
+    },
+    mounted() {
+        // запрос данных пользователя
+        axios.get(`http://cloud.io-tech.ru/api/users/${this.userIdDel}/`,
+            {
+                headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+            }).then((response) => {
+                console.log(response.data);
+
+                this.editableUser = response.data; // сохранение данных юзера
+
+                // заполнение полей
+
+                if (this.editableUser.profile.role === 'User') {
+                    this.chooseNewObserver();
+                } else if (this.editableUser.profile.role === 'Moderator') {
+                    this.chooseNewModer();
+                } else if (this.editableUser.profile.role === 'Admin') {
+                    this.chooseNewAdmin();
+                }
+
+                this.newFirstName = this.editableUser.first_name;
+                this.newLastName = this.editableUser.last_name;
+                this.newUserEmail = this.editableUser.email;
+                this.newUserLogin = this.editableUser.username;
+            }).catch((error) => {
+                // обработка ошибки
+                console.log(error);
+            });
     }
 }
 </script>
@@ -277,13 +299,8 @@ ul div {
 }
 
 .dropdown input {
-    padding: 14px 16px;
-    border-radius: 8px;
-    background-color: transparent;
-    border: 1px solid #293b5f;
-    color: #293b5f;
-    font-size: 16px;
-    margin-bottom: 8px;
+    font-weight: 500;
+    width: 94%;
 }
 
 .dropdown input::placeholder {
@@ -296,25 +313,19 @@ ul div {
     margin-top: 8px;
 }
 
-.btn-container button {
-    border-radius: 8px;
-    width: 156px;
-    height: 48px;
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 112%;
-    text-align: center;
-}
-
-.save-btn {
-    background: #294b8e;
-    color: #f8f6f4;
-    margin-right: 8px;
+.edit-save-btn {
+    width: 200px !important;
 }
 
 .cancel-btn {
     background-color: transparent;
     color: #294b8e;
     border: 1px solid #294b8e;
+}
+
+.dropdown p {
+    margin: 10px 17px;
+    color: #293b5f;
+    font-weight: 500;
 }
 </style>

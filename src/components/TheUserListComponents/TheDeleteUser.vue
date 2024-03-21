@@ -221,8 +221,4 @@ ul div {
     border: 1px solid #294b8e;
 }
 
-.window-delete {
-    left: 0;
-    background-color: rgb(14 22 38 / 25%) !important;
-}
 </style>

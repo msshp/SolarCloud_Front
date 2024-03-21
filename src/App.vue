@@ -57,11 +57,18 @@
                         <div class="icon-control" v-bind:class="{ iconcontrol_active: pages.controlPageVisibility }">
                         </div>Контрольная панель
                     </button>
-                    <div class="separator"></div>
-                    <button id="sidenav__project" @click="openProject()"
+                    <div v-if="projBtnVisibility" class="separator"></div>
+                    <button v-if="projBtnVisibility" id="sidenav__project" @click="openProject()"
                         v-bind:class="{ sidebtn_active: pages.projectPageVisibility }">
                         <div class="icon-project" v-bind:class="{ iconproj_active: pages.projectPageVisibility }"></div>
                         Проект
+                    </button>
+                    <button v-if="listUsersBtnVisibility" id="sidenav__userlist" @click="openUserListPage()"
+                        v-bind:class="{ sidebtn_active: pages.listUsersPageVisibility }">
+                        <div class="icon-personal-area"
+                            v-bind:class="{ icon_personal_area_active: pages.listUsersPageVisibility }">
+                        </div>
+                        Список пользователей
                     </button>
                     <div class="separator"></div>
                     <button id="sidenav__map" @click="openMap()"
@@ -97,8 +104,8 @@
                     </button>
                 </nav>
             </div>
-            <div class="page-content" v-bind:class="{ content_compressed: contentIsCompressed }">
-                <nav className="top-menu">
+            <div id="page-content" class="page-content" v-bind:class="{ content_compressed: contentIsCompressed }">
+                <nav class="top-menu" v-bind:class="{ top_menu_compressed: contentIsCompressed }">
                     <div class="top-menu__item" @click="openExtraMenu()"
                         v-bind:class="{ personalarea_active: pages.personalAreaPageVisibility }">
                         <div class="top-menu__item-name">
@@ -125,10 +132,10 @@
                 </nav>
                 <TheControlPage v-if="pages.controlPageVisibility" />
                 <TheProjectPage v-if="pages.projectPageVisibility" />
+                <TheUserListPage v-if="pages.listUsersPageVisibility" :saveUserData="saveUserData" :access="access" />
                 <TheMapPage v-if="pages.mapPageVisibility" />
                 <TheListPage v-if="pages.listPageVisibility" />
-                <TheAdministratorAccount v-if="pages.personalAreaPageVisibility" :saveUserData="saveUserData"
-                    :access="access" />
+                <ThePersonalArea v-if="pages.personalAreaPageVisibility" :saveUserData="saveUserData" />
                 <TheSubscriptionPage v-if="pages.subscriptionPageVisibility" />
                 <TheEventsPage v-if="pages.eventsPageVisibility" />
                 <TheCommandsPage v-if="pages.commandsPageVisibility" />
@@ -141,8 +148,9 @@
 <script>
 
 import TheMapPage from './components/TheMapPage.vue'
-import TheAdministratorAccount from './components/TheAdministratorAccount.vue'
+import ThePersonalArea from './components/ThePersonalArea.vue'
 import TheProjectPage from './components/TheProjectPage.vue'
+import TheUserListPage from './components/pages/TheUserListPage.vue'
 import TheControlPage from './components/TheControlPage.vue'
 import TheListPage from './components/TheListPage.vue'
 import TheSubscriptionPage from './components/TheSubscriptionPage.vue'
@@ -155,8 +163,9 @@ import axios from 'axios';
 export default {
     components: {
         TheMapPage,
-        TheAdministratorAccount,
+        ThePersonalArea,
         TheProjectPage,
+        TheUserListPage,
         TheControlPage,
         TheListPage,
         TheSubscriptionPage,
@@ -188,6 +197,8 @@ export default {
             sidenavIsHidden: false,
             contentIsCompressed: false,
             extraMenuIsHidden: false,
+            listUsersBtnVisibility: false,
+            projBtnVisibility: false,
 
             pages: {
                 personalAreaPageVisibility: false,
@@ -198,7 +209,8 @@ export default {
                 subscriptionPageVisibility: false,
                 eventsPageVisibility: false,
                 commandsPageVisibility: false,
-                reportsPageVisibility: false
+                reportsPageVisibility: false,
+                listUsersPageVisibility: false
             },
 
             saveUserData: {
@@ -396,6 +408,7 @@ export default {
             }
 
             this.pages.mapPageVisibility = true;
+            document.getElementById('page-content').classList.remove('overflow_hidden');
         },
         drawLogIn() {
             this.mainPageVisibility = true;
@@ -411,13 +424,19 @@ export default {
 
                     if (this.saveUserData.profile.role === 'User') {
                         this.access = false;
-                        this.saveUserData.profile.role = 'наблюдатель'
+                        this.saveUserData.profile.role = 'наблюдатель';
+                        this.listUsersBtnVisibility = false;
+                        this.projBtnVisibility = false;
                     } else if (this.saveUserData.profile.role === 'Admin') {
                         this.saveUserData.profile.role = 'администратор';
                         this.access = true;
+                        this.listUsersBtnVisibility = true;
+                        this.projBtnVisibility = true;
                     } else if (this.saveUserData.profile.role === 'Moderator') {
                         this.saveUserData.profile.role = 'модератор';
                         this.access = false;
+                        this.listUsersBtnVisibility = false;
+                        this.projBtnVisibility = false;
                     }
 
                     // удаление запятой в датах
@@ -441,54 +460,70 @@ export default {
                 this.pages[page] = false;
             }
             this.pages.personalAreaPageVisibility = true;
+            document.getElementById('page-content').classList.remove('overflow_hidden');
+        },
+        openUserListPage() {
+            for (let page in this.pages) {
+                this.pages[page] = false;
+            }
+            this.pages.listUsersPageVisibility = true;
+            document.getElementById('page-content').classList.remove('overflow_hidden');
         },
         openMap() {
             for (let page in this.pages) {
                 this.pages[page] = false;
             }
             this.pages.mapPageVisibility = true;
+            document.getElementById('page-content').classList.remove('overflow_hidden');
         },
         openControl() {
             for (let page in this.pages) {
                 this.pages[page] = false;
             }
             this.pages.controlPageVisibility = true;
+            document.getElementById('page-content').classList.remove('overflow_hidden');
         },
         openProject() {
             for (let page in this.pages) {
                 this.pages[page] = false;
             }
             this.pages.projectPageVisibility = true;
+            document.getElementById('page-content').classList.remove('overflow_hidden');
         },
         openList() {
             for (let page in this.pages) {
                 this.pages[page] = false;
             }
             this.pages.listPageVisibility = true;
+            document.getElementById('page-content').classList.remove('overflow_hidden');
         },
         openSubscription() {
             for (let page in this.pages) {
                 this.pages[page] = false;
             }
             this.pages.subscriptionPageVisibility = true;
+            document.getElementById('page-content').classList.remove('overflow_hidden');
         },
         openEvents() {
             for (let page in this.pages) {
                 this.pages[page] = false;
             }
             this.pages.eventsPageVisibility = true;
+            document.getElementById('page-content').classList.remove('overflow_hidden');
         },
         openCommands() {
             for (let page in this.pages) {
                 this.pages[page] = false;
             }
             this.pages.commandsPageVisibility = true;
+            document.getElementById('page-content').classList.remove('overflow_hidden');
         },
         openReports() {
             for (let page in this.pages) {
                 this.pages[page] = false;
             }
             this.pages.reportsPageVisibility = true;
+            document.getElementById('page-content').classList.remove('overflow_hidden');
         }
     }
 }
@@ -579,7 +614,9 @@ input::placeholder {
     background-image: url(../img/logout-hover.svg);
 }
 
-#button-pa:hover .icon-personal-area {
+#button-pa:hover .icon-personal-area,
+#sidenav__userlist:hover .icon-personal-area,
+.icon_personal_area_active {
     background-image: url(../img/pa-hover.svg);
 }
 
@@ -593,12 +630,13 @@ input::placeholder {
 /* структура страниц */
 
 .page-content__container {
-    padding: 40px 48px;
+    padding: 86px 40px 48px;
+    background-color: #EEEEEE;
 }
 
 .page-content__title p {
     margin: 0 0 32px 0;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 18px;
     line-height: 125%;
     letter-spacing: -0.02em;
@@ -641,4 +679,4 @@ input::placeholder {
     width: 70%;
     margin-left: 0px;
 }
-</style>
+</style>../components/TheUserListComponents.vue/TheUserListPage.vue

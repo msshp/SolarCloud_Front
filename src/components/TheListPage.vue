@@ -141,7 +141,16 @@ export default {
                 // обработка успешного запроса
                 // console.log(response.data.results)
                 this.controllerList = response.data.results;
-                console.log(this.controllerList)
+
+                this.controllerList.sort(function (a, b) { // сортировка controllerList по id
+                    if (a.id > b.id) {
+                        return 1;
+                    }
+                    if (a.id < b.id) {
+                        return -1;
+                    }
+                    return 0;
+                });
             }).catch((error) => {
                 // обработка ошибки
                 console.log(error);

@@ -1,7 +1,7 @@
 <template>
     <div class="page-content__container">
         <div class="page-content__title">
-            <p>Личный кабинет</p>
+            <p>Список пользователей</p>
             <div></div>
         </div>
         <div v-if="access" class="account__number-users">
@@ -73,7 +73,8 @@
                         <!-- <button class="basket"></button><button class="settings"></button> -->
                     </td>
                 </tr>
-                <TheAccountLine :usersList="usersList" @deleteUserFromMainUserList="deleteUserFromMainUserList" />
+                <TheAccountLine :usersList="usersList" @deleteUserFromMainUserList="deleteUserFromMainUserList"
+                    @editUserFromMainUserList="editUserFromMainUserList" />
             </tbody>
         </table>
     </div>
@@ -84,8 +85,8 @@
 <script>
 
 // import { containsProp } from '@vueuse/core';
-import TheAccountLine from './TheAccountLine.vue'
-import TheAddUserWindow from './TheAddUserWindow.vue'
+import TheAccountLine from '../TheUserListComponents/TheAccountLine.vue'
+import TheAddUserWindow from '../TheUserListComponents/TheAddUserWindow.vue'
 
 import axios from 'axios';
 
@@ -103,7 +104,7 @@ export default {
             addUserWindowVis: false,
 
             usersList: [],
-            numAdmin: 1,
+            numAdmin: 0,
             numModer: 0,
             numObserver: 0,
 
@@ -118,15 +119,28 @@ export default {
             this.usersList = this.usersList.filter((user) => user.id !== id);
             this.userRecalculation();
         },
+        editUserFromMainUserList(data) {
+            this.getUsersList();
+            console.log(data);
+            // console.log('data')
+            // this.usersList.forEach((el) => {
+            //     if (el.id === data.id) {
+            //         el = data;
+            //     }
+            // })
+            // console.log(this.usersList);
+            // this.userRecalculation();
+        },
         addUser() {
             this.addUserWindowVis = true;
+            document.getElementById('page-content').classList.add('overflow_hidden');
         },
         userRecalculation() {
             this.numModer = 0;
             this.numObserver = 0;
+            this.numAdmin = 0;
 
             this.usersList.forEach((el) => {
-                console.log(el)
                 if (el.profile.role === 'User' || el.profile.role === 'наблюдатель') {
                     el.profile.role = 'наблюдатель';
                     this.numObserver++;
@@ -138,13 +152,20 @@ export default {
                     this.numModer++;
                 }
             })
+
+            this.numAdmin++; // первая строка таблицы
+
+            console.log('итоговый лист')
+            console.log(this.usersList);
         },
         closeAddWindow(data) {
             this.addUserWindowVis = data; // закрытие окна «Добавление пользователя»
         },
         addNewUserToList(data) {
-            this.usersList.push(data);
-            this.userRecalculation();
+            // to do
+            console.log('обновление листа')
+            this.getUsersList();
+            console.log(data);
         },
         searchUser() { // поиск пользователя по ID
             let list = document.querySelectorAll('tbody tr');
@@ -232,78 +253,52 @@ export default {
             list.forEach(elem => {
                 elem.classList.remove('display_none');
             });
+        },
+        getUsersList() {
+            axios.get('http://cloud.io-tech.ru/api/users/',
+                {
+                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+                }).then((response) => {
+                    // обработка успешного запроса
+                    this.usersList = response.data.results;
+                    console.log('ответ')
+                    console.log(this.usersList);
+
+                    // this.usersList = response.data.results.filter((user) => user.id !== this.saveUserData.id);
+                    // console.log(this.usersList);
+
+
+                    this.usersList.sort(function (a, b) { // сортировка usersList по id
+                        if (a.id > b.id) {
+                            return 1;
+                        }
+                        if (a.id < b.id) {
+                            return -1;
+                        }
+                        return 0;
+                    });
+
+                    // удаление запятой в датах
+                    this.usersList.forEach((el) => {
+                        el.profile.created = el.profile.created.replace(',', ' ');
+                        el.profile.updated = el.profile.updated.replace(',', ' ');
+                    })
+
+                    if (this.saveUserData.profile.role === 'администратор' || this.saveUserData.profile.role === 'Admin') {
+                        this.usersList.shift(); // удаление первого пользователя в списке (дублируется строка) - только у админа
+                    }
+
+                    this.userRecalculation();
+
+                }).catch((error) => {
+                    // обработка ошибки
+                    console.log(error);
+                });
         }
-        // sortByCreation() {
-        // this.choosingSortByCreation = !this.choosingSortByCreation;
-
-        // let list = document.querySelectorAll('tbody tr').slice(1);
-
-        // reference
-
-        // let table = document.getElementById('device-table__table');
-        // let list = Array.from(table.rows);
-        // list = list.slice(1);
-
-        // if (sortByDateBtn.classList.contains('sort-on')) { // сортировка по дате
-
-        //     list.sort(compare);
-
-        //     function compare(a, b) {
-        //         if (a.cells[0].tagName == "TH" ||
-        //             b.cells[0].tagName == "TH") return 0;
-
-        //         var dateA = a.cells[5].textContent;
-        //         let fDateA = new Date(`${dateA.slice(3, 5)}/${dateA.slice(0, 2)}/${dateA.slice(6)}`);
-        //         var dateB = b.cells[5].textContent;
-        //         let fDateB = new Date(`${dateB.slice(3, 5)}/${dateB.slice(0, 2)}/${dateB.slice(6)}`);
-
-        //         return fDateB - fDateA;
-        //     }
-        //     table.tBodies[0].append(...list);
-
-        // } else { // сортировка по сер ном
-        //     list.sort(compareName);
-
-        //     function compareName(a, b) {
-        //         if (a.cells[0].tagName == "TH" ||
-        //             b.cells[0].tagName == "TH") return 0;
-
-        //         var serA = a.cells[0].textContent;
-        //         var serB = b.cells[0].textContent;
-        //         return serB - serA;
-        //     }
-        //     list.reverse();
-        //     table.tBodies[0].append(...list);
-        // }
-        // }
     },
     // вывести список пользователей аккаунта
     mounted() {
-        axios.get('http://cloud.io-tech.ru/api/users/',
-            {
-                headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
-            }).then((response) => {
-                // обработка успешного запроса
-                this.usersList = response.data.results;
-
-                this.usersList = response.data.results.filter((user) => user.id !== this.saveUserData.id);
-
-                // удаление запятой в датах
-                this.usersList.forEach((el) => {
-                    el.profile.created = el.profile.created.replace(',', ' ');
-                    el.profile.updated = el.profile.updated.replace(',', ' ');
-                })
-
-                if (this.saveUserData.profile.role === 'администратор' || this.saveUserData.profile.role === 'Admin') {
-                    this.usersList.shift(); // удаление первого пользователя в списке (дублируется строка) - только у админа
-                }
-
-                this.userRecalculation();
-
-            }).catch((error) => {
-                // обработка ошибки
-                console.log(error);
-            });
+        this.getUsersList();
     }
 }
 </script>
@@ -457,17 +452,18 @@ td p {
     position: relative;
     display: flex;
     flex-direction: column;
+    padding-left: 8px !important;
 }
 
 .dropdown__list_table {
     display: none;
     position: absolute;
-    left: 0;
+    left: 8px;
     top: 32px;
     list-style-type: none;
     background: #294b8e;
     border-radius: 2px 2px 8px 8px;
-    width: 100%;
+    width: 94%;
     padding: 4px 0;
     margin: 0;
 }
@@ -500,10 +496,16 @@ td p {
 .sort-by-date {
     color: rgba(14, 22, 38, 0.5);
     text-align: left;
-    padding-left: 16px;
+    padding-left: 16px !important;
 }
 
 tr th input {
     margin-left: 12px;
+}
+
+@media (min-width: 1775px) {
+    .dropdown__list_table {
+        width: 96%;
+    }
 }
 </style>

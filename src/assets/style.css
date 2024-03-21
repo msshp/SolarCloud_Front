@@ -139,17 +139,19 @@ button {
 /* top-menu */
 
 .top-menu {
+    width: 86%;
+    position: fixed;
     height: 56px;
     align-items: center;
     padding: 0 0 0 16px;
     box-shadow: 0 8px 16px 0 rgba(41, 59, 95, 0.08);
     background-color: #F8F6F4;
     display: flex;
-    position: relative;
+    z-index: 100;
 }
 
 .delta-block {
-    padding: 22px 20px 25px 20px;
+    padding: 22px 32px 25px 20px;
 }
 
 .delta {
@@ -302,6 +304,10 @@ button {
     width: 100% !important;
 }
 
+.top_menu_compressed {
+    width: 99% !important;
+}
+
 .sidenav__block div {
     height: 20px;
     width: 20px;
@@ -391,7 +397,7 @@ button {
 }
 
 .window-container {
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     background-color: rgba(14, 22, 38, 0.7);
     z-index: 10000;
@@ -400,6 +406,7 @@ button {
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
 }
 
 .display_none {
@@ -414,12 +421,24 @@ button {
     border-radius: 8px 8px 0 0 !important;
 }
 
+.overflow_hidden {
+    overflow: hidden;
+}
+
+.page-content__container th {
+    padding: 0;
+}
+
 @media (max-width: 1840px) {
     .sidenav {
         width: 16%;
     }
 
     .page-content {
+        width: 84%;
+    }
+
+    .top-menu {
         width: 84%;
     }
 }
@@ -430,6 +449,10 @@ button {
     }
 
     .page-content {
+        width: 82%;
+    }
+
+    .top-menu {
         width: 82%;
     }
 }
