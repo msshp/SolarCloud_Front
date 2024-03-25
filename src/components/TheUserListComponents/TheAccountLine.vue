@@ -14,7 +14,7 @@
     <TheDeleteUser v-if="deleteUserVis" @closeDeleteWindow="closeDeleteWindow" :userIdDel="userIdDel"
         @deleteUserFromUserList="deleteUserFromUserList" />
     <TheEditUser v-if="editUserVis" @closeEditWindow="closeEditWindow" :userIdDel="userIdDel"
-        @editUserFromUserList="editUserFromUserList" />
+        @editUserFromUserList="editUserFromUserList" :roleChange="roleChange" />
 </template>
 
 <script>
@@ -31,7 +31,8 @@ export default {
         return {
             deleteUserVis: false,
             editUserVis: false,
-            userIdDel: ''
+            userIdDel: '',
+            roleChange: true
         }
     },
     props: {
@@ -69,9 +70,6 @@ export default {
 
 
 <style>
-tbody tr {
-    height: 72px;
-}
 
 .window-delete {
     left: 0;

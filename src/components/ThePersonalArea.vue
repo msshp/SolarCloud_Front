@@ -12,7 +12,7 @@
                     <th class="tr-pa">email</th>
                     <th class="tr-role">роль</th>
                     <th class="tr-pa">дата создания</th>
-                    <th class="tr-pa">последний сеанс</th>
+                    <th class="tr-pa">дата обновления</th>
                     <th></th>
                 </tr>
             </thead>
@@ -24,10 +24,12 @@
                     <td class="tr-role">{{ saveUserData.profile.role }}</td>
                     <td class="tr-pa">{{ saveUserData.profile.created }}</td>
                     <td class="tr-pa">{{ saveUserData.profile.updated }}</td>
-                    <td class="tr-btns">
-                        <!-- <button class="basket"></button><button class="settings"></button> -->
+                    <td class="tr-btns ">
+                        <button class="settings pa__settings" @click="showEditWindow(saveUserData.id)"></button>
                     </td>
                 </tr>
+                <TheEditUser v-if="editUserVis" @closeEditWindow="closeEditWindow" :userIdDel="userIdDel"
+                    @editUserFromUserList="editUserFromUserList" :roleChange="roleChange" />
             </tbody>
         </table>
     </div>
@@ -35,9 +37,35 @@
 
 <script>
 
+import TheEditUser from './TheUserListComponents/TheEditUser.vue'
+
 export default {
+    components: {
+        TheEditUser
+    },
+    data() {
+        return {
+            editUserVis: false,
+            userIdDel: null,
+            roleChange: false
+        }
+    },
     props: {
         saveUserData: Object
+    },
+    methods: {
+        showEditWindow(id) {
+            this.editUserVis = true;
+            this.userIdDel = id;
+            document.getElementById('page-content').classList.add('overflow_hidden');
+        },
+        closeEditWindow(data) {
+            this.editUserVis = data; // закрытие окна «Обновление пользователя»
+            document.getElementById('page-content').classList.remove('overflow_hidden');
+        },
+        editUserFromUserList(data) { // обновить информацию о юзере, который отредактировали 
+            this.$emit('editAuthorizedUser', data);
+        }
     }
 }
 </script>
@@ -52,11 +80,13 @@ export default {
     padding: 0px;
 }
 
-/* .tr-pa {
-    width: 19%;
+.pa__settings {
+    width: 26px !important;
+    height: 26px !important;
+    background-size: contain;
 }
 
-.tr-role {
-    width: 12%;
-} */
+.pa__line:hover {
+    background-color: transparent;
+}
 </style>

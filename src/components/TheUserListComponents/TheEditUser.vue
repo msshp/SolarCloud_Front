@@ -3,10 +3,10 @@
         <div class="window" v-if="editWindow">
             <h3>Редактирование пользователя</h3>
             <div class="dropdown">
-                <button class="dropdown__button" @click="chooseAccessLevel()"
+                <button v-if="roleChange" class="dropdown__button" @click="chooseAccessLevel()"
                     v-bind:class="{ opened_button: selectorVisible }">{{ selectorContent }}<i class="white_delta"
                         v-bind:class="{ inverted_white_delta: selectorVisible }"></i></button>
-                <ul class="dropdown__list" v-bind:class="{ dropdown__list_visible: selectorVisible }">
+                <ul v-if="roleChange" class="dropdown__list" v-bind:class="{ dropdown__list_visible: selectorVisible }">
                     <div></div>
                     <li class="dropdown__list-item" @click="chooseNewObserver()">Наблюдатель</li>
                     <li class="dropdown__list-item" @click="chooseNewModer()">Модератор</li>
@@ -73,11 +73,13 @@ export default {
                 //     "updated": "17.01.2024,09:42:54",
                 //     "account": 20
                 // }
-            }
+            },
+            newInfoUser: {}
         }
     },
     props: {
-        userIdDel: Text
+        userIdDel: Text,
+        roleChange: Boolean
     },
     methods: {
         chooseAccessLevel() {
@@ -99,23 +101,8 @@ export default {
             this.selectorVisible = false;
         },
         sendNewUser() {
-            // проверка полей на изменение to do
-
-            console.log({
-                "email": this.newUserEmail,
-                "username": this.newUserLogin,
-                "first_name": this.newFirstName,
-                "last_name": this.newLastName,
-                "profile": {
-                    "role": this.engSelectorContent,
-                    "account": this.editableUser.profile.account,
-                    "telegram_chat_id": null
-                }
-            })
-
-            // отправка новых данных
-            axios.patch(`http://cloud.io-tech.ru/api/users/${this.userIdDel}/`,
-                {
+            if (this.roleChange) {
+                this.newInfoUser = {
                     "email": this.newUserEmail,
                     "username": this.newUserLogin,
                     "first_name": this.newFirstName,
@@ -125,7 +112,21 @@ export default {
                         "account": this.editableUser.profile.account,
                         "telegram_chat_id": null
                     }
-                }, {
+                }
+            } else {
+                this.newInfoUser = {
+                    "email": this.newUserEmail,
+                    "username": this.newUserLogin,
+                    "first_name": this.newFirstName,
+                    "last_name": this.newLastName,
+                    "profile": {
+                        "account": this.editableUser.profile.account,
+                    }
+                }
+            }
+
+            // отправка новых данных
+            axios.patch(`http://cloud.io-tech.ru/api/users/${this.userIdDel}/`, this.newInfoUser, {
                 headers: {
                     'Authorization': `Token ${sessionStorage.getItem('token')}`,
                     'Content-Type': 'application/json; charset=utf-8'
@@ -133,13 +134,10 @@ export default {
             }).then((response) => { // обработка ошибок
                 if (response.status === 200) { // данные обновлены
 
-                    console.log(response.data);
-
                     this.$emit('editUserFromUserList', response.data); // изменить строку в таблице с пользователями
 
                     // сообщение об успешном выводе
                     this.addErrorText = 'Данные успешно обновлены';
-                    console.log(this.addErrorText)
                     this.errorWindow();
 
                 } else if (response.status === 401) { // окно с ошибкой
@@ -171,7 +169,6 @@ export default {
             {
                 headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
             }).then((response) => {
-                console.log(response.data);
 
                 this.editableUser = response.data; // сохранение данных юзера
 

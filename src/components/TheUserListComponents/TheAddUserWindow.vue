@@ -12,7 +12,6 @@
                     <li class="dropdown__list-item" @click="chooseNewModer()">Модератор</li>
                     <li class="dropdown__list-item" @click="chooseNewAdmin()">Администратор</li>
                 </ul>
-
                 <input type="text" v-model.trim="newFirstName" placeholder="Имя">
                 <input type="text" v-model.trim="newLastName" placeholder="Фамилия">
                 <input type="email" v-model.trim="newUserEmail" placeholder="Email">
@@ -64,7 +63,13 @@ export default {
             resultNewUserEmail: '',
             resultNewUserPass: '',
 
-            addErrorText: 'Ошибка'
+            addErrorText: 'Ошибка',
+
+            newUserPass: '',
+            newUserLogin: '',
+            newUserEmail: '',
+            newFirstName: '',
+            newLastName: ''
         }
     },
     props: {
@@ -131,16 +136,16 @@ export default {
                     this.addWindow = false;
 
                 } else if (response.status === 400) { // окно с ошибкой
-                    console.log(response);
+
                     this.errorWindow();
                 } else if (response.status === 401) {
                     this.errorWindow();
-                    console.log(response);
+
                 } else if (response.status === 403) {
-                    console.log(response);
+
                     this.errorWindow();
                 } else {
-                    console.log(response);
+
                     this.errorWindow();
                 }
             }).catch((error) => {

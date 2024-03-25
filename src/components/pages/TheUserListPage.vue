@@ -52,11 +52,8 @@
                             <li class="dropdown__list-item_table" @click="selectTableAdmin()">администратор</li>
                         </ul>
                     </th>
-                    <th class="sort-by-date">дата создания
-                        <!-- <button class="sort-by-creation" @click="sortByCreation()"
-                            v-bind:class="{ grey_btn: choosingSortByCreation }">дата создания</button> -->
-                    </th>
-                    <th class="sort-by-date">последний сеанс</th>
+                    <th class="sort-by-date">дата создания</th>
+                    <th class="sort-by-date">дата обновления</th>
                     <th></th>
                 </tr>
             </thead>
@@ -69,9 +66,7 @@
                     <td>{{ saveUserData.profile.role }}</td>
                     <td>{{ saveUserData.profile.created }}</td>
                     <td>{{ saveUserData.profile.updated }}</td>
-                    <td class="tr-btns">
-                        <!-- <button class="basket"></button><button class="settings"></button> -->
-                    </td>
+                    <td class="tr-btns"></td>
                 </tr>
                 <TheAccountLine :usersList="usersList" @deleteUserFromMainUserList="deleteUserFromMainUserList"
                     @editUserFromMainUserList="editUserFromMainUserList" />
@@ -111,7 +106,11 @@ export default {
             selectorTableContent: 'роль',
             selectorTableVisible: false,
 
-            choosingSortByCreation: false
+            choosingSortByCreation: false,
+
+            searchUserEmail: '',
+            searchUserName: '',
+            searchUserID: ''
         }
     },
     methods: {
@@ -119,17 +118,8 @@ export default {
             this.usersList = this.usersList.filter((user) => user.id !== id);
             this.userRecalculation();
         },
-        editUserFromMainUserList(data) {
+        editUserFromMainUserList() {
             this.getUsersList();
-            console.log(data);
-            // console.log('data')
-            // this.usersList.forEach((el) => {
-            //     if (el.id === data.id) {
-            //         el = data;
-            //     }
-            // })
-            // console.log(this.usersList);
-            // this.userRecalculation();
         },
         addUser() {
             this.addUserWindowVis = true;
@@ -154,18 +144,12 @@ export default {
             })
 
             this.numAdmin++; // первая строка таблицы
-
-            console.log('итоговый лист')
-            console.log(this.usersList);
         },
         closeAddWindow(data) {
             this.addUserWindowVis = data; // закрытие окна «Добавление пользователя»
         },
-        addNewUserToList(data) {
-            // to do
-            console.log('обновление листа')
+        addNewUserToList() {
             this.getUsersList();
-            console.log(data);
         },
         searchUser() { // поиск пользователя по ID
             let list = document.querySelectorAll('tbody tr');
@@ -255,18 +239,12 @@ export default {
             });
         },
         getUsersList() {
-            axios.get('http://cloud.io-tech.ru/api/users/',
+            axios.get('http://cloud.io-tech.ru/api/users/?limit=100',
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     // обработка успешного запроса
                     this.usersList = response.data.results;
-                    console.log('ответ')
-                    console.log(this.usersList);
-
-                    // this.usersList = response.data.results.filter((user) => user.id !== this.saveUserData.id);
-                    // console.log(this.usersList);
-
 
                     this.usersList.sort(function (a, b) { // сортировка usersList по id
                         if (a.id > b.id) {
@@ -442,10 +420,15 @@ td p {
     margin: 0;
 }
 
+.tr-btns {
+    padding-left: 4px;
+}
+
 .tr-btns button {
     width: 32px;
     height: 32px;
     background-repeat: no-repeat;
+    background-color: transparent;
 }
 
 .select_role {
@@ -453,6 +436,7 @@ td p {
     display: flex;
     flex-direction: column;
     padding-left: 8px !important;
+    margin-bottom: 0px !important;
 }
 
 .dropdown__list_table {

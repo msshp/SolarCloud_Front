@@ -26,7 +26,7 @@
                 </tr>
             </thead>
             <tbody>
-                <TheControllerLine :controllerList="controllerList" />
+                <TheControllerLine :controllerList="controllerList" @openMainControllerPage="openMainControllerPage" />
             </tbody>
         </table>
     </div>
@@ -43,6 +43,9 @@ export default {
     },
     data() {
         return {
+            searchIdControllerById: '',
+            searchValControllerByControllerName: '',
+            searchValControllerBySn: '',
             controllerList: [
                 // {
                 //     "id": 1,
@@ -114,7 +117,6 @@ export default {
             }
         },
         searchControllerByControllerName() { // поиск устройства по Серийнику
-            console.log(this.searchValControllerByControllerName)
             let list = document.querySelectorAll('tbody tr');
 
             if (this.searchValControllerByControllerName != '') {
@@ -130,6 +132,9 @@ export default {
                     elem.classList.remove('display_none');
                 });
             }
+        },
+        openMainControllerPage(id) {
+            this.$emit('openMainControllerPage', id);
         }
     },
     // вывести список контроллеров
@@ -139,7 +144,6 @@ export default {
                 headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
             }).then((response) => {
                 // обработка успешного запроса
-                // console.log(response.data.results)
                 this.controllerList = response.data.results;
 
                 this.controllerList.sort(function (a, b) { // сортировка controllerList по id

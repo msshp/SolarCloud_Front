@@ -134,12 +134,14 @@
                 <TheProjectPage v-if="pages.projectPageVisibility" />
                 <TheUserListPage v-if="pages.listUsersPageVisibility" :saveUserData="saveUserData" :access="access" />
                 <TheMapPage v-if="pages.mapPageVisibility" />
-                <TheListPage v-if="pages.listPageVisibility" />
-                <ThePersonalArea v-if="pages.personalAreaPageVisibility" :saveUserData="saveUserData" />
+                <TheListPage v-if="pages.listPageVisibility" @openMainControllerPage="openMainControllerPage" />
+                <ThePersonalArea v-if="pages.personalAreaPageVisibility" :saveUserData="saveUserData"
+                    @editAuthorizedUser="editAuthorizedUser" />
                 <TheSubscriptionPage v-if="pages.subscriptionPageVisibility" />
                 <TheEventsPage v-if="pages.eventsPageVisibility" />
                 <TheCommandsPage v-if="pages.commandsPageVisibility" />
                 <TheReportsPage v-if="pages.reportsPageVisibility" />
+                <TheControllerPage v-if="pages.controllerPageVisibility" :controllerId="controllerId"/>
             </div>
         </div>
     </div>
@@ -157,6 +159,7 @@ import TheSubscriptionPage from './components/TheSubscriptionPage.vue'
 import TheEventsPage from './components/TheEventsPage.vue'
 import TheCommandsPage from './components/TheCommandsPage.vue'
 import TheReportsPage from './components/TheReportsPage.vue'
+import TheControllerPage from './components/TheControllerPage.vue'
 
 import axios from 'axios';
 
@@ -171,7 +174,8 @@ export default {
         TheSubscriptionPage,
         TheEventsPage,
         TheCommandsPage,
-        TheReportsPage
+        TheReportsPage,
+        TheControllerPage
     },
     data() {
         return {
@@ -184,6 +188,9 @@ export default {
 
             mainPageVisibility: false, // доступ после авторизации
             loginPageVisibility: true, // страница авторизации
+
+            userEmail: '',
+            userPass: '',
 
             userEmailIsEmpty: false,
             userPassIsEmpty: false,
@@ -210,7 +217,8 @@ export default {
                 eventsPageVisibility: false,
                 commandsPageVisibility: false,
                 reportsPageVisibility: false,
-                listUsersPageVisibility: false
+                listUsersPageVisibility: false,
+                controllerPageVisibility: false
             },
 
             saveUserData: {
@@ -228,7 +236,8 @@ export default {
                     "account": null
                 }
             },
-            access: true
+            access: true,
+            controllerId: null
         };
     },
     methods: {
@@ -439,14 +448,16 @@ export default {
                         this.projBtnVisibility = false;
                     }
 
-                    // удаление запятой в датах
-                    this.saveUserData.profile.created = this.saveUserData.profile.created.replace(',', ' ');
-                    this.saveUserData.profile.updated = this.saveUserData.profile.updated.replace(',', ' ');
-
+                    this.dateFormatting();
                 }).catch((error) => {
                     // обработка ошибки
                     console.log(error);
                 })
+        },
+        dateFormatting() {
+            // удаление запятой в датах
+            this.saveUserData.profile.created = this.saveUserData.profile.created.replace(',', ' ');
+            this.saveUserData.profile.updated = this.saveUserData.profile.updated.replace(',', ' ');
         },
         sidenavToggle() {
             this.sidenavIsHidden = !this.sidenavIsHidden;
@@ -524,6 +535,27 @@ export default {
             }
             this.pages.reportsPageVisibility = true;
             document.getElementById('page-content').classList.remove('overflow_hidden');
+        },
+        openMainControllerPage(id) { // открыть отдельную страницу с контроллером
+            this.controllerId = id;
+            for (let page in this.pages) {
+                this.pages[page] = false;
+            }
+            this.pages.controllerPageVisibility = true;
+            document.getElementById('page-content').classList.remove('overflow_hidden');
+        },
+        editAuthorizedUser(data) {
+            this.saveUserData = data;
+
+            if (this.saveUserData.profile.role === 'User') {
+                this.saveUserData.profile.role = 'наблюдатель';
+            } else if (this.saveUserData.profile.role === 'Admin') {
+                this.saveUserData.profile.role = 'администратор';
+            } else if (this.saveUserData.profile.role === 'Moderator') {
+                this.saveUserData.profile.role = 'модератор';
+            }
+
+            this.dateFormatting();
         }
     }
 }

@@ -40,7 +40,6 @@ export default {
                 }
             }).then((response) => {
                 if (response.status === 204) { // пользователь успешно удалён
-                    console.log('204')
                     // сообщение об успешном удалении
                     this.deleteErrorText = 'Пользователь удалён';
                     this.errorWindow();
@@ -71,9 +70,6 @@ export default {
             this.$emit('closeDeleteWindow', false);
             this.userDeleteError = false;
         }
-    },
-    mounted() {
-        console.log('mount');
     }
 }
 </script>
