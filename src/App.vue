@@ -141,7 +141,7 @@
                 <TheEventsPage v-if="pages.eventsPageVisibility" />
                 <TheCommandsPage v-if="pages.commandsPageVisibility" />
                 <TheReportsPage v-if="pages.reportsPageVisibility" />
-                <TheControllerPage v-if="pages.controllerPageVisibility" :controllerId="controllerId"/>
+                <TheControllerPage v-if="pages.controllerPageVisibility" :controllerId="controllerId" />
             </div>
         </div>
     </div>
@@ -662,7 +662,7 @@ input::placeholder {
 /* структура страниц */
 
 .page-content__container {
-    padding: 86px 40px 48px;
+    padding: 86px 40px 24px 40px;
     background-color: #EEEEEE;
 }
 
