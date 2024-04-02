@@ -12,8 +12,6 @@ export default {
     mounted() {
         let ctx = document.getElementById('bat_cChart');
 
-        console.log(this.controllerInfoStorage);
-
         let labels = [];
         let data = [];
 

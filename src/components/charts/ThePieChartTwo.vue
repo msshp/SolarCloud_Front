@@ -12,7 +12,7 @@ export default {
     mounted() {
         let ctx = document.getElementById('p_genChart');
 
-        console.log(this.controllerInfoStorage);
+        // console.log(this.controllerInfoStorage);
 
         let labels = [];
         let data = [];

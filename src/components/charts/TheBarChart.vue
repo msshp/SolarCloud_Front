@@ -12,7 +12,7 @@ export default {
     mounted() {
         let ctx = document.getElementById('myChart');
 
-        console.log(this.controllerInfoStorage);
+        // console.log(this.controllerInfoStorage);
 
         let labels = [];
         let data = [];
@@ -21,6 +21,9 @@ export default {
             labels.push(el.measured_at);
             data.push(el.bat_i);
         });
+
+        labels.reverse();
+        data.reverse();
 
         new Chart(ctx, {
             type: 'line',
@@ -33,6 +36,7 @@ export default {
                 }]
             },
             options: {
+
                 scales: {
                     y: {
                         beginAtZero: true

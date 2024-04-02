@@ -664,6 +664,7 @@ input::placeholder {
 .page-content__container {
     padding: 86px 40px 24px 40px;
     background-color: #EEEEEE;
+    position: relative;
 }
 
 .page-content__title p {

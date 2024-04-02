@@ -5,7 +5,7 @@
             <div></div>
         </div>
         <nav className="controller-nav">
-            <div>
+            <div class="controller-nav__btns">
                 <button @click="dashBoardOn()"
                     v-bind:class="{ controller_btn_active: btns.dashBoardActive }">Дашборд</button>
                 <button @click="settingsOn()"
@@ -31,9 +31,14 @@
                 </div>
             </div>
         </nav>
+        <div v-if="btns.loading" class="loading">
+            <div>
+                <div class="loader"></div>
+            </div>
+        </div>
         <div class="dashboard-container" v-if="btns.dashBoardActive">
             <div class="info-block__first">
-                <div class="info-block__half">
+                <div class="info-block__half info-block_line-charts">
                     <div class="info-block__block info-block__block-current">
                         <TheBarChart v-if="visibleChart" :controllerInfoStorage="controllerInfoStorage" />
                     </div>
@@ -54,7 +59,7 @@
                         <div>Ток АКБ</div>
                         <div>Ток нагрузки</div>
                     </div>
-                    <div class="controller-data controller-data__dashboard">
+                    <div class="controller-data__dashboard">
                         <div className="info-line info-line__table" v-for="info in smallControllerInfoStorage"
                             :key="info">
                             <div class="measured_at measured-at__dashboard">{{ info.measured_at }}</div>
@@ -149,7 +154,8 @@ export default {
             btns: {
                 dashBoardActive: true,
                 settingsActive: false,
-                dataActive: false
+                dataActive: false,
+                loading: true
             },
             selectortimeContent: '',
             selectortimeVisible: false,
@@ -240,6 +246,7 @@ export default {
             this.getControllerData();
         },
         getControllerData() {
+            this.btns.loading = true; // показать загрузку
             this.visibleChart = false; // скрыть графики
 
             this.selectortimeVisible = false; // закрыть селектор
@@ -253,12 +260,7 @@ export default {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     if (response.status === 200) {
-                        console.log(response.data.results);
                         this.controllerInfoStorage = response.data.results;
-                        // удаление запятой в датах
-                        this.controllerInfoStorage.forEach((el) => {
-                            el.measured_at = el.measured_at.replace(',', ' ');
-                        });
 
                         this.correctControllerData();
                     }
@@ -267,15 +269,81 @@ export default {
                     console.log(error);
                 });
         },
-        correctControllerData() {
+        correctControllerData() { // новый массив с интервалами (1 день - 5 мин, неделя - 1 час, месяц - 1 день)
+            let unformattedLastTime = new Date(parseInt(new Date().getTime() / 300000) * 300000); // последняя отметка времени, кратная 5 мин
+            let unformattedFirstTime = new Date(this.dateStart).setHours(unformattedLastTime.getHours(), unformattedLastTime.getMinutes());
 
-            console.log(this.dateEnd);
-            // let unformattedLastTime = new Date(parseInt(this.dateEnd.getTime() / 300000) * 300000); // последняя отметка времени, кратная 5
-            // let timeInterval = Math.floor((unformattedLastTime - unformattedFirstTime) / (1000 * 60)); // заданный период в минутах (1440 по умолчанию)
-            // let numberOfRecords = timeInterval / 5 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию)
+            let timeInterval = Math.floor((unformattedLastTime - unformattedFirstTime) / (1000 * 60)); // заданный период в минутах
+            let numberOfRecords = timeInterval / 5 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
+
+            let timestamps = [];
+
+            for (let i = 0; i < numberOfRecords; i++) {
+                let date = new Date(unformattedFirstTime);
+                let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 5 * i);
+                timestamps.push(newRec);
+            }
+
+            timestamps.reverse();
+
+            let rightControllerStorage = [];
+
+            for (let m = 0; m < timestamps.length; m++) {
+                for (let v = 0; v < this.controllerInfoStorage.length; v++) {
+                    let num = this.controllerInfoStorage[v].created_at.slice(0, 2);
+                    let month = this.controllerInfoStorage[v].created_at.slice(3, 6);
+                    let time = this.controllerInfoStorage[v].created_at.slice(5);
+
+                    let newdate = month + num + time;
+
+                    let a = new Date(timestamps[m].getFullYear(), timestamps[m].getMonth(), timestamps[m].getDate(), timestamps[m].getHours(), timestamps[m].getMinutes()); // кратно 5 минутам, без секунд
+                    let b = new Date(new Date(newdate).getFullYear(), new Date(newdate).getMonth(), new Date(newdate).getDate(), new Date(newdate).getHours(), new Date(newdate).getMinutes()); // пришедшие данные
+
+                    if (String(a) === String(b)) {
+                        this.controllerInfoStorage[v].measured_at = newdate;
+                        rightControllerStorage.push(this.controllerInfoStorage[v]);
+                    }
+                }
+
+                if (rightControllerStorage.length < m + 1) {
+                    rightControllerStorage.push({
+                        bat_c: null,
+                        bat_i: null,
+                        bat_v: null,
+                        created_at: timestamps[m],
+                        crg_mode: null,
+                        dbi: null,
+                        device: 1,
+                        id: this.controllerId,
+                        load_i: null,
+                        load_mode: null,
+                        load_st: null,
+                        load_v: null,
+                        measured_at: timestamps[m],
+                        p_con: null,
+                        p_con_all: null,
+                        p_gen: null,
+                        p_gen_all: null,
+                        pv_i: null,
+                        pv_v: null,
+                        temp: null
+                    })
+                }
+            }
+
+            this.controllerInfoStorage = rightControllerStorage;
+
+            // удаление запятой в датах
+            this.controllerInfoStorage.forEach((el) => {
+                let date = new Date(el.measured_at);
+                el.measured_at = date;
+                el.measured_at = this.twoDigits(date.getDate()) + '/' + this.twoDigits(date.getMonth() + 1) + ' ' + this.twoDigits(date.getHours()) + ':' + this.twoDigits(date.getMinutes());
+            });
 
             this.visibleChart = true;
-            this.smallControllerInfoStorage = this.controllerInfoStorage.slice(0, 17); // заполнение таблицы для дашборда
+            this.smallControllerInfoStorage = this.controllerInfoStorage.slice(0, 23); // заполнение таблицы для дашборда
+
+            this.btns.loading = false;
         }
     },
     mounted() {
@@ -287,7 +355,6 @@ export default {
                 headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
             }).then((response) => {
                 if (response.status === 200) {
-                    console.log(response.data)
                     this.controllerInfo = response.data;
                 }
             }).catch((error) => {
@@ -299,6 +366,107 @@ export default {
 </script>
 
 <style>
+@keyframes mulShdSpin {
+
+    0%,
+    100% {
+        box-shadow: 0 -3em 0 0.2em,
+            2em -2em 0 0em, 3em 0 0 -1em,
+            2em 2em 0 -1em, 0 3em 0 -1em,
+            -2em 2em 0 -1em, -3em 0 0 -1em,
+            -2em -2em 0 0;
+    }
+
+    12.5% {
+        box-shadow: 0 -3em 0 0, 2em -2em 0 0.2em,
+            3em 0 0 0, 2em 2em 0 -1em, 0 3em 0 -1em,
+            -2em 2em 0 -1em, -3em 0 0 -1em,
+            -2em -2em 0 -1em;
+    }
+
+    25% {
+        box-shadow: 0 -3em 0 -0.5em,
+            2em -2em 0 0, 3em 0 0 0.2em,
+            2em 2em 0 0, 0 3em 0 -1em,
+            -2em 2em 0 -1em, -3em 0 0 -1em,
+            -2em -2em 0 -1em;
+    }
+
+    37.5% {
+        box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em,
+            3em 0em 0 0, 2em 2em 0 0.2em, 0 3em 0 0em,
+            -2em 2em 0 -1em, -3em 0em 0 -1em, -2em -2em 0 -1em;
+    }
+
+    50% {
+        box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em,
+            3em 0 0 -1em, 2em 2em 0 0em, 0 3em 0 0.2em,
+            -2em 2em 0 0, -3em 0em 0 -1em, -2em -2em 0 -1em;
+    }
+
+    62.5% {
+        box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em,
+            3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 0,
+            -2em 2em 0 0.2em, -3em 0 0 0, -2em -2em 0 -1em;
+    }
+
+    75% {
+        box-shadow: 0em -3em 0 -1em, 2em -2em 0 -1em,
+            3em 0em 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em,
+            -2em 2em 0 0, -3em 0em 0 0.2em, -2em -2em 0 0;
+    }
+
+    87.5% {
+        box-shadow: 0em -3em 0 0, 2em -2em 0 -1em,
+            3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em,
+            -2em 2em 0 0, -3em 0em 0 0, -2em -2em 0 0.2em;
+    }
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    background-color: #EEEEEE;
+    height: 100vh;
+    width: 100%;
+    position: absolute;
+    left: 0;
+}
+
+.loader {
+    margin-top: 200px;
+    width: 55px;
+    aspect-ratio: 1;
+    display: grid;
+}
+
+.loader::before,
+.loader::after {
+    content: "";
+    grid-area: 1/1;
+    --c: no-repeat radial-gradient(farthest-side, #2482c5 95%, #b3373700);
+    background:
+        var(--c) 50% 0,
+        var(--c) 50% 100%,
+        var(--c) 100% 50%,
+        var(--c) 0 50%;
+    background-size: 12px 12px;
+    animation: l12 1s infinite;
+}
+
+.loader::before {
+    margin: 4px;
+    filter: hue-rotate(45deg);
+    background-size: 8px 8px;
+    animation-timing-function: linear
+}
+
+@keyframes l12 {
+    100% {
+        transform: rotate(.5turn)
+    }
+}
+
 .info-line {
     display: flex;
     width: 100%;
@@ -316,7 +484,7 @@ export default {
 
 .info-line div {
     text-align: center;
-    width: 160px;
+    width: 115px;
     height: 32px;
     display: flex;
     justify-content: center;
@@ -339,7 +507,7 @@ export default {
     font-weight: 500;
     font-size: 16px;
     line-height: 125%;
-    color: #0e1626;
+    color: #293b5f;
     margin-right: 32px;
 }
 
@@ -350,6 +518,7 @@ export default {
 .controller-nav__data-filter {
     width: 208px;
     position: relative;
+    z-index: 99;
 }
 
 .dropdown__button-data-filter {
@@ -411,6 +580,10 @@ export default {
     color: #0E1626;
 }
 
+.controller-nav__btns button {
+    background-color: transparent;
+}
+
 .controller-data {
     height: 62vh;
     overflow-y: scroll;
@@ -436,8 +609,8 @@ export default {
 }
 
 .info-block__half:last-child {
-    margin-left: 24px;
     padding: 24px 24px 16px;
+    width: 44%;
 }
 
 .info-block__block-current {
@@ -462,7 +635,7 @@ export default {
 }
 
 .measured-at__dashboard {
-    width: 230px !important;
+    width: 100px !important;
     font-size: 10px !important;
 }
 
@@ -472,12 +645,11 @@ export default {
 
 .controller-data__dashboard {
     overflow: hidden;
-    height: 415px !important;
+    height: 480px;
 }
 
 .info-block__second div {
-    width: 30%;
-    margin-right: 24px;
+    width: 28%;
     padding: 24px;
 }
 
@@ -499,6 +671,34 @@ export default {
 .more-btn {
     border-radius: 8px;
     padding: 6px 12px;
+    margin-right: 0px;
+}
+
+/* canvas {
+    width: 100% !important;
+} */
+
+.info-block_line-charts {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.info-block_line-charts div {
+    height: 50%;
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+}
+
+.info-line__title-dashboard:hover {
+    background-color: transparent;
+}
+
+@media (min-width: 1500px) {
+    .controller-data__dashboard {
+        height: 510px;
+    }
 }
 
 @media (min-width: 1600px) {
@@ -506,8 +706,12 @@ export default {
         height: 65vh;
     }
 
-    .measured-at__dashboard {
-        width: 200px !important;
+    .loader {
+        margin-top: 230px !important;
+    }
+
+    .controller-data__dashboard {
+        height: 546px;
     }
 }
 
@@ -515,11 +719,23 @@ export default {
     .measured-at__dashboard {
         font-size: 11px !important;
     }
+
+    .controller-data__dashboard {
+        height: 606px;
+    }
+
+    .info-block__second div {
+        width: 28.5%;
+    }
 }
 
 @media (min-width: 1800px) {
     .controller-data {
         height: 68vh;
+    }
+
+    .controller-data__dashboard {
+        height: 646px;
     }
 
     .info-line__title-dashboard {
@@ -536,8 +752,12 @@ export default {
         height: 71vh;
     }
 
+    .controller-data__dashboard {
+        height: 738px;
+    }
+
     .measured-at__dashboard {
-        width: 180px !important;
+        width: 100px !important;
     }
 
     .info-line__table div {
@@ -546,6 +766,18 @@ export default {
 
     .info-line__title-dashboard {
         font-size: 13px;
+    }
+
+    .loader {
+        margin-top: 270px !important;
+    }
+
+    .info-block__half {
+        width: 51.5%;
+    }
+
+    .info-block__second div {
+        width: 29%;
     }
 }
 </style>
