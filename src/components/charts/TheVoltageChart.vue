@@ -12,31 +12,53 @@ export default {
     mounted() {
         let ctx = document.getElementById('voltageChart');
 
-        // console.log(this.controllerInfoStorage);
-
         let labels = [];
-        let data = [];
+        let dataPvV = [];
+        let dataBatV = [];
+        let dataLoadV = [];
 
         this.controllerInfoStorage.forEach((el) => {
             labels.push(el.measured_at);
-            data.push(el.bat_v);
+            dataPvV.push(el.pv_v);
+            dataBatV.push(el.bat_v);
+            dataLoadV.push(el.load_v);
         });
 
         labels.reverse();
-        data.reverse();
+        dataPvV.reverse();
+        dataBatV.reverse();
+        dataLoadV.reverse();
 
         new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
-                datasets: [{
-                    label: 'Напряжение',
-                    data: data,
-                    borderWidth: 1
-                }]
+                datasets: [
+                    {
+                        label: 'Напряжение PV (В)',
+                        data: dataPvV,
+                        borderWidth: 2,
+                        borderColor: '#F4CA8D',
+                        pointBorderWidth: 0,
+                        pointHitRadius: 0,
+                        cubicInterpolationMode: 'monotone',
+                        pointStyle: 'cross',
+                        backgroundColor: '#F4CA8D',
+                    },
+                    {
+                        label: 'Напряжение АКБ (В) / Напряжение нагрузки (В)',
+                        data: dataBatV,
+                        borderWidth: 2,
+                        borderColor: '#B6DE14',
+                        pointBorderWidth: 0,
+                        pointHitRadius: 0,
+                        cubicInterpolationMode: 'monotone',
+                        pointStyle: 'cross',
+                        backgroundColor: '#B6DE14',
+                    }
+                ]
             },
             options: {
-                responsive: true,
                 scales: {
                     y: {
                         beginAtZero: true

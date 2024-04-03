@@ -40,9 +40,11 @@
             <div class="info-block__first">
                 <div class="info-block__half info-block_line-charts">
                     <div class="info-block__block info-block__block-current">
+                        <h4>ток</h4>
                         <TheBarChart v-if="visibleChart" :controllerInfoStorage="controllerInfoStorage" />
                     </div>
                     <div class="info-block__block">
+                        <h4>Напряжение</h4>
                         <TheVoltageChart v-if="visibleChart" :controllerInfoStorage="controllerInfoStorage" />
                     </div>
                 </div>
@@ -52,12 +54,12 @@
                     </div>
                     <div className="info-line info-line__title info-line__title-dashboard">
                         <div class="measured_at measured-at__dashboard">дата/время</div>
-                        <div>Напряжение PV</div>
-                        <div>Напряжение АКБ</div>
-                        <div>Напряжение нагрузки</div>
-                        <div>Ток PV</div>
-                        <div>Ток АКБ</div>
-                        <div>Ток нагрузки</div>
+                        <div>Напряжение PV(В)</div>
+                        <div>Напряжение АКБ(В)</div>
+                        <div>Напряжение нагрузки(В)</div>
+                        <div>Ток PV(А)</div>
+                        <div>Ток АКБ(А)</div>
+                        <div>Ток нагрузки(А)</div>
                     </div>
                     <div class="controller-data__dashboard">
                         <div className="info-line info-line__table" v-for="info in smallControllerInfoStorage"
@@ -75,15 +77,15 @@
             </div>
             <div class="info-block__first info-block__second">
                 <div class="info-block__block">
-                    <h4>Уровень заряда АКБ</h4>
-                    <ThePieChart v-if="visibleChart" :controllerInfoStorage="controllerInfoStorage" />
+                    <h4 class="charge-level">Уровень заряда АКБ (%)</h4>
+                    <ThePieChart v-if="visibleChart" :controllerInfoStorage="receivedData" />
                 </div>
                 <div class="info-block__block">
-                    <h4>Сгенерированная мощность</h4>
+                    <h4 class="charge-level">Сгенерированная мощность (%)</h4>
                     <ThePieChartTwo v-if="visibleChart" :controllerInfoStorage="controllerInfoStorage" />
                 </div>
                 <div class="info-block__block">
-                    <h4>Потреблённая мощность</h4>
+                    <h4 class="charge-level">Потреблённая мощность (%)</h4>
                     <ThePieChartThree v-if="visibleChart" :controllerInfoStorage="controllerInfoStorage" />
                 </div>
             </div>
@@ -108,12 +110,12 @@
         <div v-if="btns.dataActive">
             <div className="info-line info-line__title">
                 <div class="measured_at">дата/время</div>
-                <div>Напряжение PV</div>
-                <div>Напряжение АКБ</div>
-                <div>Напряжение нагрузки</div>
-                <div>Ток PV</div>
-                <div>Ток АКБ</div>
-                <div>Ток нагрузки</div>
+                <div>Напряжение PV(В)</div>
+                <div>Напряжение АКБ(В)</div>
+                <div>Напряжение нагрузки(В)</div>
+                <div>Ток PV(А)</div>
+                <div>Ток АКБ(А)</div>
+                <div>Ток нагрузки(А)</div>
             </div>
             <div class="controller-data">
                 <div className="info-line" v-for="info in controllerInfoStorage" :key="info">
@@ -182,6 +184,7 @@ export default {
             },
 
             controllerInfoStorage: [], // данные за период
+            receivedData: [], // ответ сервера (без корректировки)
             smallControllerInfoStorage: []
         }
     },
@@ -261,6 +264,8 @@ export default {
                 }).then((response) => {
                     if (response.status === 200) {
                         this.controllerInfoStorage = response.data.results;
+                        console.log(this.controllerInfoStorage);
+                        this.receivedData = this.controllerInfoStorage;
 
                         this.correctControllerData();
                     }
@@ -341,7 +346,7 @@ export default {
             });
 
             this.visibleChart = true;
-            this.smallControllerInfoStorage = this.controllerInfoStorage.slice(0, 23); // заполнение таблицы для дашборда
+            this.smallControllerInfoStorage = this.controllerInfoStorage.slice(0, 25); // заполнение таблицы для дашборда
 
             this.btns.loading = false;
         }
@@ -480,6 +485,10 @@ export default {
 
 .info-line__title {
     margin-bottom: 8px;
+}
+
+.info-line__title:hover {
+    background-color: transparent;
 }
 
 .info-line div {
@@ -645,7 +654,7 @@ export default {
 
 .controller-data__dashboard {
     overflow: hidden;
-    height: 480px;
+    height: 509px;
 }
 
 .info-block__second div {
@@ -695,9 +704,18 @@ export default {
     background-color: transparent;
 }
 
+.charge-level {
+    margin-bottom: 16px !important;
+}
+
+.info-block_line-charts div {
+    display: flex;
+    flex-direction: column;
+}
+
 @media (min-width: 1500px) {
     .controller-data__dashboard {
-        height: 510px;
+        height: 540px;
     }
 }
 
@@ -711,7 +729,7 @@ export default {
     }
 
     .controller-data__dashboard {
-        height: 546px;
+        height: 580px;
     }
 }
 
@@ -721,7 +739,7 @@ export default {
     }
 
     .controller-data__dashboard {
-        height: 606px;
+        height: 639px;
     }
 
     .info-block__second div {
@@ -735,7 +753,7 @@ export default {
     }
 
     .controller-data__dashboard {
-        height: 646px;
+        height: 671px;
     }
 
     .info-line__title-dashboard {
@@ -753,7 +771,7 @@ export default {
     }
 
     .controller-data__dashboard {
-        height: 738px;
+        height: 767px;
     }
 
     .measured-at__dashboard {
