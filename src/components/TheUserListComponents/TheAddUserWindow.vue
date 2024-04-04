@@ -149,7 +149,6 @@ export default {
                     this.errorWindow();
                 }
             }).catch((error) => {
-                console.log(error);
                 this.addErrorText = error.request.responseText;
                 this.errorWindow();
             });

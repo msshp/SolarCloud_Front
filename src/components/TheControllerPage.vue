@@ -76,17 +76,19 @@
                 </div>
             </div>
             <div class="info-block__first info-block__second">
-                <div class="info-block__block">
-                    <h4 class="charge-level">Уровень заряда АКБ (%)</h4>
+                <div class="info-block__block pie-container">
+                    <h4 class="charge-level">Уровень заряда АКБ</h4>
                     <ThePieChart v-if="visibleChart" :controllerInfoStorage="receivedData" />
                 </div>
-                <div class="info-block__block">
-                    <h4 class="charge-level">Сгенерированная мощность (%)</h4>
-                    <ThePieChartTwo v-if="visibleChart" :controllerInfoStorage="controllerInfoStorage" />
+                <div class="info-block__block pie-container">
+                    <h4 class="charge-level">Сгенерированно энергии</h4>
+                    <p class="pie-last-time">{{ dateText }}</p>
+                    <ThePieChartTwo v-if="visibleChart" :controllerInfoStorage="receivedData" />
                 </div>
-                <div class="info-block__block">
-                    <h4 class="charge-level">Потреблённая мощность (%)</h4>
-                    <ThePieChartThree v-if="visibleChart" :controllerInfoStorage="controllerInfoStorage" />
+                <div class="info-block__block pie-container">
+                    <h4 class="charge-level">Потрачено энергии</h4>
+                    <p class="pie-last-time">{{ dateText }}</p>
+                    <ThePieChartThree v-if="visibleChart" :controllerInfoStorage="receivedData" />
                 </div>
             </div>
             <div class="info-block__block info-block__errors">
@@ -254,17 +256,14 @@ export default {
 
             this.selectortimeVisible = false; // закрыть селектор
             this.dateText = `${this.dateStart} – ${this.dateEnd}`;
-            console.log(this.controllerId);
 
             // &date_end=${this.dateEnd}
-            console.log(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/fixdata/?date_start=${this.dateStart}&limit=100000`);
             axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/fixdata/?date_start=${this.dateStart}&limit=100000`,
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     if (response.status === 200) {
                         this.controllerInfoStorage = response.data.results;
-                        console.log(this.controllerInfoStorage);
                         this.receivedData = this.controllerInfoStorage;
 
                         this.correctControllerData();
@@ -343,6 +342,14 @@ export default {
                 let date = new Date(el.measured_at);
                 el.measured_at = date;
                 el.measured_at = this.twoDigits(date.getDate()) + '/' + this.twoDigits(date.getMonth() + 1) + ' ' + this.twoDigits(date.getHours()) + ':' + this.twoDigits(date.getMinutes());
+
+                let key;
+                for (key in el) {
+                    if (el[key] === null) {
+                        el[key] = '–';
+                    }
+                    // тело цикла выполняется для каждого свойства объекта
+                }
             });
 
             this.visibleChart = true;
@@ -432,10 +439,11 @@ export default {
     display: flex;
     justify-content: center;
     background-color: #EEEEEE;
-    height: 100vh;
+    height: 110vh;
     width: 100%;
     position: absolute;
     left: 0;
+    z-index: 98;
 }
 
 .loader {
@@ -683,9 +691,9 @@ export default {
     margin-right: 0px;
 }
 
-/* canvas {
-    width: 100% !important;
-} */
+.pie-container canvas {
+    padding: 24px;
+}
 
 .info-block_line-charts {
     display: flex;
@@ -713,9 +721,43 @@ export default {
     flex-direction: column;
 }
 
+.pie-container {
+    position: relative;
+}
+
+.pie-value {
+    position: absolute;
+    padding: 0 !important;
+    font-size: 48px;
+    width: 100px !important;
+    top: 49%;
+    left: 38%;
+    text-align: center;
+}
+
+.pie-energy {
+    top: 45%;
+    left: 38%;
+}
+
+.pie-value p {
+    margin: 0;
+    font-size: 24px;
+}
+
+.pie-last-time {
+    margin: 0;
+    text-align: center;
+    color: #293b5f;
+}
+
 @media (min-width: 1500px) {
     .controller-data__dashboard {
         height: 540px;
+    }
+
+    .pie-energy {
+        left: 38%;
     }
 }
 
@@ -731,6 +773,14 @@ export default {
     .controller-data__dashboard {
         height: 580px;
     }
+
+    .pie-value {
+        left: 39%;
+    }
+
+    .pie-energy {
+        left: 39%;
+    }
 }
 
 @media (min-width: 1700px) {
@@ -744,6 +794,14 @@ export default {
 
     .info-block__second div {
         width: 28.5%;
+    }
+
+    .pie-value {
+        left: 40%;
+    }
+
+    .pie-energy {
+        left: 40%;
     }
 }
 
@@ -762,6 +820,15 @@ export default {
 
     .measured-at__dashboard {
         font-size: 12px !important;
+    }
+
+    .pie-value {
+        left: 41%;
+    }
+
+    .pie-energy {
+        left: 40.5%;
+        top: 46%;
     }
 }
 
@@ -796,6 +863,10 @@ export default {
 
     .info-block__second div {
         width: 29%;
+    }
+
+    .pie-energy {
+        left: 41%;
     }
 }
 </style>

@@ -1,5 +1,7 @@
 <template>
     <canvas id="p_genChart"></canvas>
+    <div class="pie-value pie-energy">{{ value }}<p>кВт⋅ч</p>
+    </div>
 </template>
 
 <script>
@@ -9,40 +11,40 @@ export default {
     props: {
         controllerInfoStorage: Array,
     },
+    data() {
+        return {
+            value: null
+        }
+    },
     mounted() {
         let ctx = document.getElementById('p_genChart');
 
-        // console.log(this.controllerInfoStorage);
+        this.controllerInfoStorage.forEach(el => {
+            this.value = this.value + el.p_gen;
+        })
 
-        let labels = [];
-        let data = [];
-
-        this.controllerInfoStorage.forEach((el) => {
-            labels.push(el.measured_at);
-        });
-
-        let sum = this.controllerInfoStorage.reduce((sum, current) => sum + current.p_gen, 0);
-
-        data.push(sum);
+        const chartdata = {
+            datasets: [{
+                data: [this.value],
+                borderWidth: [0, 0],
+                backgroundColor: [
+                    '#2384c5'
+                ],
+                hoverBackgroundColor: [
+                    '#3396D8'
+                ],
+                hoverOffset: 0
+            }]
+        }
 
         new Chart(ctx, {
             type: 'doughnut',
-            data: {
-                datasets: [
-                    {
-                        label: 'Сгенерированная мощность',
-                        data: data,
-                    }
-                ]
-            },
+            data: chartdata,
             options: {
-                responsive: true,
+                cutout: 100,
                 plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true
+                    tooltip: {
+                        enabled: false
                     }
                 }
             }

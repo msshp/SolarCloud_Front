@@ -1,5 +1,7 @@
 <template>
+    <p class="pie-last-time">{{ lastvalueTime }}</p>
     <canvas id="bat_cChart"></canvas>
+    <div class="pie-value">{{ value }}%</div>
 </template>
 
 <script>
@@ -12,25 +14,26 @@ export default {
     data() {
         return {
             value: null,
-            chartColor: ''
+            chartColor: '',
+            chartDefColor: '#A9B8D7',
+            lastvalueTime: ''
+        }
+    },
+    methods: {
+        twoDigits(num) {
+            return ('0' + num).slice(-2);
         }
     },
     mounted() {
         let ctx = document.getElementById('bat_cChart');
 
-        let labels = [];
-        let data = [];
-
-        this.controllerInfoStorage.forEach((el) => {
-            labels.push(el.measured_at);
-        });
-
         let lastvalue = this.controllerInfoStorage[0];
-        this.value = lastvalue.bat_c;
-        console.log(lastvalue);
-        let difference = 100 - lastvalue.bat_c;
 
-        data.push(lastvalue.bat_c);
+        let time = new Date(lastvalue.measured_at); // вывести время последней записи
+        this.lastvalueTime = this.twoDigits(time.getDate()) + '/' + this.twoDigits(time.getMonth() + 1) + ' ' + this.twoDigits(time.getHours()) + ':' + this.twoDigits(time.getMinutes());
+
+        this.value = lastvalue.bat_c;
+        let difference = 100 - lastvalue.bat_c;
 
         if (Number(lastvalue.bat_c) < 50) {
             this.chartColor = '#E94B4B';
@@ -40,25 +43,36 @@ export default {
             this.chartColor = '#F4CA8D';
         }
 
+        if (Number(lastvalue.bat_c) === 0) {
+            this.chartDefColor = '#E94B4B';
+        }
+
         const chartdata = {
             datasets: [{
                 data: [Number(lastvalue.bat_c), Number(difference)],
                 borderWidth: [0, 0],
-                borderColor: '#00CA8B',
-                borderRadius: 0,
                 backgroundColor: [
                     this.chartColor,
-                    '#A9B8D7',
+                    this.chartDefColor
                 ],
-                hoverOffset: 4
+                hoverBackgroundColor: [
+                    this.chartColor,
+                    this.chartDefColor
+                ],
+                hoverOffset: [10, 0]
             }]
-        };
+        }
 
         new Chart(ctx, {
             type: 'doughnut',
             data: chartdata,
             options: {
-                cutout: 80,
+                cutout: 100,
+                plugins: {
+                    tooltip: {
+                        enabled: false
+                    }
+                }
             }
         });
     }
