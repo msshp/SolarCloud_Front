@@ -111,7 +111,7 @@
                         <div class="top-menu__item-name">
                             <p class="menu__user-name"
                                 v-bind:class="{ personalarea_active: pages.personalAreaPageVisibility }"> {{
-        saveUserData.first_name + ' ' + saveUserData.last_name }}</p>
+                                    saveUserData.first_name + ' ' + saveUserData.last_name }}</p>
                             <p class="menu__user-role"
                                 v-bind:class="{ personalarea_active: pages.personalAreaPageVisibility }">
                                 {{ saveUserData.profile.role }}
@@ -396,8 +396,8 @@ export default {
                         this.drawErrorLogIn();
                     }
                 }).catch((error) => {
-                    console.log(error);
-                    this.errorLoginMessage = `${error.response.data.non_field_errors[0]}`;
+                    // this.errorLoginMessage = `${error.response.data.non_field_errors}`;
+                    this.errorLoginMessage = `Ошибка ${error.response.status}`;
                     this.drawErrorLogIn();
                 });
             }
@@ -667,7 +667,8 @@ input::placeholder {
     position: relative;
 }
 
-.page-content__title p {
+.page-content__title p,
+.controller-page__title {
     margin: 0 0 32px 0;
     font-weight: 500;
     font-size: 18px;
@@ -678,7 +679,6 @@ input::placeholder {
 
 .page-content__title div,
 .account-separator {
-    /* width: 1559px; */
     height: 1px;
     background: rgba(0, 0, 0, 0.1);
     margin-bottom: 24px;

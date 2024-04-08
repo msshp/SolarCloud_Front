@@ -145,7 +145,6 @@ export default {
 
                     this.errorWindow();
                 } else {
-
                     this.errorWindow();
                 }
             }).catch((error) => {

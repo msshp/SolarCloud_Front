@@ -1,8 +1,26 @@
 <template>
     <div class="page-content__container">
-        <div class="page-content__title">
-            <p>{{ controllerInfo.name }}</p>
-            <div></div>
+        <div>
+            <p class="controller-page__title">{{ controllerInfo.name }}</p>
+            <div class="controller-page__info-container">
+                <div class="controller-page__info-block">
+                    <p>cерийный номер</p>
+                    <span>{{ controllerInfo.sn }}</span>
+                </div>
+                <div class="controller-page__info-block">
+                    <p>тип контроллера</p>
+                    <span>{{ controllerInfo.device_type.device_type }}</span>
+                </div>
+                <div class="controller-page__info-block">
+                    <p>уровень сигнала</p>
+                    <span>{{ receivedData[0].dbi }}</span>
+                </div>
+                <div class="controller-page__info-block">
+                    <p>дата последнего выхода</p>
+                    <span>{{ receivedData[0].measured_at }}</span>
+                </div>
+            </div>
+            <div class="account-separator"></div>
         </div>
         <nav className="controller-nav">
             <div class="controller-nav__btns">
@@ -186,8 +204,30 @@ export default {
             },
 
             controllerInfoStorage: [], // данные за период
-            receivedData: [], // ответ сервера (без корректировки)
-            smallControllerInfoStorage: []
+            receivedData: [{ // ответ сервера (без корректировки)
+                "id": 0,
+                "pv_v": "0",
+                "pv_i": "0",
+                "bat_v": "0",
+                "bat_i": "0",
+                "bat_c": null,
+                "load_v": "0",
+                "load_i": "0",
+                "load_st": "0",
+                "load_mode": "0",
+                "crg_mode": "0",
+                "temp": "0",
+                "p_gen": 0,
+                "p_con": 0,
+                "p_gen_all": 0,
+                "p_con_all": 0,
+                "dbi": "-",
+                "measured_at": "–",
+                "created_at": "",
+                "device": 0
+            }],
+            smallControllerInfoStorage: [],
+            indicatorSearchLastEntry: false
         }
     },
     methods: {
@@ -251,6 +291,7 @@ export default {
             this.getControllerData();
         },
         getControllerData() {
+            this.indicatorSearchLastEntry = false;
             this.btns.loading = true; // показать загрузку
             this.visibleChart = false; // скрыть графики
 
@@ -264,7 +305,17 @@ export default {
                 }).then((response) => {
                     if (response.status === 200) {
                         this.controllerInfoStorage = response.data.results;
-                        this.receivedData = this.controllerInfoStorage;
+                        console.log(this.controllerInfoStorage);
+
+                        if (this.controllerInfoStorage.length === 0) {
+                            this.indicatorSearchLastEntry = true; // найти последнюю запись
+                        }
+
+                        if (this.controllerInfoStorage.length !== 0) {
+                            this.receivedData = this.controllerInfoStorage; //исходный ответ с сервера (для графиков и последнего выхода на связь)
+                            let date = new Date(this.receivedData[0].measured_at);
+                            this.receivedData[0].measured_at = this.twoDigits(date.getMonth() + 1) + '/' + this.twoDigits(date.getDate()) + ' ' + this.twoDigits(date.getHours()) + ':' + this.twoDigits(date.getMinutes());
+                        }
 
                         this.correctControllerData();
                     }
@@ -278,14 +329,37 @@ export default {
             let unformattedFirstTime = new Date(this.dateStart).setHours(unformattedLastTime.getHours(), unformattedLastTime.getMinutes());
 
             let timeInterval = Math.floor((unformattedLastTime - unformattedFirstTime) / (1000 * 60)); // заданный период в минутах
-            let numberOfRecords = timeInterval / 5 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
 
-            let timestamps = [];
+            let timestamps = []; // массив с временными метками
 
-            for (let i = 0; i < numberOfRecords; i++) {
-                let date = new Date(unformattedFirstTime);
-                let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 5 * i);
-                timestamps.push(newRec);
+            console.log(timeInterval);
+            if (timeInterval < 1441) { // минут за день
+                let numberOfRecords = timeInterval / 5 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
+                console.log(numberOfRecords);
+
+                for (let i = 0; i < numberOfRecords; i++) {
+                    let date = new Date(unformattedFirstTime);
+                    let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 5 * i);
+                    timestamps.push(newRec);
+                }
+            } else if (timeInterval > 43199) { // период месяц/больше месяца
+                let numberOfRecords = timeInterval / 1440 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
+                console.log(numberOfRecords);
+
+                for (let i = 0; i < numberOfRecords; i++) {
+                    let date = new Date(unformattedFirstTime);
+                    let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 1440 * i);
+                    timestamps.push(newRec);
+                }
+            } else { // каждый час (неделя) период больше недели и меньше месяца
+                let numberOfRecords = timeInterval / 60 + 1; // сколько в интервале отметок, кратных 60? (289 по умолчанию за день)
+                console.log(numberOfRecords);
+
+                for (let i = 0; i < numberOfRecords; i++) {
+                    let date = new Date(unformattedFirstTime);
+                    let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 60 * i);
+                    timestamps.push(newRec);
+                }
             }
 
             timestamps.reverse();
@@ -355,7 +429,37 @@ export default {
             this.visibleChart = true;
             this.smallControllerInfoStorage = this.controllerInfoStorage.slice(0, 25); // заполнение таблицы для дашборда
 
+
+            if (this.indicatorSearchLastEntry) {
+                this.searchLastEntry();
+            }
             this.btns.loading = false;
+        },
+        searchLastEntry() { // to do
+            console.log('искать последнюю запись в базе'); // искать последнюю запись в базе
+
+            // axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/fixdata/?date_start=${this.dateStart}&limit=100000`,
+            //     {
+            //         headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+            //     }).then((response) => {
+            //         if (response.status === 200) {
+            //             this.controllerInfoStorage = response.data.results;
+            //             console.log(this.controllerInfoStorage);
+
+            //             if (this.controllerInfoStorage.length === 0) {
+            //                 console.log('искать последнюю запись в базе'); // искать последнюю запись в базе
+            //                 this.searchLastEntry();
+            //             } else {
+            //                 this.receivedData = this.controllerInfoStorage; //исходный ответ с сервера (для графиков и последнего выхода на связь)
+            //                 let date = new Date(this.receivedData[0].measured_at);
+            //                 this.receivedData[0].measured_at = this.twoDigits(date.getMonth() + 1) + '/' + this.twoDigits(date.getDate()) + ' ' + this.twoDigits(date.getHours()) + ':' + this.twoDigits(date.getMinutes());
+            //             }
+            //             this.correctControllerData();
+            //         }
+            //     }).catch((error) => {
+            //         // обработка ошибки
+            //         console.log(error);
+            //     });
         }
     },
     mounted() {
@@ -737,7 +841,7 @@ export default {
 
 .pie-energy {
     top: 45%;
-    left: 38%;
+    left: 37%;
 }
 
 .pie-value p {
@@ -749,6 +853,43 @@ export default {
     margin: 0;
     text-align: center;
     color: #293b5f;
+}
+
+.controller-page__info-block {
+    border-radius: 8px;
+    width: 30%;
+    height: 60px;
+    box-shadow: 3px 3px 6px 0 rgba(41, 75, 142, 0.5);
+    background: linear-gradient(90deg, #294b8e 27%, #2384c5 100%);
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 112%;
+    color: #f8f6f4;
+    padding: 16px;
+    margin: -12px 16px 24px 0;
+}
+
+.controller-page__info-block:last-child {
+    margin-right: 0;
+}
+
+.controller-page__info-block p {
+    margin: 0 0 16px 0;
+}
+
+.controller-page__info-block span {
+    font-size: 20px;
+}
+
+.controller-page__info-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.controller-page__title {
+    text-transform: uppercase;
+    font-weight: 600 !important;
+    margin-bottom: 26px !important;
 }
 
 @media (min-width: 1500px) {
@@ -779,7 +920,7 @@ export default {
     }
 
     .pie-energy {
-        left: 39%;
+        left: 38.5%;
     }
 }
 
@@ -801,7 +942,7 @@ export default {
     }
 
     .pie-energy {
-        left: 40%;
+        left: 39.5%;
     }
 }
 
@@ -827,7 +968,7 @@ export default {
     }
 
     .pie-energy {
-        left: 40.5%;
+        left: 40%;
         top: 46%;
     }
 }

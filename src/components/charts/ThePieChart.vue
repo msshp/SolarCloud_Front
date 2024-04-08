@@ -30,7 +30,7 @@ export default {
         let lastvalue = this.controllerInfoStorage[0];
 
         let time = new Date(lastvalue.measured_at); // вывести время последней записи
-        this.lastvalueTime = this.twoDigits(time.getDate()) + '/' + this.twoDigits(time.getMonth() + 1) + ' ' + this.twoDigits(time.getHours()) + ':' + this.twoDigits(time.getMinutes());
+        this.lastvalueTime = this.twoDigits(time.getMonth() + 1) + '/' + this.twoDigits(time.getDate()) + ' ' + this.twoDigits(time.getHours()) + ':' + this.twoDigits(time.getMinutes());
 
         this.value = lastvalue.bat_c;
         let difference = 100 - lastvalue.bat_c;
@@ -59,7 +59,7 @@ export default {
                     this.chartColor,
                     this.chartDefColor
                 ],
-                hoverOffset: [10, 0]
+                hoverOffset: [3, 0]
             }]
         }
 

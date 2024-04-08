@@ -291,7 +291,7 @@ export default {
 }
 
 .role-block {
-    border-radius: 4px;
+    border-radius: 8px;
     width: 310px;
     height: 140px;
     background: #f8f6f4;
