@@ -1,6 +1,8 @@
 <template>
-    <canvas id="p_genChart"></canvas>
-    <div class="pie-value pie-energy">{{ value }}<p>кВт⋅ч</p>
+    <div class="pie-container">
+        <canvas id="p_genChart"></canvas>
+        <div class="pie-value pie-energy">{{ value }}<p>вт⋅ч</p>
+        </div>
     </div>
 </template>
 
@@ -18,10 +20,15 @@ export default {
     },
     mounted() {
         let ctx = document.getElementById('p_genChart');
+        console.log(this.controllerInfoStorage);
 
-        this.controllerInfoStorage.forEach(el => {
-            this.value = this.value + el.p_gen;
-        })
+        if (this.controllerInfoStorage.length === 0) {
+            this.value = 0;
+        } else {
+            this.controllerInfoStorage.forEach(el => {
+                this.value = this.value + el.p_gen;
+            })
+        }
 
         const chartdata = {
             datasets: [{
@@ -41,7 +48,7 @@ export default {
             type: 'doughnut',
             data: chartdata,
             options: {
-                cutout: 100,
+                cutout: 90,
                 plugins: {
                     tooltip: {
                         enabled: false

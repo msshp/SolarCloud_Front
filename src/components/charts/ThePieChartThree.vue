@@ -1,6 +1,8 @@
 <template>
-    <canvas id="p_conChart"></canvas>
-    <div class="pie-value pie-energy">{{ value }}<p>кВт⋅ч</p>
+    <div class="pie-container">
+        <canvas id="p_conChart"></canvas>
+        <div class="pie-value pie-energy">{{ value }}<p>вт⋅ч</p>
+        </div>
     </div>
 </template>
 
@@ -19,9 +21,13 @@ export default {
     mounted() {
         let ctx = document.getElementById('p_conChart');
 
-        this.controllerInfoStorage.forEach(el => {
-            this.value = this.value + el.p_con;
-        })
+        if (this.controllerInfoStorage.length === 0) {
+            this.value = 0;
+        } else {
+            this.controllerInfoStorage.forEach(el => {
+                this.value = this.value + el.p_con;
+            })
+        }
 
         const chartdata = {
             datasets: [{
@@ -41,7 +47,7 @@ export default {
             type: 'doughnut',
             data: chartdata,
             options: {
-                cutout: 100,
+                cutout: 90,
                 plugins: {
                     tooltip: {
                         enabled: false

@@ -1,8 +1,11 @@
 <template>
     <div class="page-content__container">
         <div>
-            <p class="controller-page__title">{{ controllerInfo.name }}</p>
             <div class="controller-page__info-container">
+                <div class="controller-page__info-block">
+                    <p>название</p>
+                    <span>{{ controllerInfo.name }}</span>
+                </div>
                 <div class="controller-page__info-block">
                     <p>cерийный номер</p>
                     <span>{{ controllerInfo.sn }}</span>
@@ -13,11 +16,11 @@
                 </div>
                 <div class="controller-page__info-block">
                     <p>уровень сигнала</p>
-                    <span>{{ receivedData[0].dbi }}</span>
+                    <span>{{ lastReleaseSignal }}</span>
                 </div>
                 <div class="controller-page__info-block">
                     <p>дата последнего выхода</p>
-                    <span>{{ receivedData[0].measured_at }}</span>
+                    <span>{{ lastReleaseDate }}</span>
                 </div>
             </div>
             <div class="account-separator"></div>
@@ -56,61 +59,96 @@
         </div>
         <div class="dashboard-container" v-if="btns.dashBoardActive">
             <div class="info-block__first">
-                <div class="info-block__half info-block_line-charts">
-                    <div class="info-block__block info-block__block-current">
+                <div class="info-block__half">
+                    <div class="pies-block">
+                        <div class="info-block__half">
+                            <div class="info-block__block">
+                                <h4 class="charge-level">Напряжение АКБ</h4>
+                                <ThePieVoltage v-if="batCChart" :controllerInfoStorage="receivedData"
+                                    :lastResult="lastResult" />
+                            </div>
+                        </div>
+                        <div class="info-block__half">
+                            <div class="info-block__block">
+                                <h4 class="charge-level">Уровень заряда АКБ</h4>
+                                <ThePieChart v-if="batCChart" :controllerInfoStorage="receivedData"
+                                    :lastResult="lastResult" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pies-block">
+                        <div class="info-block__half">
+                            <div class="info-block__block">
+                                <h4 class="charge-level">Сгенерированно энергии</h4>
+                                <p class="pie-last-time">{{ dateText }}</p>
+                                <ThePieChartTwo v-if="visibleChart" :controllerInfoStorage="receivedData" />
+                            </div>
+                        </div>
+                        <div class="info-block__half">
+                            <div class="info-block__block">
+                                <h4 class="charge-level">Потрачено энергии</h4>
+                                <p class="pie-last-time">{{ dateText }}</p>
+                                <ThePieChartThree v-if="visibleChart" :controllerInfoStorage="receivedData" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="info-block__block info-block__half info-block__errors">
+                    <div class="info-block__errors-container">
+                        <h4>ошибки</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="info-block__first">
+                <div class="info-block__half">
+                    <div class="info-block__block info-block__block-current ">
                         <h4>ток</h4>
                         <TheBarChart v-if="visibleChart" :controllerInfoStorage="controllerInfoStorage" />
                     </div>
+                </div>
+                <div class="info-block__half">
                     <div class="info-block__block">
                         <h4>Напряжение</h4>
                         <TheVoltageChart v-if="visibleChart" :controllerInfoStorage="controllerInfoStorage" />
                     </div>
                 </div>
-                <div class="info-block__block info-block__half">
-                    <div class="info-block__half-title">
-                        <h4>Последние данные</h4><button class="save-btn more-btn" @click="dataOn()">больше →</button>
+            </div>
+            <div class="info-block__first">
+                <div class="info-block__half dashboard-map">
+                    <div class="info-block__block">
+                        <p>карта</p>
                     </div>
-                    <div className="info-line info-line__title info-line__title-dashboard">
-                        <div class="measured_at measured-at__dashboard">дата/время</div>
-                        <div>Напряжение PV(В)</div>
-                        <div>Напряжение АКБ(В)</div>
-                        <div>Напряжение нагрузки(В)</div>
-                        <div>Ток PV(А)</div>
-                        <div>Ток АКБ(А)</div>
-                        <div>Ток нагрузки(А)</div>
-                    </div>
-                    <div class="controller-data__dashboard">
-                        <div className="info-line info-line__table" v-for="info in smallControllerInfoStorage"
-                            :key="info">
-                            <div class="measured_at measured-at__dashboard">{{ info.measured_at }}</div>
-                            <div>{{ info.pv_v }}</div>
-                            <div>{{ info.bat_v }}</div>
-                            <div>{{ info.load_v }}</div>
-                            <div>{{ info.pv_i }}</div>
-                            <div>{{ info.bat_i }}</div>
-                            <div>{{ info.load_i }}</div>
+                </div>
+                <div class="info-block__half dashboard-table">
+                    <div v-if="thereIsData" class="there-is-data">Нет данных за период</div>
+                    <div class="info-block__block">
+                        <div class="info-block__half-title">
+                            <h4 class="dashboard-table__title">Последние данные</h4><button class="save-btn more-btn"
+                                @click="dataOn()">больше
+                                →</button>
+                        </div>
+                        <div className="info-line info-line__title info-line__title-dashboard">
+                            <div class="measured_at measured-at__dashboard">дата/время</div>
+                            <div>Напряжение PV(В)</div>
+                            <div>Напряжение АКБ(В)</div>
+                            <div>Напряжение нагрузки(В)</div>
+                            <div>Ток PV(А)</div>
+                            <div>Ток АКБ(А)</div>
+                            <div>Ток нагрузки(А)</div>
+                        </div>
+                        <div class="controller-data__dashboard">
+                            <div className="info-line info-line__table" v-for="info in receivedData" :key="info">
+                                <div class="measured_at measured-at__dashboard">{{ info.measured_at }}</div>
+                                <div>{{ info.pv_v }}</div>
+                                <div>{{ info.bat_v }}</div>
+                                <div>{{ info.load_v }}</div>
+                                <div>{{ info.pv_i }}</div>
+                                <div>{{ info.bat_i }}</div>
+                                <div>{{ info.load_i }}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="info-block__first info-block__second">
-                <div class="info-block__block pie-container">
-                    <h4 class="charge-level">Уровень заряда АКБ</h4>
-                    <ThePieChart v-if="visibleChart" :controllerInfoStorage="receivedData" />
-                </div>
-                <div class="info-block__block pie-container">
-                    <h4 class="charge-level">Сгенерированно энергии</h4>
-                    <p class="pie-last-time">{{ dateText }}</p>
-                    <ThePieChartTwo v-if="visibleChart" :controllerInfoStorage="receivedData" />
-                </div>
-                <div class="info-block__block pie-container">
-                    <h4 class="charge-level">Потрачено энергии</h4>
-                    <p class="pie-last-time">{{ dateText }}</p>
-                    <ThePieChartThree v-if="visibleChart" :controllerInfoStorage="receivedData" />
-                </div>
-            </div>
-            <div class="info-block__block info-block__errors">
-                <h4>ошибки</h4>
             </div>
         </div>
         <div class="controller-settings" v-if="btns.settingsActive">
@@ -122,12 +160,12 @@
                 <p><span>Серийный номер</span> {{ controllerInfo.sn }}</p>
                 <p><span>Пин-код</span> {{ controllerInfo.pin }}</p>
                 <p><span>Тип устройства</span> {{ controllerInfo.device_type.device_type }}</p>
-                <p><span>Модель</span> {{ controllerInfo.model.model }}</p>
                 <p><span>Дата создания</span> {{ controllerInfo.created_at }}</p>
             </div>
             <div class="controller-map">Карта</div>
         </div>
-        <div v-if="btns.dataActive">
+        <div v-if="btns.dataActive" class="dashboard-table">
+            <div v-if="thereIsData" class="there-is-data">Нет данных за период</div>
             <div className="info-line info-line__title">
                 <div class="measured_at">дата/время</div>
                 <div>Напряжение PV(В)</div>
@@ -138,7 +176,7 @@
                 <div>Ток нагрузки(А)</div>
             </div>
             <div class="controller-data">
-                <div className="info-line" v-for="info in controllerInfoStorage" :key="info">
+                <div className="info-line" v-for="info in receivedData" :key="info">
                     <div class="measured_at">{{ info.measured_at }}</div>
                     <div>{{ info.pv_v }}</div>
                     <div>{{ info.bat_v }}</div>
@@ -151,7 +189,6 @@
         </div>
     </div>
 </template>
-
 <script>
 import axios from 'axios';
 import TheBarChart from './charts/TheBarChart.vue';
@@ -159,6 +196,7 @@ import TheVoltageChart from './charts/TheVoltageChart.vue';
 import ThePieChart from './charts/ThePieChart.vue';
 import ThePieChartTwo from './charts/ThePieChartTwo.vue';
 import ThePieChartThree from './charts/ThePieChartThree.vue';
+import ThePieVoltage from './charts/ThePieVoltage.vue';
 
 export default {
     components: {
@@ -166,7 +204,8 @@ export default {
         TheVoltageChart,
         ThePieChart,
         ThePieChartTwo,
-        ThePieChartThree
+        ThePieChartThree,
+        ThePieVoltage
     },
     props: {
         controllerId: Text
@@ -179,9 +218,9 @@ export default {
                 dataActive: false,
                 loading: true
             },
+            batCChart: false,
             selectortimeContent: '',
             selectortimeVisible: false,
-            visibleChart: false,
 
             // даты
             dateEnd: '',
@@ -195,7 +234,6 @@ export default {
                 device_type: { id: '', device_type: '' },
                 id: '',
                 installer: null,
-                model: { id: '', model: '' },
                 name: "Устройство",
                 pin: '',
                 sn: "",
@@ -204,30 +242,15 @@ export default {
             },
 
             controllerInfoStorage: [], // данные за период
-            receivedData: [{ // ответ сервера (без корректировки)
-                "id": 0,
-                "pv_v": "0",
-                "pv_i": "0",
-                "bat_v": "0",
-                "bat_i": "0",
-                "bat_c": null,
-                "load_v": "0",
-                "load_i": "0",
-                "load_st": "0",
-                "load_mode": "0",
-                "crg_mode": "0",
-                "temp": "0",
-                "p_gen": 0,
-                "p_con": 0,
-                "p_gen_all": 0,
-                "p_con_all": 0,
-                "dbi": "-",
-                "measured_at": "–",
-                "created_at": "",
-                "device": 0
-            }],
+            receivedData: [],
             smallControllerInfoStorage: [],
-            indicatorSearchLastEntry: false
+            indicatorSearchLastEntry: false,
+            lastResult: [],
+            lastReleaseDate: ' ', // последний выход на связь,
+            lastReleaseSignal: ' ',
+
+            visibleChart: false,
+            thereIsData: false
         }
     },
     methods: {
@@ -294,27 +317,46 @@ export default {
             this.indicatorSearchLastEntry = false;
             this.btns.loading = true; // показать загрузку
             this.visibleChart = false; // скрыть графики
+            this.thereIsData = false; // скрыть блок «Нет данных за этот период»
 
             this.selectortimeVisible = false; // закрыть селектор
             this.dateText = `${this.dateStart} – ${this.dateEnd}`;
 
-            // &date_end=${this.dateEnd}
+            // // дата для запроса
+            // const dayMilliseconds = 24 * 60 * 60 * 1000;
+            // var currentDate = new Date(this.dateStart);
+            // console.log(currentDate);
+
+            // let daybefore = new Date(currentDate.setTime(currentDate.getTime() - dayMilliseconds));
+            // console.log(daybefore);
+            // let currentdaybefore = `${daybefore.getFullYear()}-${this.twoDigits(daybefore.getMonth() + 1)}-${this.twoDigits(daybefore.getDate())}`;
+            // console.log(currentdaybefore)
+
+            // ?date_start=2024-02-01
             axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/fixdata/?date_start=${this.dateStart}&limit=100000`,
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     if (response.status === 200) {
                         this.controllerInfoStorage = response.data.results;
-                        console.log(this.controllerInfoStorage);
 
                         if (this.controllerInfoStorage.length === 0) {
                             this.indicatorSearchLastEntry = true; // найти последнюю запись
+                            this.thereIsData = true; // показать блок «Нет данных за этот период»
                         }
 
                         if (this.controllerInfoStorage.length !== 0) {
                             this.receivedData = this.controllerInfoStorage; //исходный ответ с сервера (для графиков и последнего выхода на связь)
                             let date = new Date(this.receivedData[0].measured_at);
                             this.receivedData[0].measured_at = this.twoDigits(date.getMonth() + 1) + '/' + this.twoDigits(date.getDate()) + ' ' + this.twoDigits(date.getHours()) + ':' + this.twoDigits(date.getMinutes());
+
+                            this.receivedData.forEach((el) => {
+                                let date = new Date(el.measured_at);
+                                el.measured_at = this.twoDigits(date.getMonth() + 1) + '/' + this.twoDigits(date.getDate()) + ' ' + this.twoDigits(date.getHours()) + ':' + this.twoDigits(date.getMinutes());
+                            })
+
+                            this.lastReleaseDate = this.receivedData[0].measured_at;
+                            this.lastReleaseSignal = this.receivedData[0].dbi;
                         }
 
                         this.correctControllerData();
@@ -325,6 +367,8 @@ export default {
                 });
         },
         correctControllerData() { // новый массив с интервалами (1 день - 5 мин, неделя - 1 час, месяц - 1 день)
+            this.batCChart = false;
+
             let unformattedLastTime = new Date(parseInt(new Date().getTime() / 300000) * 300000); // последняя отметка времени, кратная 5 мин
             let unformattedFirstTime = new Date(this.dateStart).setHours(unformattedLastTime.getHours(), unformattedLastTime.getMinutes());
 
@@ -332,35 +376,45 @@ export default {
 
             let timestamps = []; // массив с временными метками
 
-            console.log(timeInterval);
-            if (timeInterval < 1441) { // минут за день
+            if (timeInterval < 43199) { // минут за день
                 let numberOfRecords = timeInterval / 5 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
-                console.log(numberOfRecords);
-
                 for (let i = 0; i < numberOfRecords; i++) {
                     let date = new Date(unformattedFirstTime);
                     let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 5 * i);
                     timestamps.push(newRec);
                 }
-            } else if (timeInterval > 43199) { // период месяц/больше месяца
+            } else {
                 let numberOfRecords = timeInterval / 1440 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
-                console.log(numberOfRecords);
-
                 for (let i = 0; i < numberOfRecords; i++) {
                     let date = new Date(unformattedFirstTime);
                     let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 1440 * i);
                     timestamps.push(newRec);
                 }
-            } else { // каждый час (неделя) период больше недели и меньше месяца
-                let numberOfRecords = timeInterval / 60 + 1; // сколько в интервале отметок, кратных 60? (289 по умолчанию за день)
-                console.log(numberOfRecords);
-
-                for (let i = 0; i < numberOfRecords; i++) {
-                    let date = new Date(unformattedFirstTime);
-                    let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 60 * i);
-                    timestamps.push(newRec);
-                }
             }
+
+            // if (timeInterval < 1441) { // минут за день
+            //     let numberOfRecords = timeInterval / 5 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
+            //     for (let i = 0; i < numberOfRecords; i++) {
+            //         let date = new Date(unformattedFirstTime);
+            //         let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 5 * i);
+            //         timestamps.push(newRec);
+            //     }
+            // } else if (timeInterval > 43199) { // период месяц/больше месяца
+            //     let numberOfRecords = timeInterval / 1440 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
+
+            //     for (let i = 0; i < numberOfRecords; i++) {
+            //         let date = new Date(unformattedFirstTime);
+            //         let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 1440 * i);
+            //         timestamps.push(newRec);
+            //     }
+            // } else { // каждый час (неделя) период больше недели и меньше месяца
+            //     let numberOfRecords = timeInterval / 60 + 1; // сколько в интервале отметок, кратных 60? (289 по умолчанию за день)
+            //     for (let i = 0; i < numberOfRecords; i++) {
+            //         let date = new Date(unformattedFirstTime);
+            //         let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 60 * i);
+            //         timestamps.push(newRec);
+            //     }
+            // }
 
             timestamps.reverse();
 
@@ -425,41 +479,36 @@ export default {
                     // тело цикла выполняется для каждого свойства объекта
                 }
             });
-
             this.visibleChart = true;
             this.smallControllerInfoStorage = this.controllerInfoStorage.slice(0, 25); // заполнение таблицы для дашборда
 
-
             if (this.indicatorSearchLastEntry) {
                 this.searchLastEntry();
+            } else {
+                this.batCChart = true;
             }
             this.btns.loading = false;
         },
-        searchLastEntry() { // to do
-            console.log('искать последнюю запись в базе'); // искать последнюю запись в базе
+        searchLastEntry() {
+            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/fixdata/?date_start=2024-02-01&limit=1`,
+                {
+                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+                }).then((response) => {
+                    if (response.status === 200) {
+                        this.lastResult = response.data.results;
+                        console.log(this.lastResult);
 
-            // axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/fixdata/?date_start=${this.dateStart}&limit=100000`,
-            //     {
-            //         headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
-            //     }).then((response) => {
-            //         if (response.status === 200) {
-            //             this.controllerInfoStorage = response.data.results;
-            //             console.log(this.controllerInfoStorage);
+                        let date = new Date(this.lastResult[0].measured_at);
+                        this.lastResult[0].measured_at = this.twoDigits(date.getMonth() + 1) + '/' + this.twoDigits(date.getDate()) + ' ' + this.twoDigits(date.getHours()) + ':' + this.twoDigits(date.getMinutes());
 
-            //             if (this.controllerInfoStorage.length === 0) {
-            //                 console.log('искать последнюю запись в базе'); // искать последнюю запись в базе
-            //                 this.searchLastEntry();
-            //             } else {
-            //                 this.receivedData = this.controllerInfoStorage; //исходный ответ с сервера (для графиков и последнего выхода на связь)
-            //                 let date = new Date(this.receivedData[0].measured_at);
-            //                 this.receivedData[0].measured_at = this.twoDigits(date.getMonth() + 1) + '/' + this.twoDigits(date.getDate()) + ' ' + this.twoDigits(date.getHours()) + ':' + this.twoDigits(date.getMinutes());
-            //             }
-            //             this.correctControllerData();
-            //         }
-            //     }).catch((error) => {
-            //         // обработка ошибки
-            //         console.log(error);
-            //     });
+                        this.lastReleaseDate = this.lastResult[0].measured_at;
+                        this.batCChart = true;
+                        this.lastReleaseSignal = '-';
+                    }
+                }).catch((error) => {
+                    // обработка ошибки
+                    console.log(error);
+                });
         }
     },
     mounted() {
@@ -472,6 +521,7 @@ export default {
             }).then((response) => {
                 if (response.status === 200) {
                     this.controllerInfo = response.data;
+                    console.log(this.controllerInfo);
                 }
             }).catch((error) => {
                 // обработка ошибки
@@ -706,7 +756,7 @@ export default {
 }
 
 .controller-data {
-    height: 62vh;
+    height: 50vh;
     overflow-y: scroll;
 }
 
@@ -719,28 +769,26 @@ export default {
 .info-block__block {
     background-color: #F8F6F4;
     border-radius: 8px;
-    padding: 32px;
+    padding: 16px;
     font-weight: 400;
     font-size: 14px;
     color: #0E1626;
 }
 
 .info-block__half {
-    width: 50%;
-}
-
-.info-block__half:last-child {
-    padding: 24px 24px 16px;
-    width: 44%;
+    width: 49%;
 }
 
 .info-block__block-current {
-    margin-bottom: 24px;
-    padding: 24px;
+    padding: 16px;
 }
 
 .info-block__errors {
-    padding: 24px;
+    padding: 0px;
+}
+
+.info-block__errors-container {
+    padding: 16px;
 }
 
 .dashboard-container h4 {
@@ -766,7 +814,7 @@ export default {
 
 .controller-data__dashboard {
     overflow: hidden;
-    height: 509px;
+    height: 230px;
 }
 
 .info-block__second div {
@@ -827,26 +875,31 @@ export default {
 
 .pie-container {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .pie-value {
     position: absolute;
     padding: 0 !important;
-    font-size: 48px;
-    width: 100px !important;
-    top: 49%;
-    left: 38%;
+    font-size: 40px;
+    width: 100%;
+    top: 44%;
     text-align: center;
 }
 
 .pie-energy {
-    top: 45%;
-    left: 37%;
+    top: 34%;
+}
+
+.pie-voltage {
+    top: 40%;
 }
 
 .pie-value p {
     margin: 0;
-    font-size: 24px;
+    font-size: 20px;
 }
 
 .pie-last-time {
@@ -862,7 +915,7 @@ export default {
     box-shadow: 3px 3px 6px 0 rgba(41, 75, 142, 0.5);
     background: linear-gradient(90deg, #294b8e 27%, #2384c5 100%);
     font-weight: 400;
-    font-size: 16px;
+    font-size: 14px;
     line-height: 112%;
     color: #f8f6f4;
     padding: 16px;
@@ -886,41 +939,64 @@ export default {
     justify-content: space-between;
 }
 
-.controller-page__title {
-    text-transform: uppercase;
-    font-weight: 600 !important;
-    margin-bottom: 26px !important;
+.pies-block {
+    display: flex;
+    justify-content: space-between;
 }
 
-@media (min-width: 1500px) {
-    .controller-data__dashboard {
-        height: 540px;
-    }
+.pies-block:first-child {
+    margin-bottom: 16px;
+}
 
-    .pie-energy {
-        left: 38%;
-    }
+.dashboard-map div {
+    padding: 0;
+    height: 100%;
+}
+
+.dashboard-map p {
+    padding: 24px;
+    margin: 0;
+}
+
+.there-is-data {
+    position: absolute;
+    display: flex;
+    background: #f8f6f4;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    color: #0e1626;
+    font-size: 20px;
+    font-weight: 500;
+    font-size: 14px;
+    text-transform: uppercase;
+    border-radius: 16px;
+}
+
+.dashboard-table {
+    position: relative;
+}
+
+.dashboard-table__title {
+    margin-left: 8px;
 }
 
 @media (min-width: 1600px) {
     .controller-data {
-        height: 65vh;
+        height: 55vh;
     }
 
     .loader {
         margin-top: 230px !important;
     }
 
-    .controller-data__dashboard {
-        height: 580px;
-    }
-
-    .pie-value {
-        left: 39%;
+    .controller-page__info-block {
+        font-size: 16px;
     }
 
     .pie-energy {
-        left: 38.5%;
+        top: 35%;
     }
 }
 
@@ -929,30 +1005,18 @@ export default {
         font-size: 11px !important;
     }
 
-    .controller-data__dashboard {
-        height: 639px;
-    }
-
     .info-block__second div {
         width: 28.5%;
     }
 
-    .pie-value {
-        left: 40%;
-    }
-
     .pie-energy {
-        left: 39.5%;
+        top: 38%;
     }
 }
 
 @media (min-width: 1800px) {
     .controller-data {
-        height: 68vh;
-    }
-
-    .controller-data__dashboard {
-        height: 671px;
+        height: 60vh;
     }
 
     .info-line__title-dashboard {
@@ -963,23 +1027,22 @@ export default {
         font-size: 12px !important;
     }
 
+    .pie-voltage {
+        top: 42% !important;
+    }
+
     .pie-value {
-        left: 41%;
+        top: 45%;
     }
 
     .pie-energy {
-        left: 40%;
-        top: 46%;
+        top: 39%;
     }
 }
 
 @media (min-width: 1900px) {
     .controller-data {
-        height: 71vh;
-    }
-
-    .controller-data__dashboard {
-        height: 767px;
+        height: 63vh;
     }
 
     .measured-at__dashboard {
@@ -998,16 +1061,8 @@ export default {
         margin-top: 270px !important;
     }
 
-    .info-block__half {
-        width: 51.5%;
-    }
-
     .info-block__second div {
         width: 29%;
-    }
-
-    .pie-energy {
-        left: 41%;
     }
 }
 </style>

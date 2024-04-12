@@ -1,9 +1,15 @@
 <template>
     <div class="pie-container">
         <p class="pie-last-time">{{ lastvalueTime }}</p>
-        <canvas id="bat_cChart"></canvas>
-        <div class="pie-value">{{ value }}%</div>
+        <canvas id="pieVoltage"></canvas>
+        <div class="pie-value pie-voltage">{{ value }}<p>вольт</p>
+        </div>
     </div>
+    <!-- <div class="pie-container">
+        <canvas id="p_genChart"></canvas>
+        <div class="pie-value pie-energy">{{ value }}<p>вт⋅ч</p>
+        </div>
+    </div> -->
 </template>
 
 <script>
@@ -28,23 +34,26 @@ export default {
         }
     },
     mounted() {
-        let ctx = document.getElementById('bat_cChart');
+        let ctx = document.getElementById('pieVoltage');
         let lastvalue = this.controllerInfoStorage[0];
-        
+
         if (lastvalue === undefined) {
             this.lastvalueTime = this.lastResult[0].measured_at;
-            this.value = this.lastResult[0].bat_c;
+            this.value = this.lastResult[0].bat_v;
         } else {
             let time = new Date(lastvalue.measured_at); // вывести время последней записи
             this.lastvalueTime = this.twoDigits(time.getMonth() + 1) + '/' + this.twoDigits(time.getDate()) + ' ' + this.twoDigits(time.getHours()) + ':' + this.twoDigits(time.getMinutes());
-            this.value = lastvalue.bat_c;
+            this.value = lastvalue.bat_v;
         }
 
-        let difference = 100 - this.value;
+        // 10 - 14.5 вольт
+        let a = this.value - 10;
+        let b = (a * 100) / 4.5;
+        let c = 100 - b;
 
-        if (Number(this.value) < 50) {
+        if (b < 50) {
             this.chartColor = '#E94B4B';
-        } else if (Number(this.value) > 70) {
+        } else if (b > 70) {
             this.chartColor = '#B6DE14';
         } else {
             this.chartColor = '#F4CA8D';
@@ -56,7 +65,7 @@ export default {
 
         const chartdata = {
             datasets: [{
-                data: [Number(this.value), Number(difference)],
+                data: [b, c],
                 borderWidth: [0, 0],
                 backgroundColor: [
                     this.chartColor,
