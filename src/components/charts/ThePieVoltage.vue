@@ -41,8 +41,9 @@ export default {
             this.lastvalueTime = this.lastResult[0].measured_at;
             this.value = this.lastResult[0].bat_v;
         } else {
-            let time = new Date(lastvalue.measured_at); // вывести время последней записи
-            this.lastvalueTime = this.twoDigits(time.getMonth() + 1) + '/' + this.twoDigits(time.getDate()) + ' ' + this.twoDigits(time.getHours()) + ':' + this.twoDigits(time.getMinutes());
+            // let time = new Date(lastvalue.measured_at); // вывести время последней записи
+            this.lastvalueTime = lastvalue.created_at;
+            // this.lastvalueTime = this.twoDigits(time.getMonth() + 1) + '/' + this.twoDigits(time.getDate()) + ' ' + this.twoDigits(time.getHours()) + ':' + this.twoDigits(time.getMinutes());
             this.value = lastvalue.bat_v;
         }
 

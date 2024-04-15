@@ -30,6 +30,8 @@ export default {
         dataPvI.reverse();
         dataLoadI.reverse();
 
+
+
         new Chart(ctx, {
             type: 'line',
             data: {

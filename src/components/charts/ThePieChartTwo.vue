@@ -20,7 +20,6 @@ export default {
     },
     mounted() {
         let ctx = document.getElementById('p_genChart');
-        console.log(this.controllerInfoStorage);
 
         if (this.controllerInfoStorage.length === 0) {
             this.value = 0;

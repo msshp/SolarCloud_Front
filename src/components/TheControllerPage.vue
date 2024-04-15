@@ -138,7 +138,7 @@
                         </div>
                         <div class="controller-data__dashboard">
                             <div className="info-line info-line__table" v-for="info in receivedData" :key="info">
-                                <div class="measured_at measured-at__dashboard">{{ info.measured_at }}</div>
+                                <div class="measured_at measured-at__dashboard">{{ info.created_at }}</div>
                                 <div>{{ info.pv_v }}</div>
                                 <div>{{ info.bat_v }}</div>
                                 <div>{{ info.load_v }}</div>
@@ -177,7 +177,7 @@
             </div>
             <div class="controller-data">
                 <div className="info-line" v-for="info in receivedData" :key="info">
-                    <div class="measured_at">{{ info.measured_at }}</div>
+                    <div class="measured_at">{{ info.created_at }}</div>
                     <div>{{ info.pv_v }}</div>
                     <div>{{ info.bat_v }}</div>
                     <div>{{ info.load_v }}</div>
@@ -322,16 +322,6 @@ export default {
             this.selectortimeVisible = false; // закрыть селектор
             this.dateText = `${this.dateStart} – ${this.dateEnd}`;
 
-            // // дата для запроса
-            // const dayMilliseconds = 24 * 60 * 60 * 1000;
-            // var currentDate = new Date(this.dateStart);
-            // console.log(currentDate);
-
-            // let daybefore = new Date(currentDate.setTime(currentDate.getTime() - dayMilliseconds));
-            // console.log(daybefore);
-            // let currentdaybefore = `${daybefore.getFullYear()}-${this.twoDigits(daybefore.getMonth() + 1)}-${this.twoDigits(daybefore.getDate())}`;
-            // console.log(currentdaybefore)
-
             // ?date_start=2024-02-01
             axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/fixdata/?date_start=${this.dateStart}&limit=100000`,
                 {
@@ -347,15 +337,18 @@ export default {
 
                         if (this.controllerInfoStorage.length !== 0) {
                             this.receivedData = this.controllerInfoStorage; //исходный ответ с сервера (для графиков и последнего выхода на связь)
-                            let date = new Date(this.receivedData[0].measured_at);
-                            this.receivedData[0].measured_at = this.twoDigits(date.getMonth() + 1) + '/' + this.twoDigits(date.getDate()) + ' ' + this.twoDigits(date.getHours()) + ':' + this.twoDigits(date.getMinutes());
+                            let date = this.receivedData[0].created_at;
+                            let formatDate = date.split(',');
 
                             this.receivedData.forEach((el) => {
-                                let date = new Date(el.measured_at);
-                                el.measured_at = this.twoDigits(date.getMonth() + 1) + '/' + this.twoDigits(date.getDate()) + ' ' + this.twoDigits(date.getHours()) + ':' + this.twoDigits(date.getMinutes());
-                            })
+                                let a = el.created_at.split(',')
+                                el.created_at = a[0] + ' ' + a[1];
 
-                            this.lastReleaseDate = this.receivedData[0].measured_at;
+                                // let date = new Date(el.measured_at);
+                                // console.log(el.measured_at)
+                                // el.measured_at = this.twoDigits(date.getMonth() + 1) + '/' + this.twoDigits(date.getDate()) + ' ' + this.twoDigits(date.getHours()) + ':' + this.twoDigits(date.getMinutes());
+                            })
+                            this.lastReleaseDate = formatDate[0] + ' ' + formatDate[1];
                             this.lastReleaseSignal = this.receivedData[0].dbi;
                         }
 
@@ -496,7 +489,6 @@ export default {
                 }).then((response) => {
                     if (response.status === 200) {
                         this.lastResult = response.data.results;
-                        console.log(this.lastResult);
 
                         let date = new Date(this.lastResult[0].measured_at);
                         this.lastResult[0].measured_at = this.twoDigits(date.getMonth() + 1) + '/' + this.twoDigits(date.getDate()) + ' ' + this.twoDigits(date.getHours()) + ':' + this.twoDigits(date.getMinutes());
@@ -521,7 +513,6 @@ export default {
             }).then((response) => {
                 if (response.status === 200) {
                     this.controllerInfo = response.data;
-                    console.log(this.controllerInfo);
                 }
             }).catch((error) => {
                 // обработка ошибки
@@ -911,7 +902,6 @@ export default {
 .controller-page__info-block {
     border-radius: 8px;
     width: 30%;
-    height: 60px;
     box-shadow: 3px 3px 6px 0 rgba(41, 75, 142, 0.5);
     background: linear-gradient(90deg, #294b8e 27%, #2384c5 100%);
     font-weight: 400;
@@ -927,11 +917,11 @@ export default {
 }
 
 .controller-page__info-block p {
-    margin: 0 0 16px 0;
+    margin: 0 0 12px 0;
 }
 
 .controller-page__info-block span {
-    font-size: 20px;
+    font-size: 17px;
 }
 
 .controller-page__info-container {
