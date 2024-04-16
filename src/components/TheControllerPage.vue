@@ -103,13 +103,13 @@
                 <div class="info-block__half">
                     <div class="info-block__block info-block__block-current ">
                         <h4>ток</h4>
-                        <TheBarChart v-if="visibleChart" :controllerInfoStorage="controllerInfoStorage" />
+                        <TheBarChart v-if="visibleChart" :controllerInfoStorage="receivedData" />
                     </div>
                 </div>
                 <div class="info-block__half">
                     <div class="info-block__block">
                         <h4>Напряжение</h4>
-                        <TheVoltageChart v-if="visibleChart" :controllerInfoStorage="controllerInfoStorage" />
+                        <TheVoltageChart v-if="visibleChart" :controllerInfoStorage="receivedData" />
                     </div>
                 </div>
             </div>
@@ -281,8 +281,10 @@ export default {
         showDay() {
             let today = new Date(); // сегодня
             this.dateEnd = `${today.getFullYear()}-${this.twoDigits(today.getMonth() + 1)}-${this.twoDigits(today.getDate())}`; // формат 2024-02-01
-            let datestart = new Date(today.getTime() - (24 * 60 * 60 * 1000));
+            let datestart = new Date(today.getTime());
+            // let datestart = new Date(today.getTime() - (24 * 60 * 60 * 1000));
             this.dateStart = `${datestart.getFullYear()}-${this.twoDigits(datestart.getMonth() + 1)}-${this.twoDigits(datestart.getDate())}`;
+            console.log(this.dateStart);
 
             this.selectortimeContent = 'Последний день';
             this.getControllerData();
@@ -352,6 +354,7 @@ export default {
                             this.lastReleaseSignal = this.receivedData[0].dbi;
                         }
 
+                        console.log(this.receivedData);
                         this.correctControllerData();
                     }
                 }).catch((error) => {
@@ -369,21 +372,32 @@ export default {
 
             let timestamps = []; // массив с временными метками
 
-            if (timeInterval < 43199) { // минут за день
-                let numberOfRecords = timeInterval / 5 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
-                for (let i = 0; i < numberOfRecords; i++) {
-                    let date = new Date(unformattedFirstTime);
-                    let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 5 * i);
-                    timestamps.push(newRec);
-                }
-            } else {
-                let numberOfRecords = timeInterval / 1440 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
-                for (let i = 0; i < numberOfRecords; i++) {
-                    let date = new Date(unformattedFirstTime);
-                    let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 1440 * i);
-                    timestamps.push(newRec);
-                }
+            let numberOfRecords = timeInterval;
+            for (let i = 0; i < numberOfRecords; i++) {
+                let date = new Date(unformattedFirstTime);
+                let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 5 * i);
+                // let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + i);
+                timestamps.push(newRec);
             }
+
+            // if (timeInterval < 43199) { // минут за день
+            //     let numberOfRecords = timeInterval / 5 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
+            //     for (let i = 0; i < numberOfRecords; i++) {
+            //         let date = new Date(unformattedFirstTime);
+            //         let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 5 * i);
+            //         timestamps.push(newRec);
+            //     }
+            // } else {
+            //     let numberOfRecords = timeInterval / 1440 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
+            //     for (let i = 0; i < numberOfRecords; i++) {
+            //         let date = new Date(unformattedFirstTime);
+            //         let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 1440 * i);
+            //         timestamps.push(newRec);
+            //     }
+            // }
+
+
+            ///// 
 
             // if (timeInterval < 1441) { // минут за день
             //     let numberOfRecords = timeInterval / 5 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
@@ -1001,6 +1015,10 @@ export default {
 
     .pie-energy {
         top: 38%;
+    }
+
+    .controller-data__dashboard {
+        height: 226px;
     }
 }
 

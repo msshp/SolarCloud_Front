@@ -18,7 +18,7 @@ export default {
         let dataLoadV = [];
 
         this.controllerInfoStorage.forEach((el) => {
-            labels.push(el.measured_at);
+            labels.push(el.created_at.slice(0, -3));
             dataPvV.push(el.pv_v);
             dataBatV.push(el.bat_v);
             dataLoadV.push(el.load_v);
