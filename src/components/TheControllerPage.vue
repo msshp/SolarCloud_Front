@@ -284,7 +284,6 @@ export default {
             let datestart = new Date(today.getTime());
             // let datestart = new Date(today.getTime() - (24 * 60 * 60 * 1000));
             this.dateStart = `${datestart.getFullYear()}-${this.twoDigits(datestart.getMonth() + 1)}-${this.twoDigits(datestart.getDate())}`;
-            console.log(this.dateStart);
 
             this.selectortimeContent = 'Последний день';
             this.getControllerData();
@@ -322,7 +321,11 @@ export default {
             this.thereIsData = false; // скрыть блок «Нет данных за этот период»
 
             this.selectortimeVisible = false; // закрыть селектор
-            this.dateText = `${this.dateStart} – ${this.dateEnd}`;
+
+            let start = this.dateStart.split('-');
+            let end = this.dateEnd.split('-'); // ['2024', '04', '17']
+
+            this.dateText = `${start[2]}.${start[1]} – ${end[2]}.${end[1]}`;
 
             // ?date_start=2024-02-01
             axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/fixdata/?date_start=${this.dateStart}&limit=100000`,
@@ -344,17 +347,12 @@ export default {
 
                             this.receivedData.forEach((el) => {
                                 let a = el.created_at.split(',')
-                                el.created_at = a[0] + ' ' + a[1];
-
-                                // let date = new Date(el.measured_at);
-                                // console.log(el.measured_at)
-                                // el.measured_at = this.twoDigits(date.getMonth() + 1) + '/' + this.twoDigits(date.getDate()) + ' ' + this.twoDigits(date.getHours()) + ':' + this.twoDigits(date.getMinutes());
+                                el.created_at = a[0].slice(0, -5) + ' ' + a[1].slice(0, -3); // дата без вывода секунд
                             })
-                            this.lastReleaseDate = formatDate[0] + ' ' + formatDate[1];
+
+                            this.lastReleaseDate = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
                             this.lastReleaseSignal = this.receivedData[0].dbi;
                         }
-
-                        console.log(this.receivedData);
                         this.correctControllerData();
                     }
                 }).catch((error) => {
@@ -362,132 +360,10 @@ export default {
                     console.log(error);
                 });
         },
-        correctControllerData() { // новый массив с интервалами (1 день - 5 мин, неделя - 1 час, месяц - 1 день)
+        correctControllerData() {
             this.batCChart = false;
 
-            let unformattedLastTime = new Date(parseInt(new Date().getTime() / 300000) * 300000); // последняя отметка времени, кратная 5 мин
-            let unformattedFirstTime = new Date(this.dateStart).setHours(unformattedLastTime.getHours(), unformattedLastTime.getMinutes());
-
-            let timeInterval = Math.floor((unformattedLastTime - unformattedFirstTime) / (1000 * 60)); // заданный период в минутах
-
-            let timestamps = []; // массив с временными метками
-
-            let numberOfRecords = timeInterval;
-            for (let i = 0; i < numberOfRecords; i++) {
-                let date = new Date(unformattedFirstTime);
-                let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 5 * i);
-                // let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + i);
-                timestamps.push(newRec);
-            }
-
-            // if (timeInterval < 43199) { // минут за день
-            //     let numberOfRecords = timeInterval / 5 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
-            //     for (let i = 0; i < numberOfRecords; i++) {
-            //         let date = new Date(unformattedFirstTime);
-            //         let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 5 * i);
-            //         timestamps.push(newRec);
-            //     }
-            // } else {
-            //     let numberOfRecords = timeInterval / 1440 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
-            //     for (let i = 0; i < numberOfRecords; i++) {
-            //         let date = new Date(unformattedFirstTime);
-            //         let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 1440 * i);
-            //         timestamps.push(newRec);
-            //     }
-            // }
-
-
-            ///// 
-
-            // if (timeInterval < 1441) { // минут за день
-            //     let numberOfRecords = timeInterval / 5 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
-            //     for (let i = 0; i < numberOfRecords; i++) {
-            //         let date = new Date(unformattedFirstTime);
-            //         let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 5 * i);
-            //         timestamps.push(newRec);
-            //     }
-            // } else if (timeInterval > 43199) { // период месяц/больше месяца
-            //     let numberOfRecords = timeInterval / 1440 + 1; // сколько в интервале отметок, кратных 5? (289 по умолчанию за день)
-
-            //     for (let i = 0; i < numberOfRecords; i++) {
-            //         let date = new Date(unformattedFirstTime);
-            //         let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 1440 * i);
-            //         timestamps.push(newRec);
-            //     }
-            // } else { // каждый час (неделя) период больше недели и меньше месяца
-            //     let numberOfRecords = timeInterval / 60 + 1; // сколько в интервале отметок, кратных 60? (289 по умолчанию за день)
-            //     for (let i = 0; i < numberOfRecords; i++) {
-            //         let date = new Date(unformattedFirstTime);
-            //         let newRec = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes() + 60 * i);
-            //         timestamps.push(newRec);
-            //     }
-            // }
-
-            timestamps.reverse();
-
-            let rightControllerStorage = [];
-
-            for (let m = 0; m < timestamps.length; m++) {
-                for (let v = 0; v < this.controllerInfoStorage.length; v++) {
-                    let num = this.controllerInfoStorage[v].created_at.slice(0, 2);
-                    let month = this.controllerInfoStorage[v].created_at.slice(3, 6);
-                    let time = this.controllerInfoStorage[v].created_at.slice(5);
-
-                    let newdate = month + num + time;
-
-                    let a = new Date(timestamps[m].getFullYear(), timestamps[m].getMonth(), timestamps[m].getDate(), timestamps[m].getHours(), timestamps[m].getMinutes()); // кратно 5 минутам, без секунд
-                    let b = new Date(new Date(newdate).getFullYear(), new Date(newdate).getMonth(), new Date(newdate).getDate(), new Date(newdate).getHours(), new Date(newdate).getMinutes()); // пришедшие данные
-
-                    if (String(a) === String(b)) {
-                        this.controllerInfoStorage[v].measured_at = newdate;
-                        rightControllerStorage.push(this.controllerInfoStorage[v]);
-                    }
-                }
-
-                if (rightControllerStorage.length < m + 1) {
-                    rightControllerStorage.push({
-                        bat_c: null,
-                        bat_i: null,
-                        bat_v: null,
-                        created_at: timestamps[m],
-                        crg_mode: null,
-                        dbi: null,
-                        device: 1,
-                        id: this.controllerId,
-                        load_i: null,
-                        load_mode: null,
-                        load_st: null,
-                        load_v: null,
-                        measured_at: timestamps[m],
-                        p_con: null,
-                        p_con_all: null,
-                        p_gen: null,
-                        p_gen_all: null,
-                        pv_i: null,
-                        pv_v: null,
-                        temp: null
-                    })
-                }
-            }
-
-            this.controllerInfoStorage = rightControllerStorage;
-
-            // удаление запятой в датах
-            this.controllerInfoStorage.forEach((el) => {
-                let date = new Date(el.measured_at);
-                el.measured_at = date;
-                el.measured_at = this.twoDigits(date.getDate()) + '/' + this.twoDigits(date.getMonth() + 1) + ' ' + this.twoDigits(date.getHours()) + ':' + this.twoDigits(date.getMinutes());
-
-                let key;
-                for (key in el) {
-                    if (el[key] === null) {
-                        el[key] = '–';
-                    }
-                    // тело цикла выполняется для каждого свойства объекта
-                }
-            });
             this.visibleChart = true;
-            this.smallControllerInfoStorage = this.controllerInfoStorage.slice(0, 25); // заполнение таблицы для дашборда
 
             if (this.indicatorSearchLastEntry) {
                 this.searchLastEntry();
@@ -1002,11 +878,15 @@ export default {
     .pie-energy {
         top: 35%;
     }
+
+    .measured-at__dashboard {
+        font-size: 11px !important;
+    }
 }
 
 @media (min-width: 1700px) {
     .measured-at__dashboard {
-        font-size: 11px !important;
+        font-size: 12px !important;
     }
 
     .info-block__second div {
@@ -1019,6 +899,14 @@ export default {
 
     .controller-data__dashboard {
         height: 226px;
+    }
+
+    .info-line__title-dashboard {
+        font-size: 11px;
+    }
+
+    .info-line__table div {
+        font-size: 13px;
     }
 }
 
@@ -1054,7 +942,7 @@ export default {
     }
 
     .measured-at__dashboard {
-        width: 100px !important;
+        width: 80px !important;
     }
 
     .info-line__table div {

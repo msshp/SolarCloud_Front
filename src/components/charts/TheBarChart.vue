@@ -19,7 +19,7 @@ export default {
         let dataLoadI = [];
 
         this.controllerInfoStorage.forEach((el) => {
-            labels.push(el.created_at.slice(0, -3));
+            labels.push(el.created_at);
             dataBatI.push(el.bat_i);
             dataPvI.push(el.pv_i);
             dataLoadI.push(el.load_i);
@@ -29,9 +29,6 @@ export default {
         dataBatI.reverse();
         dataPvI.reverse();
         dataLoadI.reverse();
-
-        console.log(labels);
-        console.log(dataBatI);
 
         new Chart(ctx, {
             type: 'line',

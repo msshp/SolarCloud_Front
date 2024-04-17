@@ -48,6 +48,7 @@
                 <div className="side-menu__btn" @click="sidenavToggle()">
                     <div className="icon-burger"></div>
                 </div>
+                <div v-if="pages.controllerPageVisibility" @click="openList()" className="side-menu__btn-back"></div>
                 <div className="sidenav__top-block">
                     <img src="../public/img/logo-color.svg" alt="logo">
                 </div>

@@ -73,6 +73,18 @@ button {
     right: -58px;
 }
 
+.side-menu__btn-back {
+    position: absolute;
+    top: 9px;
+    right: -94px;
+    padding: 20px 8px;
+    cursor: pointer;
+    width: 30px;
+    background-position: center;
+    background-image: url(../img/arrow-right.svg);
+    background-repeat: no-repeat;
+}
+
 .icon-burger {
     padding: 15px 15px;
     cursor: pointer;
