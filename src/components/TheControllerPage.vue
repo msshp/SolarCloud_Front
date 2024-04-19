@@ -333,7 +333,7 @@ export default {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     if (response.status === 200) {
-                        this.controllerInfoStorage = response.data.results;
+                        this.controllerInfoStorage = response.data;
 
                         if (this.controllerInfoStorage.length === 0) {
                             this.indicatorSearchLastEntry = true; // найти последнюю запись
@@ -378,7 +378,7 @@ export default {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     if (response.status === 200) {
-                        this.lastResult = response.data.results;
+                        this.lastResult = response.data;
 
                         let date = this.lastResult[0].created_at;
                         let formatDate = date.split(',');
