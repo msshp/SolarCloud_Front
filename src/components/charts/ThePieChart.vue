@@ -32,15 +32,10 @@ export default {
         let lastvalue = this.controllerInfoStorage[0];
 
         if (lastvalue === undefined) {
-            this.lastvalueTime = this.lastResult[0].measured_at;
+            this.lastvalueTime = this.lastResult[0].created_at;
             this.value = this.lastResult[0].bat_c;
         } else {
             this.lastvalueTime = lastvalue.created_at;
-
-            // let time = new Date(lastvalue.measured_at); // вывести время последней записи
-            // this.lastvalueTime = this.twoDigits(time.getMonth() + 1) + '/' + this.twoDigits(time.getDate()) + ' ' + this.twoDigits(time.getHours()) + ':' + this.twoDigits(time.getMinutes());
-            // console.log(lastvalue.measured_at);
-
             this.value = lastvalue.bat_c;
         }
 

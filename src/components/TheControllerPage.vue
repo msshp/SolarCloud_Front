@@ -380,10 +380,11 @@ export default {
                     if (response.status === 200) {
                         this.lastResult = response.data.results;
 
-                        let date = new Date(this.lastResult[0].measured_at);
-                        this.lastResult[0].measured_at = this.twoDigits(date.getMonth() + 1) + '/' + this.twoDigits(date.getDate()) + ' ' + this.twoDigits(date.getHours()) + ':' + this.twoDigits(date.getMinutes());
+                        let date = this.lastResult[0].created_at;
+                        let formatDate = date.split(',');
+                        this.lastResult[0].created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+                        this.lastReleaseDate = this.lastResult[0].created_at;
 
-                        this.lastReleaseDate = this.lastResult[0].measured_at;
                         this.batCChart = true;
                         this.lastReleaseSignal = '-';
                     }
