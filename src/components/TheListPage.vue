@@ -19,10 +19,10 @@
                     </th>
                     <th><input v-model.trim="searchValControllerByControllerName" type="text" placeholder="Название"
                             v-on:input="searchControllerByControllerName"></th>
-                    <th class="sort-by-date">Модель</th>
-                    <th class="sort-by-date">Тип устройства</th>
-                    <th class="sort-by-date">Связь</th>
-                    <th></th>
+                    <th class="sort-by-date">Напряжение АКБ</th>
+                    <th class="sort-by-date">Уровень сигнала GSM</th>
+                    <th class="sort-by-date">Выход на связь</th>
+                    <th class="sort-by-date">event</th>
                 </tr>
             </thead>
             <tbody>
@@ -46,38 +46,7 @@ export default {
             searchIdControllerById: '',
             searchValControllerByControllerName: '',
             searchValControllerBySn: '',
-            controllerList: [
-                // {
-                //     "id": 1,
-                //     "name": "Устройство",
-                //     "sn": "123456",
-                //     "model": "Модель",
-                //     "device_type": "Тип устройства",
-                //     "status_code": null
-                // }, {
-                //     "id": 1,
-                //     "name": "Устройство",
-                //     "sn": "123456",
-                //     "model": "Модель",
-                //     "device_type": "Тип устройства",
-                //     "status_code": null
-                // },
-                // {
-                //     "id": 1,
-                //     "name": "Устройство",
-                //     "sn": "123456",
-                //     "model": "Модель",
-                //     "device_type": "Тип устройства",
-                //     "status_code": null
-                // }, {
-                //     "id": 1,
-                //     "name": "Устройство",
-                //     "sn": "123456",
-                //     "model": "Модель",
-                //     "device_type": "Тип устройства",
-                //     "status_code": null
-                // }
-            ]
+            controllerList: []
         }
     },
     methods: {
@@ -145,6 +114,14 @@ export default {
             }).then((response) => {
                 // обработка успешного запроса
                 this.controllerList = response.data.results;
+
+                this.controllerList.forEach(el => {
+                    let date = el.status.created_at;
+                    if (date !== null) {
+                        let formatDate = date.split(',');
+                        el.status.created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+                    }
+                })
 
                 this.controllerList.sort(function (a, b) { // сортировка controllerList по id
                     if (a.id > b.id) {

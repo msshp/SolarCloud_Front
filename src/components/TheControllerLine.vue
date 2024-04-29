@@ -4,9 +4,10 @@
         <td class="tr-id">{{ controller.id }}</td>
         <td class="tr-name"> {{ controller.sn }}</td>
         <td>{{ controller.name }}</td>
-        <td>{{ controller.model }}</td>
-        <td>{{ controller.device_type }}</td>
-        <td>{{ controller.status_code }}</td>
+        <td>{{ controller.status.bat_v }}</td>
+        <td>{{ controller.status.dbi }}</td>
+        <td>{{ controller.status.created_at }}</td>
+        <td>{{ controller.status.event }}</td>
         <td class="tr-btns"></td>
     </tr>
 </template>
@@ -19,7 +20,7 @@ export default {
     },
     methods: {
         openControllerPage(id) {
-            this.$emit('openMainControllerPage', id); 
+            this.$emit('openMainControllerPage', id);
         }
     }
 }

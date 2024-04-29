@@ -134,7 +134,7 @@
                 <TheControlPage v-if="pages.controlPageVisibility" />
                 <TheProjectPage v-if="pages.projectPageVisibility" />
                 <TheUserListPage v-if="pages.listUsersPageVisibility" :saveUserData="saveUserData" :access="access" />
-                <TheMapPage v-if="pages.mapPageVisibility" />
+                <TheMapPage v-if="pages.mapPageVisibility" :saveUserData="saveUserData" />
                 <TheListPage v-if="pages.listPageVisibility" @openMainControllerPage="openMainControllerPage" />
                 <ThePersonalArea v-if="pages.personalAreaPageVisibility" :saveUserData="saveUserData"
                     @editAuthorizedUser="editAuthorizedUser" />
@@ -210,7 +210,7 @@ export default {
 
             pages: {
                 personalAreaPageVisibility: false,
-                mapPageVisibility: true,
+                mapPageVisibility: false,
                 projectPageVisibility: false,
                 controlPageVisibility: false,
                 listPageVisibility: false,
@@ -431,6 +431,7 @@ export default {
                 }).then((response) => {
                     // обработка успешного запроса
                     this.saveUserData = response.data;
+                    this.pages.mapPageVisibility = true;
 
                     if (this.saveUserData.profile.role === 'User') {
                         this.access = false;
