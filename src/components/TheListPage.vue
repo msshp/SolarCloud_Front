@@ -2,10 +2,6 @@
     <div class="page-content__container">
         <div className="page-content__title page-content__title_list">
             <p>Список контроллеров</p>
-            <!-- <div>
-                <button class="save-exel">Сохранить в Exel</button>
-                <button class="save-btn">Распечатать</button>
-            </div> -->
         </div>
         <div class="account-separator"></div>
         <table>
@@ -19,7 +15,7 @@
                     </th>
                     <th><input v-model.trim="searchValControllerByControllerName" type="text" placeholder="Название"
                             v-on:input="searchControllerByControllerName"></th>
-                    <th class="sort-by-date">Напряжение АКБ</th>
+                    <th class="sort-by-date">Напряжение АКБ (Вольт)</th>
                     <th class="sort-by-date">Уровень сигнала GSM</th>
                     <th class="sort-by-date">Выход на связь</th>
                     <th class="sort-by-date">event</th>
@@ -108,7 +104,7 @@ export default {
     },
     // вывести список контроллеров
     mounted() {
-        axios.get('http://cloud.io-tech.ru/api/devices/limited/',
+        axios.get('http://cloud.io-tech.ru/api/devices/limited/?limit=10000',
             {
                 headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
             }).then((response) => {
@@ -116,7 +112,7 @@ export default {
                 this.controllerList = response.data.results;
 
                 this.controllerList.forEach(el => {
-                    let date = el.status.created_at;
+                    let date = el.status.last_session;
                     if (date !== null) {
                         let formatDate = date.split(',');
                         el.status.created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
@@ -156,5 +152,9 @@ tr th {
 
 tr th input {
     margin-left: 12px;
+}
+
+.ymaps-2-1-79-balloon__close-button {
+    height: 38px !important;
 }
 </style>

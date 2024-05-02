@@ -239,7 +239,7 @@ export default {
             });
         },
         getUsersList() {
-            axios.get('http://cloud.io-tech.ru/api/users/?limit=100',
+            axios.get('http://cloud.io-tech.ru/api/users/?limit=10000',
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
