@@ -97,6 +97,18 @@
                     <div class="info-block__errors-container">
                         <h4>ошибки</h4>
                     </div>
+                    <div className="info-line info-line__title info-line__title-errors">
+                        <div class="measured_at measured-at__dashboard-errors">дата/время</div>
+                        <div>Код события</div>
+                        <div class="measured-at__dashboard-code">Расшифровка кода</div>
+                    </div>
+                    <div class="controller-data__dashboard-errors">
+                        <div className="info-line info-line__table" v-for="info in lastErrors" :key="info">
+                            <div class="measured_at measured-at__dashboard-errors">{{ info.measured_at }}</div>
+                            <div>{{ info.code }}</div>
+                            <div class="measured-at__dashboard-code">{{ info.name }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="info-block__first">
@@ -250,7 +262,9 @@ export default {
             lastReleaseSignal: ' ',
 
             visibleChart: false,
-            thereIsData: false
+            thereIsData: false,
+
+            lastErrors: []
         }
     },
     methods: {
@@ -362,7 +376,6 @@ export default {
         },
         correctControllerData() {
             this.batCChart = false;
-
             this.visibleChart = true;
 
             if (this.indicatorSearchLastEntry) {
@@ -370,6 +383,27 @@ export default {
             } else {
                 this.batCChart = true;
             }
+            this.getErrors();
+        },
+        getErrors() {
+            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/event/?limit=20`,
+                {
+                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+                }).then((response) => {
+                    if (response.status === 200) {
+                        this.lastErrors = response.data;
+
+                        this.lastErrors.forEach((el) => {
+                            let date = el.measured_at;
+                            let formatDate = date.split(',');
+                            el.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+                        })
+                    }
+                }).catch((error) => {
+                    // обработка ошибки
+                    console.log(error);
+                });
+
             this.btns.loading = false;
         },
         searchLastEntry() {
@@ -690,6 +724,18 @@ export default {
     font-size: 10px !important;
 }
 
+.measured-at__dashboard-errors {
+    width: 150px !important;
+}
+
+.measured-at__dashboard-code {
+    width: 200px !important;
+}
+
+.info-line__title-errors {
+    font-size: 13px;
+}
+
 .info-line__table div {
     font-size: 12px;
 }
@@ -697,6 +743,12 @@ export default {
 .controller-data__dashboard {
     overflow: hidden;
     height: 230px;
+}
+
+.controller-data__dashboard-errors {
+    height: 514px;
+    overflow-y: scroll;
+    padding: 0 8px;
 }
 
 .info-block__second div {

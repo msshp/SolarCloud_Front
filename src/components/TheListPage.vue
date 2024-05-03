@@ -18,7 +18,7 @@
                     <th class="sort-by-date">Напряжение АКБ (Вольт)</th>
                     <th class="sort-by-date">Уровень сигнала GSM</th>
                     <th class="sort-by-date">Выход на связь</th>
-                    <th class="sort-by-date">event</th>
+                    <th class="sort-by-date">Ошибки</th>
                 </tr>
             </thead>
             <tbody>
@@ -110,6 +110,7 @@ export default {
             }).then((response) => {
                 // обработка успешного запроса
                 this.controllerList = response.data.results;
+                console.log(this.controllerList);
 
                 this.controllerList.forEach(el => {
                     let date = el.status.last_session;
