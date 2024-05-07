@@ -134,7 +134,8 @@
                 <TheControlPage v-if="pages.controlPageVisibility" />
                 <TheProjectPage v-if="pages.projectPageVisibility" />
                 <TheUserListPage v-if="pages.listUsersPageVisibility" :saveUserData="saveUserData" :access="access" />
-                <TheMapPage v-if="pages.mapPageVisibility" :saveUserData="saveUserData" />
+                <TheMapPage v-if="pages.mapPageVisibility" :saveUserData="saveUserData"
+                    @openMainControllerPage="openMainControllerPage" />
                 <TheListPage v-if="pages.listPageVisibility" @openMainControllerPage="openMainControllerPage" />
                 <ThePersonalArea v-if="pages.personalAreaPageVisibility" :saveUserData="saveUserData"
                     @editAuthorizedUser="editAuthorizedUser" />
@@ -714,4 +715,4 @@ input::placeholder {
     width: 70%;
     margin-left: 0px;
 }
-</style>../components/TheUserListComponents.vue/TheUserListPage.vue
+</style>

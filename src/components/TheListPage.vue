@@ -21,7 +21,12 @@
                     <th class="sort-by-date">Ошибки</th>
                 </tr>
             </thead>
-            <tbody>
+            <div v-if="list.loading" class="loading">
+                <div>
+                    <div class="loader"></div>
+                </div>
+            </div>
+            <tbody v-if="list.listTable">
                 <TheControllerLine :controllerList="controllerList" @openMainControllerPage="openMainControllerPage" />
             </tbody>
         </table>
@@ -42,7 +47,12 @@ export default {
             searchIdControllerById: '',
             searchValControllerByControllerName: '',
             searchValControllerBySn: '',
-            controllerList: []
+            controllerList: [],
+
+            list: {
+                loading: true,
+                listTable: false
+            }
         }
     },
     methods: {
@@ -110,7 +120,6 @@ export default {
             }).then((response) => {
                 // обработка успешного запроса
                 this.controllerList = response.data.results;
-                console.log(this.controllerList);
 
                 this.controllerList.forEach(el => {
                     let date = el.status.last_session;
@@ -129,6 +138,9 @@ export default {
                     }
                     return 0;
                 });
+
+                this.list.loading = false;
+                this.list.listTable = true;
             }).catch((error) => {
                 // обработка ошибки
                 console.log(error);

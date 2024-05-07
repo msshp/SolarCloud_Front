@@ -99,13 +99,11 @@
                     </div>
                     <div className="info-line info-line__title info-line__title-errors">
                         <div class="measured_at measured-at__dashboard-errors">дата/время</div>
-                        <div>Код события</div>
-                        <div class="measured-at__dashboard-code">Расшифровка кода</div>
+                        <div class="measured-at__dashboard-code">Описание</div>
                     </div>
                     <div class="controller-data__dashboard-errors">
                         <div className="info-line info-line__table" v-for="info in lastErrors" :key="info">
                             <div class="measured_at measured-at__dashboard-errors">{{ info.measured_at }}</div>
-                            <div>{{ info.code }}</div>
                             <div class="measured-at__dashboard-code">{{ info.name }}</div>
                         </div>
                     </div>
@@ -128,12 +126,12 @@
             <div class="info-block__first">
                 <div class="info-block__half dashboard-map">
                     <div class="info-block__block">
-                        <p>карта</p>
+                        <div id="map-dashboard" style="width: 100%; height: 100%;"></div>
                     </div>
                 </div>
                 <div class="info-block__half dashboard-table">
                     <div v-if="thereIsData" class="there-is-data">Нет данных за период</div>
-                    <div class="info-block__block">
+                    <div class="info-block__block dashboard-spectable">
                         <div class="info-block__half-title">
                             <h4 class="dashboard-table__title">Последние данные</h4><button class="save-btn more-btn"
                                 @click="dataOn()">больше
@@ -264,7 +262,10 @@ export default {
             visibleChart: false,
             thereIsData: false,
 
-            lastErrors: []
+            lastErrors: [],
+
+            coord: null, // координаты для дашборда
+            coordinates: { latitude: 55.76, longitude: 37.64 }
         }
     },
     methods: {
@@ -386,7 +387,7 @@ export default {
             this.getErrors();
         },
         getErrors() {
-            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/event/?limit=20`,
+            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/event/?type=3&limit=20`,
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
@@ -403,8 +404,71 @@ export default {
                     // обработка ошибки
                     console.log(error);
                 });
-
+            this.getCoords();
+        },
+        getCoords() {
             this.btns.loading = false;
+
+            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`,
+                {
+                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+                }).then((response) => {
+                    if (response.status === 200) {
+                        this.coord = this.convertCoordinates(response.data[0].value);
+                        this.drawControllerMap();
+                    }
+                }).catch((error) => {
+                    console.log(error); // обработка ошибки
+                    this.drawControllerMap();
+                })
+        },
+        drawControllerMap() {
+            if (this.coord) {
+                if ((this.coord.latitude !== 0)) {
+                    this.coordinates = this.coord;
+                }
+            }
+            ymaps.ready(() => {
+                const dashMap = new ymaps.Map('map-dashboard', {
+                    center: [this.coordinates.latitude, this.coordinates.longitude],
+                    zoom: 10
+                });
+
+                if (this.coord) {
+                    let myPlacemark = new ymaps.Placemark([this.coord.latitude, this.coord.longitude], {
+                        balloonContent: `${this.controllerId}`
+                    });
+                    dashMap.geoObjects.add(myPlacemark);
+                }
+            });
+        },
+        convertCoordinates(coordinates) {
+            const parts = coordinates.split(',');
+
+            const latDegreesMinutes = parts[0];
+            const lonDegreesMinutes = parts[2];
+
+            const latDegrees = parseInt(latDegreesMinutes.substr(0, 2));
+            const latMinutes = parseFloat(latDegreesMinutes.substr(2));
+
+            const lonDegrees = parseInt(lonDegreesMinutes.substr(0, 3));
+            const lonMinutes = parseFloat(lonDegreesMinutes.substr(3));
+
+            const latDirection = parts[1];
+            const lonDirection = parts[3];
+
+            let latDecimal = latDegrees + latMinutes / 60;
+            let lonDecimal = lonDegrees + lonMinutes / 60;
+
+            if (latDirection === 'S') {
+                latDecimal = -latDecimal;
+            }
+
+            if (lonDirection === 'W') {
+                lonDecimal = -lonDecimal;
+            }
+
+            return { latitude: latDecimal, longitude: lonDecimal };
         },
         searchLastEntry() {
             axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/fixdata/?date_start=2024-02-01&limit=1`,
@@ -518,7 +582,7 @@ export default {
 
 .loader {
     margin-top: 200px;
-    width: 55px;
+    width: 70px;
     aspect-ratio: 1;
     display: grid;
 }
@@ -734,6 +798,12 @@ export default {
 
 .info-line__title-errors {
     font-size: 13px;
+    justify-content: flex-start;
+}
+
+.info-line__title-errors div {
+    width: 134px !important;
+    font-weight: 500;
 }
 
 .info-line__table div {
@@ -746,9 +816,10 @@ export default {
 }
 
 .controller-data__dashboard-errors {
-    height: 514px;
+    height: 548px;
     overflow-y: scroll;
-    padding: 0 8px;
+    overflow-x: hidden;
+    padding: 0 0 0 16px;
 }
 
 .info-block__second div {
@@ -883,7 +954,7 @@ export default {
 
 .dashboard-map div {
     padding: 0;
-    height: 100%;
+    height: 346px !important;
 }
 
 .dashboard-map p {
@@ -911,8 +982,27 @@ export default {
     position: relative;
 }
 
+.dashboard-spectable {
+    height: 314px;
+}
+
 .dashboard-table__title {
     margin-left: 8px;
+}
+
+.info-line__title-errors div:first-child {
+    padding-left: 34px;
+    justify-content: flex-start;
+}
+
+.controller-data__dashboard-errors div {
+    justify-content: flex-start;
+    padding: 0 6px;
+}
+
+.ymaps-2-1-79-map,
+.ymaps-2-1-79-inner-panes {
+    border-radius: 8px;
 }
 
 @media (min-width: 1600px) {
@@ -921,7 +1011,7 @@ export default {
     }
 
     .loader {
-        margin-top: 230px !important;
+        margin-top: 230px;
     }
 
     .controller-page__info-block {
@@ -1007,7 +1097,7 @@ export default {
     }
 
     .loader {
-        margin-top: 270px !important;
+        margin-top: 270px;
     }
 
     .info-block__second div {

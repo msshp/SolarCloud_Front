@@ -1,10 +1,15 @@
 <template>
-    <div class="page-content__container-map">
+    <div v-if="map.loading" class="loading">
+        <div class="loading-center">
+            <div class="loader map-loader"></div>
+        </div>
+    </div>
+    <div v-if="map.map" class="page-content__container-map">
         <div className="map-content map-page">
             <div id="map" style="width: 100%; height: 100%;"></div>
         </div>
         <div v-if="widgetVisibility" class="map-widget">
-            <div class="map-widget__title">
+            <div @click="openContrPage" class="map-widget__title">
                 <div class="map-widget__icon"></div>{{ controllerMapInfo.name }}
             </div>
             <div>
@@ -86,6 +91,10 @@ export default {
                 sn: "",
                 status: {},
                 updated_at: ""
+            },
+            map: {
+                loading: true,
+                map: false
             }
         }
     },
@@ -105,6 +114,9 @@ export default {
     methods: {
         drawMap() {
             // карта
+            this.map.loading = false;
+            this.map.map = true;
+
             ymaps.ready(() => {
                 const myMap = new ymaps.Map('map', {
                     center: [55.76, 37.64],
@@ -203,6 +215,9 @@ export default {
                     // обработка ошибки
                     console.log(error);
                 })
+        },
+        openContrPage() {
+            this.$emit('openMainControllerPage', this.controllerMapInfo.id);
         }
     }
 };
@@ -254,6 +269,7 @@ export default {
     text-transform: uppercase;
     color: #293b5f;
     margin-bottom: 32px;
+    cursor: pointer;
 }
 
 .map-widget__icon {
@@ -302,5 +318,16 @@ export default {
     font-size: 13px;
     line-height: 129%;
     color: #0e1626;
+}
+
+.map-loader {
+    margin-top: 0px !important;
+    width: 80px !important;
+}
+
+.loading-center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 </style>
