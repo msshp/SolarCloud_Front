@@ -18,7 +18,7 @@
                         <h3 class="accordeon-item__title" :style="{ fontWeight: (activeIndex === 0) ? '600' : '500' }">
                             Информация</h3>
                     </div>
-                    <div class="accordeon-item__content" v-if="activeIndex === 0">
+                    <div class="accordeon-item__content accordeon-item__contentainer-info" v-if="activeIndex === 0">
                         <div class="accordeon-item__content-info">
                             <div>Cерийный номер</div>
                             <div>Тип контроллера</div>
@@ -36,12 +36,39 @@
                         </div>
                     </div>
                     <div class="accordeon-item__content" v-if="activeIndex === 1">
-                        <div>Напряжение АКБ (Вольт) {{ lastDataForWidget.bat_v }}</div>
-                        <div>Уровень заряда АКБ (%) {{ lastDataForWidget.bat_c }}</div>
-                        <div>Ток PV (А) {{ lastDataForWidget.pv_i }}</div>
-                        <div>Ток АКБ (А) {{ lastDataForWidget.bat_i }}</div>
-                        <div>Ток нагрузки (А) {{ lastDataForWidget.load_i }}</div>
-                        <div>Напряжение PV (Вольт) {{ lastDataForWidget.pv_v }}</div>
+                        <div>
+                            <p class="slider-title">Уровень заряда АКБ</p>
+                            <div class="slider-container"><input id="inputbatc" type="range" class="no-slider" min="0"
+                                    max="100" disabled>
+                                <div>{{ lastDataForWidget.bat_c }} <span>%</span></div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="slider-title">Напряжение АКБ</p>
+                            <div class="slider-container"><input id="inputbatv" type="range" class="no-slider" disabled>
+                                <div>{{ lastDataForWidget.bat_v }} <span>Вольт</span></div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="slider-title">Напряжение PV</p>
+                            <div class="slider-container"><input id="inputpvv" type="range" class="no-slider" disabled>
+                                <div>{{ lastDataForWidget.pv_v }} <span>Вольт</span></div>
+                            </div>
+                        </div>
+                        <div class="slider-title lastval">
+                            <div>Ток PV</div>
+                            <div>{{ lastDataForWidget.pv_i }} <span>А</span></div>
+                        </div>
+                        <div class="slider-title lastval">
+                            <div>Ток АКБ</div>
+                            <div>{{ lastDataForWidget.bat_i }} <span>А</span></div>
+                        </div>
+                        <div class="slider-title lastval">
+                            <div>Ток нагрузки</div>
+                            <div>{{ lastDataForWidget.load_i }} <span>А</span>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
                 <div>
@@ -50,7 +77,17 @@
                             Ошибки</h3>
                     </div>
                     <div class="accordeon-item__content" v-if="activeIndex === 2">
-                        Ошибки
+                        <div className="info-line info-line__title info-line__widget">
+                            <div class="measured_at measured-at__dashboard-errors">дата/время</div>
+                            <div>Описание</div>
+                        </div>
+                        <div>
+                            <div className="info-line info-line__table info-line__widget"
+                                v-for="info in lastErrorsForWidget" :key="info">
+                                <div class="measured_at measured-at__dashboard-errors">{{ info.measured_at }}</div>
+                                <div class="measured-at__dashboard-code">{{ info.name }}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div>
@@ -82,7 +119,7 @@ export default {
             placemarks: [],
 
             // аккордеон
-            activeIndex: 0, // открывает первый элемент по умолчанию
+            activeIndex: 1, // открывает первый элемент по умолчанию
             controllerMapInfo: {
                 account: null,
                 created_at: "",
@@ -219,7 +256,8 @@ export default {
                         let date = this.lastDataForWidget.measured_at;
                         let formatDate = date.split(',');
                         this.lastDataForWidget.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
-                        this.widgetVisibility = true;
+
+                        this.widgetVisibility = true; // показать виджеты
                     }
                 }).catch((error) => {
                     // обработка ошибки
@@ -227,15 +265,14 @@ export default {
                 });
 
             // Ошибки
+            this.lastErrorsForWidget = [];
             axios.get(`http://cloud.io-tech.ru/api/devices/${id}/event/?type=3&limit=10`,
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     if (response.status === 200) {
                         this.lastErrorsForWidget = response.data;
-                        // console.log(this.lastErrorsForWidget);
-
-                        this.lastErrors.forEach((el) => {
+                        this.lastErrorsForWidget.forEach((el) => {
                             let date = el.measured_at;
                             let formatDate = date.split(',');
                             el.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
@@ -245,6 +282,54 @@ export default {
                     // обработка ошибки
                     console.log(error);
                 });
+
+            // if (index === 1) { // установить значения для слайдеров если было нажатие на «Последние измерения»
+            setTimeout(() => {
+                let batCInput = document.getElementById('inputbatc');
+                // Установить значение из data() в атрибут value элемента input
+                batCInput.value = Number(this.lastDataForWidget.bat_c);
+
+                let colorBatC = '';
+                if (batCInput.value < 50) {
+                    colorBatC = '#E94B4B';
+                } else if (batCInput.value > 70) {
+                    colorBatC = '#B6DE14';
+                } else {
+                    colorBatC = '#F4CA8D';
+                }
+
+                batCInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorBatC} 0%, ${colorBatC} ${batCInput.value}%, #c9c7c5 ${batCInput.value}%, #c9c7c5 100%)`, 'important');
+
+                let batVInput = document.getElementById('inputbatv');
+                // 10 - 14.5 вольт
+                batVInput.value = this.calculatePercentage(this.lastDataForWidget.bat_v);
+
+                let colorBatV = '';
+                if (batVInput.value < 50) {
+                    colorBatV = '#E94B4B';
+                } else if (batVInput.value > 70) {
+                    colorBatV = '#B6DE14';
+                } else {
+                    colorBatV = '#F4CA8D';
+                }
+
+                batVInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorBatV} 0%, ${colorBatV} ${batVInput.value}%, #c9c7c5 ${batVInput.value}%, #c9c7c5 100%)`, 'important');
+
+                let pvVInput = document.getElementById('inputpvv');
+                pvVInput.value = this.calculatePercentage(this.lastDataForWidget.pv_v);
+
+                let colorPvV = '';
+                if (pvVInput.value < 50) {
+                    colorPvV = '#E94B4B';
+                } else if (pvVInput.value > 70) {
+                    colorPvV = '#B6DE14';
+                } else {
+                    colorPvV = '#F4CA8D';
+                }
+
+                pvVInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorPvV} 0%, ${colorPvV} ${pvVInput.value}%, #c9c7c5 ${pvVInput.value}%, #c9c7c5 100%)`, 'important');
+            }, 1000);
+            // }
         },
         toggleAccordion(index) {
             this.activeIndex = this.activeIndex === index ? null : index;
@@ -254,9 +339,83 @@ export default {
             headers.forEach((header, i) => {
                 header.style.fontWeight = (i === this.activeIndex) ? '600' : '500';
             });
+
+            if (index === 1) { // установить значения для слайдеров если было нажатие на «Последние измерения»
+                setTimeout(() => {
+                    let batCInput = document.getElementById('inputbatc');
+                    // Установить значение из data() в атрибут value элемента input
+                    batCInput.value = Number(this.lastDataForWidget.bat_c);
+
+                    let colorBatC = '';
+                    if (batCInput.value < 50) {
+                        colorBatC = '#E94B4B';
+                    } else if (batCInput.value > 70) {
+                        colorBatC = '#B6DE14';
+                    } else {
+                        colorBatC = '#F4CA8D';
+                    }
+
+                    batCInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorBatC} 0%, ${colorBatC} ${batCInput.value}%, #c9c7c5 ${batCInput.value}%, #c9c7c5 100%)`, 'important');
+
+                    let batVInput = document.getElementById('inputbatv');
+                    // 10 - 14.5 вольт
+                    batVInput.value = this.calculatePercentage(this.lastDataForWidget.bat_v);
+
+                    let colorBatV = '';
+                    if (batVInput.value < 50) {
+                        colorBatV = '#E94B4B';
+                    } else if (batVInput.value > 70) {
+                        colorBatV = '#B6DE14';
+                    } else {
+                        colorBatV = '#F4CA8D';
+                    }
+
+                    batVInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorBatV} 0%, ${colorBatV} ${batVInput.value}%, #c9c7c5 ${batVInput.value}%, #c9c7c5 100%)`, 'important');
+
+                    let pvVInput = document.getElementById('inputpvv');
+                    pvVInput.value = this.calculatePercentage(this.lastDataForWidget.pv_v);
+
+                    let colorPvV = '';
+                    if (pvVInput.value < 50) {
+                        colorPvV = '#E94B4B';
+                    } else if (pvVInput.value > 70) {
+                        colorPvV = '#B6DE14';
+                    } else {
+                        colorPvV = '#F4CA8D';
+                    }
+
+                    pvVInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorPvV} 0%, ${colorPvV} ${pvVInput.value}%, #c9c7c5 ${pvVInput.value}%, #c9c7c5 100%)`, 'important');
+                }, 1000);
+            }
+
+            if (index === 2) { // обновить ошибки
+                this.lastErrorsForWidget = [];
+                axios.get(`http://cloud.io-tech.ru/api/devices/${id}/event/?type=3&limit=10`,
+                    {
+                        headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+                    }).then((response) => {
+                        if (response.status === 200) {
+                            this.lastErrorsForWidget = response.data;
+                            this.lastErrorsForWidget.forEach((el) => {
+                                let date = el.measured_at;
+                                let formatDate = date.split(',');
+                                el.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+                            })
+                        }
+                    }).catch((error) => {
+                        // обработка ошибки
+                        console.log(error);
+                    });
+            }
         },
         openContrPage() {
             this.$emit('openMainControllerPage', this.controllerMapInfo.id);
+        },
+        calculatePercentage(inputVoltage) {
+            let minVoltage = 10;
+            let maxVoltage = 14.5;
+            let percentage = (inputVoltage - minVoltage) / (maxVoltage - minVoltage) * 100;
+            return percentage;
         }
     }
 };
@@ -378,17 +537,79 @@ export default {
     margin-left: 16px;
     line-height: 122%;
     color: #293b5f;
+    cursor: pointer;
 }
 
 .lastdate_widget {
     display: flex;
     border-radius: 8px;
-    padding: 6px 16px;
+    padding: 4px 12px;
     background: #de640c;
     color: #f8f6f4;
     font-weight: 300;
     align-items: center;
     justify-content: center;
-    margin-left: 8px;
+    margin-left: 16px;
+}
+
+.accordeon-item__contentainer-info {
+    flex-direction: row;
+}
+
+.no-slider {
+    -webkit-appearance: none;
+    width: 70%;
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(to right, green 0%, green calc(50% - 1px), #ddd calc(50% + 1px), #ddd 100%);
+}
+
+.no-slider::-webkit-slider-thumb {
+    display: none;
+}
+
+.slider-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 129%;
+    color: #293b5f;
+    margin-bottom: 16px;
+}
+
+.slider-container div {
+    width: 80px;
+}
+
+.slider-container span,
+.slider-title span {
+    color: rgba(0, 0, 0, 0.3);
+    width: 40px;
+}
+
+.slider-title {
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 129%;
+    color: #293b5f;
+    margin: 0 0 8px 2px;
+}
+
+.lastval {
+    display: flex;
+}
+
+.lastval div:first-child {
+    width: 90px;
+}
+
+.lastval div:last-child {
+    margin-left: 24px;
+}
+
+.info-line__widget {
+    justify-content: flex-start !important;
 }
 </style>
