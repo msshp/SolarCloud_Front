@@ -404,11 +404,13 @@ export default {
                     // обработка ошибки
                     console.log(error);
                 });
-            this.getCoords();
+            if (!document.getElementById('map-dashboard').firstChild) {
+                this.getCoords();
+            } else {
+                this.btns.loading = false;
+            }
         },
         getCoords() {
-            this.btns.loading = false;
-
             axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`,
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
@@ -441,6 +443,8 @@ export default {
                     dashMap.geoObjects.add(myPlacemark);
                 }
             });
+
+            this.btns.loading = false;
         },
         convertCoordinates(coordinates) {
             const parts = coordinates.split(',');

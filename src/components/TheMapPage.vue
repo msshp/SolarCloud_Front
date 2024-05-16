@@ -31,25 +31,32 @@
                 </div>
                 <div>
                     <div class="accordeon-item" @click="toggleAccordion(1)">
-                        <h3 class="accordeon-item__title" :style="{ fontWeight: (activeIndex === 1) ? '600' : '500' }">
-                            Последние
-                            измерения</h3>
+                        <div class="accordeon-item__title" :style="{ fontWeight: (activeIndex === 1) ? '600' : '500' }">
+                            Последние измерения <div class="lastdate_widget">{{ lastDataForWidget.measured_at }}</div>
+                        </div>
                     </div>
                     <div class="accordeon-item__content" v-if="activeIndex === 1">
+                        <div>Напряжение АКБ (Вольт) {{ lastDataForWidget.bat_v }}</div>
+                        <div>Уровень заряда АКБ (%) {{ lastDataForWidget.bat_c }}</div>
+                        <div>Ток PV (А) {{ lastDataForWidget.pv_i }}</div>
+                        <div>Ток АКБ (А) {{ lastDataForWidget.bat_i }}</div>
+                        <div>Ток нагрузки (А) {{ lastDataForWidget.load_i }}</div>
+                        <div>Напряжение PV (Вольт) {{ lastDataForWidget.pv_v }}</div>
                     </div>
                 </div>
                 <div>
                     <div class="accordeon-item" @click="toggleAccordion(2)">
                         <h3 class="accordeon-item__title" :style="{ fontWeight: (activeIndex === 2) ? '600' : '500' }">
-                            Нагрузка</h3>
+                            Ошибки</h3>
                     </div>
                     <div class="accordeon-item__content" v-if="activeIndex === 2">
+                        Ошибки
                     </div>
                 </div>
                 <div>
                     <div class="accordeon-item" @click="toggleAccordion(3)">
                         <h3 class="accordeon-item__title" :style="{ fontWeight: (activeIndex === 3) ? '600' : '500' }">
-                            Сеансы связи
+                            Команды
                         </h3>
                     </div>
                     <div class="accordeon-item__content" v-if="activeIndex === 3">
@@ -73,7 +80,6 @@ export default {
             allDevicesStorage: [],
             widgetVisibility: false,
             placemarks: [],
-            lastDataFWidget: {},
 
             // аккордеон
             activeIndex: 0, // открывает первый элемент по умолчанию
@@ -95,11 +101,22 @@ export default {
             map: {
                 loading: true,
                 map: false
-            }
+            },
+            lastDataForWidget: {
+                bat_c: "-",
+                bat_i: "-",
+                bat_v: "-",
+                dbi: "-",
+                id: null,
+                measured_at: "-",
+                pv_i: "-",
+                pv_v: "-"
+            },
+            lastErrorsForWidget: [],
         }
     },
     mounted() {
-        axios.get(`http://cloud.io-tech.ru/api/users/${this.saveUserData.id}/devices/`,
+        axios.get(`http://cloud.io-tech.ru/api/users/${this.saveUserData.id}/devices/?limit=100000`,
             {
                 headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
             }).then((response) => {
@@ -185,14 +202,49 @@ export default {
                 }).then((response) => {
                     if (response.status === 200) {
                         this.controllerMapInfo = response.data;
-                        // console.log(this.controllerMapInfo);
                     }
                 }).catch((error) => {
                     // обработка ошибки
                     console.log(error);
                 });
-            this.widgetVisibility = true;
-            this.getLastDataFWidget(id);
+
+            // Последние измерения to do
+            axios.get(`http://cloud.io-tech.ru/api/devices/${id}/fixdata/?date_start=2024-02-01&limit=1`,
+                {
+                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+                }).then((response) => {
+                    if (response.status === 200) {
+                        this.lastDataForWidget = response.data[0];
+
+                        let date = this.lastDataForWidget.measured_at;
+                        let formatDate = date.split(',');
+                        this.lastDataForWidget.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+                        this.widgetVisibility = true;
+                    }
+                }).catch((error) => {
+                    // обработка ошибки
+                    console.log(error);
+                });
+
+            // Ошибки
+            axios.get(`http://cloud.io-tech.ru/api/devices/${id}/event/?type=3&limit=10`,
+                {
+                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+                }).then((response) => {
+                    if (response.status === 200) {
+                        this.lastErrorsForWidget = response.data;
+                        // console.log(this.lastErrorsForWidget);
+
+                        this.lastErrors.forEach((el) => {
+                            let date = el.measured_at;
+                            let formatDate = date.split(',');
+                            el.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+                        })
+                    }
+                }).catch((error) => {
+                    // обработка ошибки
+                    console.log(error);
+                });
         },
         toggleAccordion(index) {
             this.activeIndex = this.activeIndex === index ? null : index;
@@ -202,19 +254,6 @@ export default {
             headers.forEach((header, i) => {
                 header.style.fontWeight = (i === this.activeIndex) ? '600' : '500';
             });
-        },
-        getLastDataFWidget(id) {
-            axios.get(`http://cloud.io-tech.ru/api/devices/${id}/fixdata/`,
-                {
-                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
-                }).then((response) => {
-                    if (response.status === 200) {
-                        this.lastDataFWidget = response.data[0];
-                    }
-                }).catch((error) => {
-                    // обработка ошибки
-                    console.log(error);
-                })
         },
         openContrPage() {
             this.$emit('openMainControllerPage', this.controllerMapInfo.id);
@@ -294,6 +333,7 @@ export default {
 
 .accordeon-item__content {
     display: flex;
+    flex-direction: column;
     border-radius: 8px;
     background: #eee;
     padding: 16px;
@@ -329,5 +369,26 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+.accordeon-item__title {
+    display: flex;
+    font-size: 14px;
+    align-items: center;
+    margin-left: 16px;
+    line-height: 122%;
+    color: #293b5f;
+}
+
+.lastdate_widget {
+    display: flex;
+    border-radius: 8px;
+    padding: 6px 16px;
+    background: #de640c;
+    color: #f8f6f4;
+    font-weight: 300;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
 }
 </style>
