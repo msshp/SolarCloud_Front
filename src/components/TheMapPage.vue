@@ -13,75 +13,70 @@
                 <div class="map-widget__icon"></div>{{ controllerMapInfo.name }}
             </div>
             <div>
-                <div>
-                    <div class="accordeon-item" @click="toggleAccordion(0)">
-                        <h3 class="accordeon-item__title" :style="{ fontWeight: (activeIndex === 0) ? '600' : '500' }">
-                            Информация</h3>
+                <h3 class="accordeon-item__title">Информация</h3>
+                <div class="accordeon-item__content accordeon-item__contentainer-info">
+                    <div class="accordeon-item__content-info">
+                        <div>Cерийный номер</div>
+                        <div>Тип контроллера</div>
                     </div>
-                    <div class="accordeon-item__content accordeon-item__contentainer-info" v-if="activeIndex === 0">
-                        <div class="accordeon-item__content-info">
-                            <div>Cерийный номер</div>
-                            <div>Тип контроллера</div>
-                        </div>
-                        <div class="accordeon-item__content-info">
-                            <div>{{ controllerMapInfo.sn }}</div>
-                            <div>{{ controllerMapInfo.device_type.device_type }}</div>
-                        </div>
+                    <div class="accordeon-item__content-info">
+                        <div>{{ controllerMapInfo.sn }}</div>
+                        <div>{{ controllerMapInfo.device_type.device_type }}</div>
                     </div>
                 </div>
-                <div>
-                    <div class="accordeon-item" @click="toggleAccordion(1)">
-                        <div class="accordeon-item__title" :style="{ fontWeight: (activeIndex === 1) ? '600' : '500' }">
-                            Последние измерения <div class="lastdate_widget">{{ lastDataForWidget.measured_at }}</div>
+                <div class="accordeon-item">
+                    <h3 class="accordeon-item__title">Последние измерения <div class="lastdate_widget">{{
+                        lastDataForWidget.measured_at }}</div>
+                    </h3>
+                </div>
+                <div class="accordeon-item__content">
+                    <div>
+                        <p class="slider-title">Уровень заряда АКБ</p>
+                        <div class="slider-container"><input id="inputbatc" type="range" class="no-slider" min="0"
+                                max="100" disabled>
+                            <div>{{ lastDataForWidget.bat_c }} <span>%</span></div>
                         </div>
                     </div>
-                    <div class="accordeon-item__content" v-if="activeIndex === 1">
-                        <div>
-                            <p class="slider-title">Уровень заряда АКБ</p>
-                            <div class="slider-container"><input id="inputbatc" type="range" class="no-slider" min="0"
-                                    max="100" disabled>
-                                <div>{{ lastDataForWidget.bat_c }} <span>%</span></div>
-                            </div>
+                    <div>
+                        <p class="slider-title">Напряжение АКБ</p>
+                        <div class="slider-container"><input id="inputbatv" type="range" class="no-slider" disabled>
+                            <div>{{ lastDataForWidget.bat_v }} <span>Вольт</span></div>
                         </div>
-                        <div>
-                            <p class="slider-title">Напряжение АКБ</p>
-                            <div class="slider-container"><input id="inputbatv" type="range" class="no-slider" disabled>
-                                <div>{{ lastDataForWidget.bat_v }} <span>Вольт</span></div>
-                            </div>
+                    </div>
+                    <div>
+                        <p class="slider-title">Напряжение PV</p>
+                        <div class="slider-container"><input id="inputpvv" type="range" class="no-slider" disabled>
+                            <div>{{ lastDataForWidget.pv_v }} <span>Вольт</span></div>
                         </div>
-                        <div>
-                            <p class="slider-title">Напряжение PV</p>
-                            <div class="slider-container"><input id="inputpvv" type="range" class="no-slider" disabled>
-                                <div>{{ lastDataForWidget.pv_v }} <span>Вольт</span></div>
-                            </div>
+                    </div>
+                    <div class="slider-title lastval">
+                        <div>Ток PV</div>
+                        <div>{{ lastDataForWidget.pv_i }} <span>А</span></div>
+                    </div>
+                    <div class="slider-title lastval">
+                        <div>Ток АКБ</div>
+                        <div>{{ lastDataForWidget.bat_i }} <span>А</span></div>
+                    </div>
+                    <div class="slider-title lastval">
+                        <div>Ток нагрузки</div>
+                        <div>{{ lastDataForWidget.load_i }} <span>А</span>
                         </div>
-                        <div class="slider-title lastval">
-                            <div>Ток PV</div>
-                            <div>{{ lastDataForWidget.pv_i }} <span>А</span></div>
-                        </div>
-                        <div class="slider-title lastval">
-                            <div>Ток АКБ</div>
-                            <div>{{ lastDataForWidget.bat_i }} <span>А</span></div>
-                        </div>
-                        <div class="slider-title lastval">
-                            <div>Ток нагрузки</div>
-                            <div>{{ lastDataForWidget.load_i }} <span>А</span>
-                            </div>
-                        </div>
+                    </div>
 
-                    </div>
                 </div>
-                <div>
-                    <div class="accordeon-item" @click="toggleAccordion(2)">
-                        <h3 class="accordeon-item__title" :style="{ fontWeight: (activeIndex === 2) ? '600' : '500' }">
-                            Ошибки</h3>
+            </div>
+            <div>
+                <div class="accordeon-item">
+                    <h3 class="accordeon-item__title">
+                        Ошибки</h3>
+                </div>
+                <div class="accordeon-item__content">
+                    <div className="info-line info-line__title info-line__widget">
+                        <div class="measured_at measured-at__dashboard-errors">дата/время</div>
+                        <div>Описание</div>
                     </div>
-                    <div class="accordeon-item__content" v-if="activeIndex === 2">
-                        <div className="info-line info-line__title info-line__widget">
-                            <div class="measured_at measured-at__dashboard-errors">дата/время</div>
-                            <div>Описание</div>
-                        </div>
-                        <div>
+                    <div>
+                        <div class="errors-container__widget">
                             <div className="info-line info-line__table info-line__widget"
                                 v-for="info in lastErrorsForWidget" :key="info">
                                 <div class="measured_at measured-at__dashboard-errors">{{ info.measured_at }}</div>
@@ -90,19 +85,9 @@
                         </div>
                     </div>
                 </div>
-                <div>
-                    <div class="accordeon-item" @click="toggleAccordion(3)">
-                        <h3 class="accordeon-item__title" :style="{ fontWeight: (activeIndex === 3) ? '600' : '500' }">
-                            Команды
-                        </h3>
-                    </div>
-                    <div class="accordeon-item__content" v-if="activeIndex === 3">
-                    </div>
-                </div>
             </div>
         </div>
     </div>
-
 </template>
 
 <script>
@@ -118,8 +103,6 @@ export default {
             widgetVisibility: false,
             placemarks: [],
 
-            // аккордеон
-            activeIndex: 1, // открывает первый элемент по умолчанию
             controllerMapInfo: {
                 account: null,
                 created_at: "",
@@ -150,6 +133,7 @@ export default {
                 pv_v: "-"
             },
             lastErrorsForWidget: [],
+            activeId: null
         }
     },
     mounted() {
@@ -159,6 +143,7 @@ export default {
             }).then((response) => {
                 // обработка успешного запроса
                 this.allDevicesStorage = response.data.results;
+                console.log(this.allDevicesStorage);
                 this.drawMap();
             }).catch((error) => {
                 // обработка ошибки
@@ -195,6 +180,7 @@ export default {
                         });
 
                         myPlacemark.events.add('click', () => {
+                            this.widgetVisibility = false;
                             this.getController(el.id);
                         });
                         myMap.geoObjects.add(myPlacemark);
@@ -232,6 +218,9 @@ export default {
             return { latitude: latDecimal, longitude: lonDecimal };
         },
         getController(id) {
+            console.log('3 запроса и нарисовать');
+            this.activeId = id;
+
             // Информация об устройстве
             axios.get(`http://cloud.io-tech.ru/api/devices/${id}/`,
                 {
@@ -245,7 +234,6 @@ export default {
                     console.log(error);
                 });
 
-            // Последние измерения to do
             axios.get(`http://cloud.io-tech.ru/api/devices/${id}/fixdata/?date_start=2024-02-01&limit=1`,
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
@@ -258,12 +246,73 @@ export default {
                         this.lastDataForWidget.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
 
                         this.widgetVisibility = true; // показать виджеты
+
+                        setTimeout(() => { // нарисовать значения
+                            this.setLastValues();
+                        }, 100);
                     }
                 }).catch((error) => {
                     // обработка ошибки
                     console.log(error);
                 });
 
+            this.getErrorsForWidget(id);
+        },
+        openContrPage() {
+            this.$emit('openMainControllerPage', this.controllerMapInfo.id);
+        },
+        calculatePercentage(inputVoltage) {
+            let minVoltage = 10;
+            let maxVoltage = 14.5;
+            let percentage = (inputVoltage - minVoltage) / (maxVoltage - minVoltage) * 100;
+            return percentage;
+        },
+        setLastValues() {
+            let batCInput = document.getElementById('inputbatc');
+            // Установить значение из data() в атрибут value элемента input
+            batCInput.value = Number(this.lastDataForWidget.bat_c);
+
+            let colorBatC = '';
+            if (batCInput.value < 50) {
+                colorBatC = '#E94B4B';
+            } else if (batCInput.value > 70) {
+                colorBatC = '#B6DE14';
+            } else {
+                colorBatC = '#F4CA8D';
+            }
+
+            batCInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorBatC} 0%, ${colorBatC} ${batCInput.value}%, #c9c7c5 ${batCInput.value}%, #c9c7c5 100%)`, 'important');
+
+            let batVInput = document.getElementById('inputbatv');
+            // 10 - 14.5 вольт
+            batVInput.value = this.calculatePercentage(this.lastDataForWidget.bat_v);
+
+            let colorBatV = '';
+            if (batVInput.value < 50) {
+                colorBatV = '#E94B4B';
+            } else if (batVInput.value > 70) {
+                colorBatV = '#B6DE14';
+            } else {
+                colorBatV = '#F4CA8D';
+            }
+
+            batVInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorBatV} 0%, ${colorBatV} ${batVInput.value}%, #c9c7c5 ${batVInput.value}%, #c9c7c5 100%)`, 'important');
+
+            let pvVInput = document.getElementById('inputpvv');
+            pvVInput.value = this.calculatePercentage(this.lastDataForWidget.pv_v);
+
+            let colorPvV = '';
+            if (pvVInput.value < 50) {
+                colorPvV = '#E94B4B';
+            } else if (pvVInput.value > 70) {
+                colorPvV = '#B6DE14';
+            } else {
+                colorPvV = '#F4CA8D';
+            }
+
+            pvVInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorPvV} 0%, ${colorPvV} ${pvVInput.value}%, #c9c7c5 ${pvVInput.value}%, #c9c7c5 100%)`, 'important');
+        },
+        getErrorsForWidget(id) {
             // Ошибки
             this.lastErrorsForWidget = [];
             axios.get(`http://cloud.io-tech.ru/api/devices/${id}/event/?type=3&limit=10`,
@@ -272,6 +321,11 @@ export default {
                 }).then((response) => {
                     if (response.status === 200) {
                         this.lastErrorsForWidget = response.data;
+
+                        if (this.lastErrorsForWidget.length > 10) {
+                            this.lastErrorsForWidget = this.lastErrorsForWidget.slice(this.lastErrorsForWidget.length - 10); // вырезаем последние 10 элементов
+                        }
+
                         this.lastErrorsForWidget.forEach((el) => {
                             let date = el.measured_at;
                             let formatDate = date.split(',');
@@ -282,140 +336,6 @@ export default {
                     // обработка ошибки
                     console.log(error);
                 });
-
-            // if (index === 1) { // установить значения для слайдеров если было нажатие на «Последние измерения»
-            setTimeout(() => {
-                let batCInput = document.getElementById('inputbatc');
-                // Установить значение из data() в атрибут value элемента input
-                batCInput.value = Number(this.lastDataForWidget.bat_c);
-
-                let colorBatC = '';
-                if (batCInput.value < 50) {
-                    colorBatC = '#E94B4B';
-                } else if (batCInput.value > 70) {
-                    colorBatC = '#B6DE14';
-                } else {
-                    colorBatC = '#F4CA8D';
-                }
-
-                batCInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorBatC} 0%, ${colorBatC} ${batCInput.value}%, #c9c7c5 ${batCInput.value}%, #c9c7c5 100%)`, 'important');
-
-                let batVInput = document.getElementById('inputbatv');
-                // 10 - 14.5 вольт
-                batVInput.value = this.calculatePercentage(this.lastDataForWidget.bat_v);
-
-                let colorBatV = '';
-                if (batVInput.value < 50) {
-                    colorBatV = '#E94B4B';
-                } else if (batVInput.value > 70) {
-                    colorBatV = '#B6DE14';
-                } else {
-                    colorBatV = '#F4CA8D';
-                }
-
-                batVInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorBatV} 0%, ${colorBatV} ${batVInput.value}%, #c9c7c5 ${batVInput.value}%, #c9c7c5 100%)`, 'important');
-
-                let pvVInput = document.getElementById('inputpvv');
-                pvVInput.value = this.calculatePercentage(this.lastDataForWidget.pv_v);
-
-                let colorPvV = '';
-                if (pvVInput.value < 50) {
-                    colorPvV = '#E94B4B';
-                } else if (pvVInput.value > 70) {
-                    colorPvV = '#B6DE14';
-                } else {
-                    colorPvV = '#F4CA8D';
-                }
-
-                pvVInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorPvV} 0%, ${colorPvV} ${pvVInput.value}%, #c9c7c5 ${pvVInput.value}%, #c9c7c5 100%)`, 'important');
-            }, 1000);
-            // }
-        },
-        toggleAccordion(index) {
-            this.activeIndex = this.activeIndex === index ? null : index;
-
-            // Установить жирность для всех заголовков
-            let headers = document.querySelectorAll('.accordeon-item__title');
-            headers.forEach((header, i) => {
-                header.style.fontWeight = (i === this.activeIndex) ? '600' : '500';
-            });
-
-            if (index === 1) { // установить значения для слайдеров если было нажатие на «Последние измерения»
-                setTimeout(() => {
-                    let batCInput = document.getElementById('inputbatc');
-                    // Установить значение из data() в атрибут value элемента input
-                    batCInput.value = Number(this.lastDataForWidget.bat_c);
-
-                    let colorBatC = '';
-                    if (batCInput.value < 50) {
-                        colorBatC = '#E94B4B';
-                    } else if (batCInput.value > 70) {
-                        colorBatC = '#B6DE14';
-                    } else {
-                        colorBatC = '#F4CA8D';
-                    }
-
-                    batCInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorBatC} 0%, ${colorBatC} ${batCInput.value}%, #c9c7c5 ${batCInput.value}%, #c9c7c5 100%)`, 'important');
-
-                    let batVInput = document.getElementById('inputbatv');
-                    // 10 - 14.5 вольт
-                    batVInput.value = this.calculatePercentage(this.lastDataForWidget.bat_v);
-
-                    let colorBatV = '';
-                    if (batVInput.value < 50) {
-                        colorBatV = '#E94B4B';
-                    } else if (batVInput.value > 70) {
-                        colorBatV = '#B6DE14';
-                    } else {
-                        colorBatV = '#F4CA8D';
-                    }
-
-                    batVInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorBatV} 0%, ${colorBatV} ${batVInput.value}%, #c9c7c5 ${batVInput.value}%, #c9c7c5 100%)`, 'important');
-
-                    let pvVInput = document.getElementById('inputpvv');
-                    pvVInput.value = this.calculatePercentage(this.lastDataForWidget.pv_v);
-
-                    let colorPvV = '';
-                    if (pvVInput.value < 50) {
-                        colorPvV = '#E94B4B';
-                    } else if (pvVInput.value > 70) {
-                        colorPvV = '#B6DE14';
-                    } else {
-                        colorPvV = '#F4CA8D';
-                    }
-
-                    pvVInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorPvV} 0%, ${colorPvV} ${pvVInput.value}%, #c9c7c5 ${pvVInput.value}%, #c9c7c5 100%)`, 'important');
-                }, 1000);
-            }
-
-            if (index === 2) { // обновить ошибки
-                this.lastErrorsForWidget = [];
-                axios.get(`http://cloud.io-tech.ru/api/devices/${id}/event/?type=3&limit=10`,
-                    {
-                        headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
-                    }).then((response) => {
-                        if (response.status === 200) {
-                            this.lastErrorsForWidget = response.data;
-                            this.lastErrorsForWidget.forEach((el) => {
-                                let date = el.measured_at;
-                                let formatDate = date.split(',');
-                                el.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
-                            })
-                        }
-                    }).catch((error) => {
-                        // обработка ошибки
-                        console.log(error);
-                    });
-            }
-        },
-        openContrPage() {
-            this.$emit('openMainControllerPage', this.controllerMapInfo.id);
-        },
-        calculatePercentage(inputVoltage) {
-            let minVoltage = 10;
-            let maxVoltage = 14.5;
-            let percentage = (inputVoltage - minVoltage) / (maxVoltage - minVoltage) * 100;
-            return percentage;
         }
     }
 };
@@ -611,5 +531,10 @@ export default {
 
 .info-line__widget {
     justify-content: flex-start !important;
+}
+
+.errors-container__widget {
+    max-height: 258px;
+    overflow-y: scroll;
 }
 </style>
