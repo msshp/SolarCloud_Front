@@ -18,10 +18,16 @@
                     <div class="accordeon-item__content-info">
                         <div>Cерийный номер</div>
                         <div>Тип контроллера</div>
+                        <div>Описание</div>
+                        <div>Уровень сигнала GSM</div>
+                        <div>Статус нагрузки</div>
                     </div>
                     <div class="accordeon-item__content-info">
                         <div>{{ controllerMapInfo.sn }}</div>
                         <div>{{ controllerMapInfo.device_type.device_type }}</div>
+                        <div>{{ controllerMapInfo.device_type.description }}</div>
+                        <div>{{ lastDataForWidget.dbi }}</div>
+                        <div>{{ lastDataForWidget.load_mode }}</div>
                     </div>
                 </div>
                 <div class="accordeon-item">
@@ -100,6 +106,8 @@ export default {
     data() {
         return {
             allDevicesStorage: [],
+            allDevicesInfoPlacemark: [],
+            newArrayWithMergedObjects: [],
             widgetVisibility: false,
             placemarks: [],
 
@@ -137,20 +145,50 @@ export default {
         }
     },
     mounted() {
-        axios.get(`http://cloud.io-tech.ru/api/users/${this.saveUserData.id}/devices/?limit=100000`,
+        axios.get(`http://cloud.io-tech.ru/api/users/${this.saveUserData.id}/devices/?limit=100000`, // запросить координаты
             {
                 headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
             }).then((response) => {
                 // обработка успешного запроса
                 this.allDevicesStorage = response.data.results;
-                console.log(this.allDevicesStorage);
-                this.drawMap();
+                this.getInfoForPlaceMark();
             }).catch((error) => {
                 // обработка ошибки
                 console.log(error);
             });
     },
     methods: {
+        getInfoForPlaceMark() {
+            axios.get('http://cloud.io-tech.ru/api/devices/limited/?limit=10000', // запросить статусы
+                {
+                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+                }).then((response) => {
+                    // обработка успешного запроса
+                    this.allDevicesInfoPlacemark = response.data.results;
+                    this.mergePropertiesForPlaceMark(); // объединить координаты и статусы в один объект
+                }).catch((error) => {
+                    // обработка ошибки
+                    console.log(error);
+                });
+        },
+        mergePropertiesForPlaceMark() {
+            const mergeArraysById = () => {
+                const mergedArray = [];
+                this.allDevicesStorage.forEach((deviceStorage) => {
+                    const matchingDevice = this.allDevicesInfoPlacemark.find((deviceInfo) => deviceInfo.id === deviceStorage.id);
+
+                    if (matchingDevice) {
+                        const mergedDevice = { ...deviceStorage, ...matchingDevice };
+                        mergedArray.push(mergedDevice);
+                    }
+                });
+
+                return mergedArray;
+            }
+
+            this.newArrayWithMergedObjects = mergeArraysById();
+            this.drawMap(); // нарисовать карту
+        },
         drawMap() {
             // карта
             this.map.loading = false;
@@ -170,13 +208,40 @@ export default {
                     });
                 });
 
-                this.allDevicesStorage.forEach((el) => {
+                this.newArrayWithMergedObjects.forEach((el) => {
                     if (el.gps !== null) {
                         const result = this.convertCoordinates(el.gps);
+
+                        // установить цвет метки
+
+                        // Красный – нет связи
+                        // Желтый – низкое напряжение АКБ (ниже 11.5В)
+                        // Зеленый – все ок
+
+                        let icon = 'greencircle.svg';
+                        let thisdate = this.formatDate(el.status.last_session);
+                        let targetDate = new Date(thisdate); // Целевая дата
+                        let currentDate = new Date(); // Текущее время
+
+                        let diffInHours = Math.abs(targetDate - currentDate) / (1000 * 60 * 60); // Вычисляем разницу в часах между целевой датой и текущим временем
+
+                        if (diffInHours >= 3) { // Проверяем, больше ли разница 3 часов
+                            icon = 'redcircle.svg';
+                        } else {
+                            if (el.status.bat_v !== null && el.status.bat_v < 11.5) {
+                                icon = 'yellowcircle.svg';
+                            }
+                        }
 
                         let myPlacemark = new ymaps.Placemark([result.latitude, result.longitude], {
                             hintContent: el.name,
                             balloonContent: `<div class="ballon-name">${el.name}</div><div class="ballon-sn">${el.sn}</div>`
+                        }, {
+                            iconLayout: 'default#image',
+                            iconImageHref: `../../public/${icon}`,
+                            iconImageSize: [20, 20],
+                            iconImageOffset: [-8, -5],
+                            hideIconOnBalloonOpen: false
                         });
 
                         myPlacemark.events.add('click', () => {
@@ -218,7 +283,6 @@ export default {
             return { latitude: latDecimal, longitude: lonDecimal };
         },
         getController(id) {
-            console.log('3 запроса и нарисовать');
             this.activeId = id;
 
             // Информация об устройстве
@@ -228,6 +292,9 @@ export default {
                 }).then((response) => {
                     if (response.status === 200) {
                         this.controllerMapInfo = response.data;
+                        if (this.controllerMapInfo.device_type.description === undefined) {
+                            this.controllerMapInfo.device_type.description = '–';
+                        }
                     }
                 }).catch((error) => {
                     // обработка ошибки
@@ -336,6 +403,17 @@ export default {
                     // обработка ошибки
                     console.log(error);
                 });
+        },
+        formatDate(date) {
+            let dateString = date;
+            let [datePart, timePart] = dateString.split(',');
+
+            let [day, month, year] = datePart.split('.');
+            let [hours, minutes, seconds] = timePart.split(':');
+
+            let formattedDate = new Date(year, month - 1, day, hours, minutes, seconds);
+
+            return formattedDate.toString();
         }
     }
 };
@@ -358,14 +436,16 @@ export default {
 }
 
 .ballon-name {
-    background-color: #2680c3;
+    background-color: #293B5F;
     color: #f8f6f4;
     text-align: center;
-    border-radius: 24px;
+    border-radius: 6px;
 }
 
 .ballon-sn {
     height: 20px;
+    color: #293B5F;
+    font-weight: 500;
 }
 
 .map-widget {
@@ -425,7 +505,7 @@ export default {
 }
 
 .accordeon-item__content-info:first-child {
-    margin-right: 18px;
+    margin-right: 32px;
     font-weight: 500;
     font-size: 13px;
     line-height: 129%;
@@ -536,5 +616,13 @@ export default {
 .errors-container__widget {
     max-height: 258px;
     overflow-y: scroll;
+}
+
+.ymaps-2-1-79-balloon {
+    border-radius: 6px;
+}
+
+.ymaps-2-1-79-balloon__layout {
+    border-radius: 6px;
 }
 </style>

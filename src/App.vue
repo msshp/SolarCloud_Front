@@ -5,7 +5,7 @@
             <div className="logo-container"><img src="../public/img/logo.png" alt="logo"></div>
             <input type="email" v-model.trim="userEmail" v-bind:class="{ empty_input: userEmailIsEmpty }"
                 placeholder="Email">
-            <input className="last-input" type="password" v-model.trim="userPass"
+            <input class="last-input" type="password" v-model.trim="userPass"
                 v-bind:class="{ empty_input: userPassIsEmpty }" placeholder="Пароль">
             <button className="login-btn" @click="logIn()">Войти</button>
             <button className="reg-btn" @click="logRegToggle()">Создать проект</button>
@@ -27,7 +27,7 @@
                 placeholder="Email">
             <input type="text" v-model.trim="projUserLogin" v-bind:class="{ empty_input: projUserLoginIsEmpty }"
                 placeholder="Логин">
-            <input className="last-input" type="password" v-model.trim="projUserPass"
+            <input class="last-input" type="password" v-model.trim="projUserPass"
                 v-bind:class="{ empty_input: projUserPassIsEmpty }" placeholder="Пароль">
             <button className="login-btn" @click="createProj()">Создать проект</button>
             <button className="reg-btn" @click="logRegToggle()">Назад</button>
@@ -582,7 +582,7 @@ export default {
     background-color: rgba(248, 246, 244, 0.3);
     color: #ffffff;
     font-size: 16px;
-    margin-bottom: 5%;
+    margin-bottom: 8px;
 }
 
 .form input:focus {
@@ -594,7 +594,7 @@ input::placeholder {
 }
 
 .last-input {
-    margin-bottom: 12% !important;
+    margin-bottom: 16px !important;
 }
 
 .form {
@@ -613,7 +613,7 @@ input::placeholder {
     border-radius: 8px;
     color: #0E1626;
     background-color: #F8F6F4;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
 .login-btn:hover {
