@@ -39,13 +39,10 @@ export default {
             }).then((response) => {
                 // обработка успешного запроса
                 this.controlUserList = response.data.results;
-                console.log(this.controlUserList);
 
                 let admins = this.controlUserList.filter(user => user.profile.role === 'Admin').length;
                 let moderators = this.controlUserList.filter(user => user.profile.role === 'Moderator').length;
                 let regularUsers = this.controlUserList.filter(user => user.profile.role === 'User').length;
-
-                console.log(admins, moderators, regularUsers);
 
                 let usersC = document.getElementById('usersChart');
 

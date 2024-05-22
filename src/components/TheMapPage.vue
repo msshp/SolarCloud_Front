@@ -9,6 +9,11 @@
             <div id="map" style="width: 100%; height: 100%;"></div>
         </div>
         <div v-if="widgetVisibility" class="map-widget">
+            <div v-if="widget.loading" class="loading widget-loading widget-loader">
+                <div class="loading-center">
+                    <div class="loader map-loader"></div>
+                </div>
+            </div>
             <div @click="openContrPage" class="map-widget__title">
                 <div class="map-widget__icon"></div>{{ controllerMapInfo.name }}
             </div>
@@ -31,8 +36,9 @@
                     </div>
                 </div>
                 <div class="accordeon-item">
-                    <h3 class="accordeon-item__title">Последние измерения <div class="lastdate_widget">{{
-                        lastDataForWidget.measured_at }}</div>
+                    <h3 class="accordeon-item__title">Последние измерения <div class="lastdate_widget"
+                            v-bind:class="{ lastdata_green: lastTimeColor }">{{
+                                lastDataForWidget.measured_at }}</div>
                     </h3>
                 </div>
                 <div class="accordeon-item__content">
@@ -49,16 +55,6 @@
                             <div>{{ lastDataForWidget.bat_v }} <span>Вольт</span></div>
                         </div>
                     </div>
-                    <div>
-                        <p class="slider-title">Напряжение PV</p>
-                        <div class="slider-container"><input id="inputpvv" type="range" class="no-slider" disabled>
-                            <div>{{ lastDataForWidget.pv_v }} <span>Вольт</span></div>
-                        </div>
-                    </div>
-                    <div class="slider-title lastval">
-                        <div>Ток PV</div>
-                        <div>{{ lastDataForWidget.pv_i }} <span>А</span></div>
-                    </div>
                     <div class="slider-title lastval">
                         <div>Ток АКБ</div>
                         <div>{{ lastDataForWidget.bat_i }} <span>А</span></div>
@@ -72,22 +68,16 @@
                 </div>
             </div>
             <div>
-                <div class="accordeon-item">
+                <div>
                     <h3 class="accordeon-item__title">
                         Ошибки</h3>
                 </div>
                 <div class="accordeon-item__content">
-                    <div className="info-line info-line__title info-line__widget">
-                        <div class="measured_at measured-at__dashboard-errors">дата/время</div>
-                        <div>Описание</div>
-                    </div>
-                    <div>
-                        <div class="errors-container__widget">
-                            <div className="info-line info-line__table info-line__widget"
-                                v-for="info in lastErrorsForWidget" :key="info">
-                                <div class="measured_at measured-at__dashboard-errors">{{ info.measured_at }}</div>
-                                <div class="measured-at__dashboard-code">{{ info.name }}</div>
-                            </div>
+                    <div class="errors-container__widget">
+                        <div className="info-line info-line__table info-line__widget"
+                            v-for="info in lastErrorsForWidget" :key="info">
+                            <div class="measured-at__widget-errors">{{ info.measured_at }}</div>
+                            <div class="measured-at__dashboard-code measured-at__widget-errval">{{ info.name }}</div>
                         </div>
                     </div>
                 </div>
@@ -130,6 +120,9 @@ export default {
                 loading: true,
                 map: false
             },
+            widget: {
+                loading: true
+            },
             lastDataForWidget: {
                 bat_c: "-",
                 bat_i: "-",
@@ -141,7 +134,8 @@ export default {
                 pv_v: "-"
             },
             lastErrorsForWidget: [],
-            activeId: null
+            activeId: null,
+            lastTimeColor: true
         }
     },
     mounted() {
@@ -238,7 +232,7 @@ export default {
                             balloonContent: `<div class="ballon-name">${el.name}</div><div class="ballon-sn">${el.sn}</div>`
                         }, {
                             iconLayout: 'default#image',
-                            iconImageHref: `../../public/${icon}`,
+                            iconImageHref: `../${icon}`,
                             iconImageSize: [20, 20],
                             iconImageOffset: [-8, -5],
                             hideIconOnBalloonOpen: false
@@ -283,6 +277,8 @@ export default {
             return { latitude: latDecimal, longitude: lonDecimal };
         },
         getController(id) {
+            this.widget.loading = true;
+            this.widgetVisibility = true; // показать виджеты ! без этого не нарисуются шкалы
             this.activeId = id;
 
             // Информация об устройстве
@@ -312,7 +308,18 @@ export default {
                         let formatDate = date.split(',');
                         this.lastDataForWidget.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
 
-                        this.widgetVisibility = true; // показать виджеты
+                        //////// установить цвет плашки с временем
+                        this.lastTimeColor = true; // зелёный
+                        let thisdate = this.formatDate(date);
+                        let targetDate = new Date(thisdate); // Целевая дата
+                        let currentDate = new Date(); // Текущее время
+
+                        let diffInHours = Math.abs(targetDate - currentDate) / (1000 * 60 * 60); // Вычисляем разницу в часах между целевой датой и текущим временем
+
+                        if (diffInHours >= 3) { // Проверяем, больше ли разница 3 часов
+                            this.lastTimeColor = false;
+                        }
+                        /////////////
 
                         setTimeout(() => { // нарисовать значения
                             this.setLastValues();
@@ -322,7 +329,6 @@ export default {
                     // обработка ошибки
                     console.log(error);
                 });
-
             this.getErrorsForWidget(id);
         },
         openContrPage() {
@@ -365,32 +371,20 @@ export default {
 
             batVInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorBatV} 0%, ${colorBatV} ${batVInput.value}%, #c9c7c5 ${batVInput.value}%, #c9c7c5 100%)`, 'important');
 
-            let pvVInput = document.getElementById('inputpvv');
-            pvVInput.value = this.calculatePercentage(this.lastDataForWidget.pv_v);
-
-            let colorPvV = '';
-            if (pvVInput.value < 50) {
-                colorPvV = '#E94B4B';
-            } else if (pvVInput.value > 70) {
-                colorPvV = '#B6DE14';
-            } else {
-                colorPvV = '#F4CA8D';
-            }
-
-            pvVInput.style.setProperty('background', `-webkit-linear-gradient(left, ${colorPvV} 0%, ${colorPvV} ${pvVInput.value}%, #c9c7c5 ${pvVInput.value}%, #c9c7c5 100%)`, 'important');
+            this.widget.loading = false;
         },
         getErrorsForWidget(id) {
             // Ошибки
             this.lastErrorsForWidget = [];
-            axios.get(`http://cloud.io-tech.ru/api/devices/${id}/event/?type=3&limit=10`,
+            axios.get(`http://cloud.io-tech.ru/api/devices/${id}/event/?type=3&limit=3`,
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     if (response.status === 200) {
                         this.lastErrorsForWidget = response.data;
 
-                        if (this.lastErrorsForWidget.length > 10) {
-                            this.lastErrorsForWidget = this.lastErrorsForWidget.slice(this.lastErrorsForWidget.length - 10); // вырезаем последние 10 элементов
+                        if (this.lastErrorsForWidget.length > 3) {
+                            this.lastErrorsForWidget = this.lastErrorsForWidget.slice(this.lastErrorsForWidget.length - 3); // вырезаем последние 10 элементов
                         }
 
                         this.lastErrorsForWidget.forEach((el) => {
@@ -456,6 +450,7 @@ export default {
     top: 0;
     right: 0;
     padding: 80px 24px;
+    box-shadow: 0 8px 16px 0 rgba(41, 59, 95, 0.08);
 }
 
 .map-widget__title {
@@ -477,10 +472,6 @@ export default {
     margin-right: 8px;
 }
 
-.accordeon-item {
-    margin-bottom: 24px;
-}
-
 .map-widget h3 {
     font-weight: 500;
     font-size: 14px;
@@ -488,6 +479,7 @@ export default {
     color: #293b5f;
     text-align: left;
     margin-left: 16px;
+    margin-bottom: 16px;
 }
 
 .accordeon-item__content {
@@ -496,7 +488,7 @@ export default {
     border-radius: 8px;
     background: #eee;
     padding: 16px;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .accordeon-item__content-info {
@@ -513,7 +505,7 @@ export default {
 }
 
 .accordeon-item__content-info:last-child {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 13px;
     line-height: 129%;
     color: #0e1626;
@@ -546,7 +538,7 @@ export default {
     padding: 4px 12px;
     background: #de640c;
     color: #f8f6f4;
-    font-weight: 300;
+    font-weight: 400;
     align-items: center;
     justify-content: center;
     margin-left: 16px;
@@ -624,5 +616,34 @@ export default {
 
 .ymaps-2-1-79-balloon__layout {
     border-radius: 6px;
+}
+
+.lastdata_green {
+    background-color: #9bbd11;
+}
+
+.widget-loading {
+    top: 0;
+    background-color: #f8f6f4 !important;
+}
+
+.widget-loader {
+    margin-top: -40px !important;
+}
+
+.measured-at__widget-errors {
+    width: 110px !important;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 129%;
+    color: #293b5f;
+    margin-right: 32px;
+}
+
+.measured-at__widget-errval {
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 129%;
+    color: #0e1626;
 }
 </style>
