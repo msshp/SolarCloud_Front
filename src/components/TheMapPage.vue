@@ -9,71 +9,71 @@
             <div id="map" style="width: 100%; height: 100%;"></div>
         </div>
         <div v-if="widgetVisibility" class="map-widget">
-            <div v-if="widget.loading" class="loading widget-loading widget-loader">
-                <div class="loading-center">
-                    <div class="loader map-loader"></div>
-                </div>
-            </div>
-            <div @click="openContrPage" class="map-widget__title">
-                <div class="map-widget__icon"></div>{{ controllerMapInfo.name }}
-            </div>
-            <div>
-                <h3 class="accordeon-item__title">Информация</h3>
-                <div class="accordeon-item__content accordeon-item__contentainer-info">
-                    <div class="accordeon-item__content-info">
-                        <div>Cерийный номер</div>
-                        <div>Тип контроллера</div>
-                        <div>Описание</div>
-                        <div>Уровень сигнала GSM</div>
-                        <div>Статус нагрузки</div>
-                    </div>
-                    <div class="accordeon-item__content-info">
-                        <div>{{ controllerMapInfo.sn }}</div>
-                        <div>{{ controllerMapInfo.device_type.device_type }}</div>
-                        <div>{{ controllerMapInfo.device_type.description }}</div>
-                        <div>{{ lastDataForWidget.dbi }}</div>
-                        <div>{{ lastDataForWidget.load_mode }}</div>
+            <div class="map-widget__padding">
+                <div v-if="widget.loading" class="loading widget-loading widget-loader">
+                    <div class="loading-center">
+                        <div class="loader map-loader"></div>
                     </div>
                 </div>
-                <div class="accordeon-item">
-                    <h3 class="accordeon-item__title">Последние измерения <div class="lastdate_widget"
-                            v-bind:class="{ lastdata_green: lastTimeColor }">{{
-                                lastDataForWidget.measured_at }}</div>
-                    </h3>
+                <div @click="openContrPage" class="map-widget__title">
+                    <div class="map-widget__icon"></div>{{ controllerMapInfo.name }}
                 </div>
-                <div class="accordeon-item__content">
-                    <div>
-                        <p class="slider-title">Уровень заряда АКБ</p>
-                        <div class="slider-container"><input id="inputbatc" type="range" class="no-slider" min="0"
-                                max="100" disabled>
-                            <div>{{ lastDataForWidget.bat_c }} <span>%</span></div>
-                        </div>
-                    </div>
-                    <div>
-                        <p class="slider-title">Напряжение АКБ</p>
-                        <div class="slider-container"><input id="inputbatv" type="range" class="no-slider" disabled>
-                            <div>{{ lastDataForWidget.bat_v }} <span>Вольт</span></div>
-                        </div>
-                    </div>
-                    <div class="slider-title lastval">
-                        <div>Ток АКБ</div>
-                        <div>{{ lastDataForWidget.bat_i }} <span>А</span></div>
-                    </div>
-                    <div class="slider-title lastval">
-                        <div>Ток нагрузки</div>
-                        <div>{{ lastDataForWidget.load_i }} <span>А</span>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-            <div>
                 <div>
-                    <h3 class="accordeon-item__title">
-                        Ошибки</h3>
+                    <h3 class="accordeon-item__title">Информация</h3>
+                    <div class="accordeon-item__content accordeon-item__contentainer-info">
+                        <div class="accordeon-item__content-info">
+                            <div>Cерийный номер</div>
+                            <div>Тип контроллера</div>
+                            <div>Описание</div>
+                            <div>Уровень сигнала GSM</div>
+                            <div>Статус нагрузки</div>
+                        </div>
+                        <div class="accordeon-item__content-info">
+                            <div>{{ controllerMapInfo.sn }}</div>
+                            <div>{{ controllerMapInfo.device_type.device_type }}</div>
+                            <div>{{ controllerMapInfo.device_type.description }}</div>
+                            <div>{{ lastDataForWidget.dbi }}</div>
+                            <div>{{ lastDataForWidget.load_mode }}</div>
+                        </div>
+                    </div>
+                    <div class="accordeon-item">
+                        <h3 class="accordeon-item__title">Последние измерения <div class="lastdate_widget"
+                                v-bind:class="{ lastdata_green: lastTimeColor }">{{
+                                    lastDataForWidget.measured_at }}</div>
+                        </h3>
+                    </div>
+                    <div class="accordeon-item__content">
+                        <div>
+                            <p class="slider-title">Уровень заряда АКБ</p>
+                            <div class="slider-container"><input id="inputbatc" type="range" class="no-slider" min="0"
+                                    max="100" disabled>
+                                <div>{{ lastDataForWidget.bat_c }} <span>%</span></div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="slider-title">Напряжение АКБ</p>
+                            <div class="slider-container"><input id="inputbatv" type="range" class="no-slider" disabled>
+                                <div>{{ lastDataForWidget.bat_v }} <span>Вольт</span></div>
+                            </div>
+                        </div>
+                        <div class="slider-title lastval">
+                            <div>Ток АКБ</div>
+                            <div>{{ lastDataForWidget.bat_i }} <span>А</span></div>
+                        </div>
+                        <div class="slider-title lastval">
+                            <div>Ток нагрузки</div>
+                            <div>{{ lastDataForWidget.load_i }} <span>А</span>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-                <div class="accordeon-item__content">
-                    <div class="errors-container__widget">
+                <div>
+                    <div>
+                        <h3 class="accordeon-item__title">
+                            Ошибки</h3>
+                    </div>
+                    <div class="accordeon-item__content">
                         <div className="info-line info-line__table info-line__widget"
                             v-for="info in lastErrorsForWidget" :key="info">
                             <div class="measured-at__widget-errors">{{ info.measured_at }}</div>
@@ -424,7 +424,6 @@ export default {
 }
 
 .page-content__container-map {
-    padding: 56px 0px 0px 0px;
     height: 100%;
     position: relative;
 }
@@ -444,13 +443,16 @@ export default {
 
 .map-widget {
     width: 31%;
-    height: 86%;
+    height: 100%;
     background-color: #f8f6f4;
     position: absolute;
     top: 0;
     right: 0;
-    padding: 80px 24px;
     box-shadow: 0 8px 16px 0 rgba(41, 59, 95, 0.08);
+}
+
+.map-widget__padding {
+    padding: 80px 24px;
 }
 
 .map-widget__title {
@@ -511,6 +513,10 @@ export default {
     color: #0e1626;
 }
 
+.accordeon-item__content-info div {
+    height: 24px;
+}
+
 .map-loader {
     margin-top: 0px !important;
     width: 80px !important;
@@ -541,7 +547,7 @@ export default {
     font-weight: 400;
     align-items: center;
     justify-content: center;
-    margin-left: 16px;
+    margin-left: 22px;
 }
 
 .accordeon-item__contentainer-info {
@@ -605,11 +611,6 @@ export default {
     justify-content: flex-start !important;
 }
 
-.errors-container__widget {
-    max-height: 258px;
-    overflow-y: scroll;
-}
-
 .ymaps-2-1-79-balloon {
     border-radius: 6px;
 }
@@ -637,7 +638,7 @@ export default {
     font-size: 13px;
     line-height: 129%;
     color: #293b5f;
-    margin-right: 32px;
+    margin-right: 56px;
 }
 
 .measured-at__widget-errval {
@@ -645,5 +646,26 @@ export default {
     font-size: 13px;
     line-height: 129%;
     color: #0e1626;
+    justify-content: flex-start !important;
+}
+
+@media (max-width: 1600px) {
+    .accordeon-item__content-info {
+        margin-right: 16px !important;
+        font-size: 12px !important;
+    }
+
+    .measured-at__widget-errors {
+        margin-right: 16px;
+    }
+}
+
+@media (max-width: 1515px) {
+
+    .accordeon-item__content-info,
+    .measured-at__widget-errors,
+    .measured-at__dashboard-code {
+        font-size: 11px !important;
+    }
 }
 </style>

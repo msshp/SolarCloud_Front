@@ -6,7 +6,7 @@
         <div class="account-separator"></div>
         <table>
             <thead>
-                <tr>
+                <tr class="list-tr">
                     <th class="tr-id"><input v-model.trim="searchIdControllerById" type="number" placeholder="ID"
                             v-on:input="searchControllerSyId">
                     </th>
@@ -15,9 +15,19 @@
                     </th>
                     <th><input v-model.trim="searchValControllerByControllerName" type="text" placeholder="Название"
                             v-on:input="searchControllerByControllerName"></th>
-                    <th class="sort-by-date">Напряжение АКБ (Вольт)</th>
+                    <th class="sort-by-date">
+                        <div class="sortlist-by-voltage_container">Напряжение АКБ (Вольт)<div
+                                @click="sortListByVoltageToggle()" class="sortlist-by-voltage"
+                                v-bind:class="{ sortlistbyvoltage_active: sortlistByVoltageActive }"></div>
+                        </div>
+                    </th>
                     <th class="sort-by-date">Уровень сигнала GSM</th>
-                    <th class="sort-by-date">Выход на связь</th>
+                    <th class="sort-by-date">
+                        <div class="sortlist-by-voltage_container">Выход на связь<div
+                                @click="sortListByLastTimeToggle()" class="sortlist-by-voltage"
+                                v-bind:class="{ sortlistbyvoltage_active: sortlistByLastTimeActive }"></div>
+                        </div>
+                    </th>
                     <th class="sort-by-date">Ошибки</th>
                 </tr>
             </thead>
@@ -26,7 +36,7 @@
                     <div class="loader"></div>
                 </div>
             </div>
-            <tbody v-if="list.listTable">
+            <tbody class="list-tbody" v-if="list.listTable">
                 <TheControllerLine :controllerList="controllerList" @openMainControllerPage="openMainControllerPage" />
             </tbody>
         </table>
@@ -52,7 +62,10 @@ export default {
             list: {
                 loading: true,
                 listTable: false
-            }
+            },
+
+            sortlistByVoltageActive: false, // Сортировка по напряжению
+            sortlistByLastTimeActive: false // Сортировка по последнему выходу на связь
         }
     },
     methods: {
@@ -110,6 +123,50 @@ export default {
         },
         openMainControllerPage(id) {
             this.$emit('openMainControllerPage', id);
+        },
+        sortListByVoltageToggle() { // сортировка по напряжению акб
+            this.sortlistByVoltageActive = !this.sortlistByVoltageActive; // цвет иконки сортировки
+            this.sortlistByLastTimeActive = false; // цвет иконки сортировки
+
+            const table = document.querySelector('.list-tbody');
+            const rows = Array.from(table.querySelectorAll('tr'));
+
+            rows.sort((a, b) => {
+                const cellIndex = this.sortlistByVoltageActive ? 4 : 1;
+
+                const aValue = parseFloat(a.querySelector(`td:nth-child(${cellIndex})`).textContent);
+                const bValue = parseFloat(b.querySelector(`td:nth-child(${cellIndex})`).textContent);
+
+                return this.sortlistByVoltageActive ? bValue - aValue : aValue - bValue;
+            });
+
+            rows.forEach(row => table.appendChild(row));
+        },
+        sortListByLastTimeToggle() { // сотировка по последнему выходу на связь
+
+            this.sortlistByLastTimeActive = !this.sortlistByLastTimeActive;
+            this.sortlistByVoltageActive = false;
+
+            const table = document.querySelector('.list-tbody');
+            const rows = Array.from(table.querySelectorAll('tr'));
+
+            rows.sort((a, b) => {
+                const cellIndex = this.sortlistByLastTimeActive ? 6 : 1;
+
+                if (this.sortlistByLastTimeActive) {
+                    const dateA = new Date(a.querySelector(`td:nth-child(${cellIndex})`).textContent.replace(/(\d{2}).(\d{2}).(\d{4}) (\d{2}):(\d{2})/, '$3-$2-$1T$4:$5'));
+                    const dateB = new Date(b.querySelector(`td:nth-child(${cellIndex})`).textContent.replace(/(\d{2}).(\d{2}).(\d{4}) (\d{2}):(\d{2})/, '$3-$2-$1T$4:$5'));
+
+                    return dateB - dateA;
+                } else {
+                    const aValue = parseFloat(a.querySelector(`td:nth-child(${cellIndex})`).textContent);
+                    const bValue = parseFloat(b.querySelector(`td:nth-child(${cellIndex})`).textContent);
+
+                    return aValue - bValue;
+                }
+            });
+
+            rows.forEach(row => table.appendChild(row));
         }
     },
     // вывести список контроллеров
@@ -169,5 +226,44 @@ tr th input {
 
 .ymaps-2-1-79-balloon__close-button {
     height: 38px !important;
+}
+
+.sortlist-by-voltage_container {
+    display: flex;
+    align-items: center;
+}
+
+.sortlist-by-voltage {
+    width: 30px;
+    height: 30px;
+    margin-left: 14px;
+    background-image: url(../sorticon_unactive.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+.sortlistbyvoltage_active {
+    background-image: url(../sorticon_active.svg);
+}
+
+@media (max-width: 1560px) {
+    .sortlist-by-voltage {
+        width: 26px;
+        height: 26px;
+        margin-left: 8px;
+    }
+}
+
+@media (max-width: 1540px) {
+    .list-tr th {
+        font-size: 12px;
+    }
+
+    table input,
+    .select__button,
+    .sort-by-creation {
+        font-size: 12px;
+    }
 }
 </style>
