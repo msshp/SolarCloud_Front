@@ -394,6 +394,10 @@ export default {
                     if (response.status === 200) {
                         this.lastErrors = response.data;
 
+                        if (this.lastErrors.length > 10) {
+                            this.lastErrors = this.lastErrors.slice(-17);
+                        }
+
                         this.lastErrors.forEach((el) => {
                             let date = el.measured_at;
                             let formatDate = date.split(',');
@@ -820,8 +824,7 @@ export default {
 }
 
 .controller-data__dashboard-errors {
-    height: 548px;
-    overflow-y: scroll;
+    overflow-y: hidden;
     overflow-x: hidden;
     padding: 0 0 0 16px;
 }
@@ -854,6 +857,8 @@ export default {
 
 .pie-container canvas {
     padding: 24px;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .info-block_line-charts {
@@ -1079,7 +1084,7 @@ export default {
     }
 
     .pie-energy {
-        top: 39%;
+        top: 37%;
     }
 }
 
@@ -1106,6 +1111,25 @@ export default {
 
     .info-block__second div {
         width: 29%;
+    }
+
+    .pie-container canvas {
+        width: 75% !important;
+        height: 75% !important;
+    }
+}
+
+@media (min-width: 2200px) {
+    .pie-container canvas {
+        width: 60% !important;
+        height: 60% !important;
+    }
+}
+
+@media (min-width: 2500px) {
+    .pie-container canvas {
+        width: 50% !important;
+        height: 50% !important;
     }
 }
 </style>
