@@ -53,7 +53,7 @@
                         <div>
                             <p class="slider-title">Напряжение АКБ</p>
                             <div class="slider-container"><input id="inputbatv" type="range" class="no-slider" disabled>
-                                <div>{{ lastDataForWidget.bat_v }} <span>Вольт</span></div>
+                                <div>{{ lastDataForWidget.bat_v }} <span>В</span></div>
                             </div>
                         </div>
                         <div class="slider-title lastval">
@@ -176,7 +176,6 @@ export default {
                         mergedArray.push(mergedDevice);
                     }
                 });
-
                 return mergedArray;
             }
 

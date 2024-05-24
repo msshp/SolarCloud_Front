@@ -95,16 +95,21 @@
                 </div>
                 <div class="info-block__block info-block__half info-block__errors">
                     <div class="info-block__errors-container">
-                        <h4>ошибки</h4>
+                        <h4>события</h4>
                     </div>
                     <div className="info-line info-line__title info-line__title-errors">
                         <div class="measured_at measured-at__dashboard-errors">дата/время</div>
-                        <div class="measured-at__dashboard-code">Описание</div>
+                        <div class="error-desc measured-at__dashboard-errors_code">Код</div>
+                        <div class="error-desc">Описание</div>
+                        <div class="error-desc">Тип</div>
                     </div>
                     <div class="controller-data__dashboard-errors">
-                        <div className="info-line info-line__table" v-for="info in lastErrors" :key="info">
+                        <div className="info-line info-line__table dashboard-event-line" v-for="info in lastEvents"
+                            :key="info" :style="{ backgroundColor: info.color }">
                             <div class="measured_at measured-at__dashboard-errors">{{ info.measured_at }}</div>
+                            <div class="measured-at__dashboard-errors_code">{{ info.code }}</div>
                             <div class="measured-at__dashboard-code">{{ info.name }}</div>
+                            <div class="measured-at__dashboard-code">{{ info.type }}</div>
                         </div>
                     </div>
                 </div>
@@ -262,7 +267,7 @@ export default {
             visibleChart: false,
             thereIsData: false,
 
-            lastErrors: [],
+            lastEvents: [],
 
             coord: null, // координаты для дашборда
             coordinates: { latitude: 55.76, longitude: 37.64 }
@@ -350,6 +355,8 @@ export default {
                     if (response.status === 200) {
                         this.controllerInfoStorage = response.data;
 
+                        this.drawControllerMap(this.controllerInfoStorage[0]); // нарисовать карту
+
                         if (this.controllerInfoStorage.length === 0) {
                             this.indicatorSearchLastEntry = true; // найти последнюю запись
                             this.thereIsData = true; // показать блок «Нет данных за этот период»
@@ -387,48 +394,56 @@ export default {
             this.getErrors();
         },
         getErrors() {
-            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/event/?type=3&limit=20`,
+            // 
+            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/event/`,
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     if (response.status === 200) {
-                        this.lastErrors = response.data;
+                        this.lastEvents = response.data.reverse();
 
-                        if (this.lastErrors.length > 10) {
-                            this.lastErrors = this.lastErrors.slice(-17);
+                        if (this.lastEvents.length > 17) {
+                            this.lastEvents = this.lastEvents.slice(0, 17);
                         }
 
-                        this.lastErrors.forEach((el) => {
+                        this.lastEvents.forEach((el) => {
                             let date = el.measured_at;
                             let formatDate = date.split(',');
                             el.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+
+                            const codeToTypeMap = {
+                                '900': 'Информация',
+                                '901': 'Предупреждение',
+                                '906': 'Ошибка'
+                            };
+
+                            el.type = codeToTypeMap[el.code] || 'Неизвестный тип события';
+
+                            const colorToTypeMap = {
+                                '900': '#F8F6F4',
+                                '901': '#F4CA8D',
+                                '906': '#f57878'
+                            };
+
+                            el.color = colorToTypeMap[el.code] || '#F8F6F4';
+
                         })
                     }
                 }).catch((error) => {
                     // обработка ошибки
                     console.log(error);
                 });
-            if (!document.getElementById('map-dashboard').firstChild) {
-                this.getCoords();
-            } else {
-                this.btns.loading = false;
+            // if (!document.getElementById('map-dashboard').firstChild) {
+            //     this.drawControllerMap();
+            // } else {
+            this.btns.loading = false;
+            // }
+        },
+        drawControllerMap(lastdata) {
+
+            if (this.controllerInfo.gps !== null) {
+                this.coord = this.convertCoordinates(this.controllerInfo.gps);
             }
-        },
-        getCoords() {
-            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`,
-                {
-                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
-                }).then((response) => {
-                    if (response.status === 200) {
-                        this.coord = this.convertCoordinates(response.data[0].value);
-                        this.drawControllerMap();
-                    }
-                }).catch((error) => {
-                    console.log(error); // обработка ошибки
-                    this.drawControllerMap();
-                })
-        },
-        drawControllerMap() {
             if (this.coord) {
                 if ((this.coord.latitude !== 0)) {
                     this.coordinates = this.coord;
@@ -440,9 +455,41 @@ export default {
                     zoom: 10
                 });
 
-                if (this.coord) {
+                if (this.coord !== null) {
+                    // установить цвет метки
+
+                    // Красный – нет связи
+                    // Желтый – низкое напряжение АКБ (ниже 11.5В)
+                    // Зеленый – все ок
+
+                    let icon = 'greencircle.svg';
+                    if (lastdata !== undefined) {
+                        let thisdate = this.formatDate(lastdata.measured_at);
+                        let targetDate = new Date(thisdate); // Целевая дата
+                        let currentDate = new Date(); // Текущее время
+
+                        let diffInHours = Math.abs(targetDate - currentDate) / (1000 * 60 * 60); // Вычисляем разницу в часах между целевой датой и текущим временем
+
+                        if (diffInHours >= 3) { // Проверяем, больше ли разница 3 часов
+                            icon = 'redcircle.svg';
+                        } else {
+                            if (lastdata.bat_v !== null && lastdata.bat_v < 11.5) {
+                                icon = 'yellowcircle.svg';
+                            }
+                        }
+                    } else {
+                        icon = 'redcircle.svg';
+                    }
+
                     let myPlacemark = new ymaps.Placemark([this.coord.latitude, this.coord.longitude], {
-                        balloonContent: `${this.controllerId}`
+                        hintContent: this.controllerInfo.name,
+                        balloonContent: `<div class="ballon-name">${this.controllerInfo.name}</div><div class="ballon-sn">${this.controllerInfo.sn}</div>`
+                    }, {
+                        iconLayout: 'default#image',
+                        iconImageHref: `../${icon}`,
+                        iconImageSize: [20, 20],
+                        iconImageOffset: [-8, -5],
+                        hideIconOnBalloonOpen: false
                     });
                     dashMap.geoObjects.add(myPlacemark);
                 }
@@ -498,10 +545,20 @@ export default {
                     // обработка ошибки
                     console.log(error);
                 });
+        },
+        formatDate(date) {
+            let dateString = date;
+            let [datePart, timePart] = dateString.split(',');
+
+            let [day, month, year] = datePart.split('.');
+            let [hours, minutes, seconds] = timePart.split(':');
+
+            let formattedDate = new Date(year, month - 1, day, hours, minutes, seconds);
+
+            return formattedDate.toString();
         }
     },
     mounted() {
-        this.showDay();
 
         // Информация об устройстве
         axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/`,
@@ -510,6 +567,7 @@ export default {
             }).then((response) => {
                 if (response.status === 200) {
                     this.controllerInfo = response.data;
+                    this.showDay();
                 }
             }).catch((error) => {
                 // обработка ошибки
@@ -797,7 +855,7 @@ export default {
 }
 
 .measured-at__dashboard-errors {
-    width: 150px !important;
+    width: 140px !important;
 }
 
 .measured-at__dashboard-code {
@@ -805,13 +863,13 @@ export default {
 }
 
 .info-line__title-errors {
-    font-size: 13px;
+    font-size: 13px !important;
+    font-weight: 500;
     justify-content: flex-start;
 }
 
 .info-line__title-errors div {
-    width: 134px !important;
-    font-weight: 500;
+    justify-content: flex-start;
 }
 
 .info-line__table div {
@@ -1012,6 +1070,18 @@ export default {
 .ymaps-2-1-79-map,
 .ymaps-2-1-79-inner-panes {
     border-radius: 8px;
+}
+
+.error-desc {
+    padding: 0 6px;
+}
+
+.dashboard-event-line {
+    width: 96%;
+}
+
+.measured-at__dashboard-errors_code {
+    width: 40px !important;
 }
 
 @media (min-width: 1600px) {

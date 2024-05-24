@@ -16,7 +16,7 @@
                     <th><input v-model.trim="searchValControllerByControllerName" type="text" placeholder="Название"
                             v-on:input="searchControllerByControllerName"></th>
                     <th class="sort-by-date">
-                        <div class="sortlist-by-voltage_container">Напряжение АКБ (Вольт)<div
+                        <div class="sortlist-by-voltage_container">Напряжение АКБ (В)<div
                                 @click="sortListByVoltageToggle()" class="sortlist-by-voltage"
                                 v-bind:class="{ sortlistbyvoltage_active: sortlistByVoltageActive }"></div>
                         </div>
