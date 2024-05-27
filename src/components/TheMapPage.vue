@@ -425,6 +425,7 @@ export default {
 .page-content__container-map {
     height: 100%;
     position: relative;
+    overflow-y: hidden;
 }
 
 .ballon-name {
@@ -646,6 +647,12 @@ export default {
     line-height: 129%;
     color: #0e1626;
     justify-content: flex-start !important;
+}
+
+@media (max-width: 1460px) {
+    .lastdate_widget {
+        margin-left: 8px;
+    }    
 }
 
 @media (max-width: 1600px) {

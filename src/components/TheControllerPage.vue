@@ -31,8 +31,9 @@
                     v-bind:class="{ controller_btn_active: btns.dashBoardActive }">Дашборд</button>
                 <button @click="settingsOn()"
                     v-bind:class="{ controller_btn_active: btns.settingsActive }">Настройки</button>
-                <button @click="dataOn()" v-bind:class="{ controller_btn_active: btns.dataActive }"> Детальные
+                <button @click="dataOn()" v-bind:class="{ controller_btn_active: btns.dataActive }">Детальные
                     данные</button>
+                <button @click="eventsOn()" v-bind:class="{ controller_btn_active: btns.eventsActive }">События</button>
             </div>
             <div class="data-filter__container">
                 <div className="datetext">{{ dateText }}</div>
@@ -96,11 +97,12 @@
                 <div class="info-block__block info-block__half info-block__errors">
                     <div class="info-block__errors-container">
                         <h4>события</h4>
+                        <button class="save-btn more-btn" @click="eventsOn()">больше →</button>
                     </div>
                     <div className="info-line info-line__title info-line__title-errors">
                         <div class="measured_at measured-at__dashboard-errors">дата/время</div>
                         <div class="error-desc measured-at__dashboard-errors_code">Код</div>
-                        <div class="error-desc">Описание</div>
+                        <div class="error-desc measured-at__dashboard-name">Описание</div>
                         <div class="error-desc">Тип</div>
                     </div>
                     <div class="controller-data__dashboard-errors">
@@ -108,7 +110,7 @@
                             :key="info" :style="{ backgroundColor: info.color }">
                             <div class="measured_at measured-at__dashboard-errors">{{ info.measured_at }}</div>
                             <div class="measured-at__dashboard-errors_code">{{ info.code }}</div>
-                            <div class="measured-at__dashboard-code">{{ info.name }}</div>
+                            <div class="measured-at__dashboard-code measured-at__dashboard-name">{{ info.name }}</div>
                             <div class="measured-at__dashboard-code">{{ info.type }}</div>
                         </div>
                     </div>
@@ -130,7 +132,7 @@
             </div>
             <div class="info-block__first">
                 <div class="info-block__half dashboard-map">
-                    <div class="info-block__block">
+                    <div class="info-block__block dashboard-map__container-map">
                         <div id="map-dashboard" style="width: 100%; height: 100%;"></div>
                     </div>
                 </div>
@@ -202,6 +204,23 @@
                 </div>
             </div>
         </div>
+        <div v-if="btns.eventsActive" class="dashboard-table">
+            <div v-if="thereIsData" class="there-is-data">Нет данных за период</div>
+            <div className="info-line info-line__title">
+                <div class="measured_at">дата/время</div>
+                <div>Код</div>
+                <div>Описание</div>
+                <div>Тип</div>
+            </div>
+            <div class="controller-data">
+                <div className="info-line" v-for="info in receivedData" :key="info">
+                    <div class="measured_at">дата/время</div>
+                    <div>код</div>
+                    <div>описание</div>
+                    <div>тип</div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <script>
@@ -231,6 +250,7 @@ export default {
                 dashBoardActive: true,
                 settingsActive: false,
                 dataActive: false,
+                eventsActive: false,
                 loading: true
             },
             batCChart: false,
@@ -279,6 +299,8 @@ export default {
                 this.btns[btn] = false;
             }
             this.btns.dashBoardActive = true;
+
+            this.drawControllerMap(this.controllerInfoStorage[0]);
         },
         settingsOn() {
             for (let btn in this.btns) { // выключение всех кнопок
@@ -291,6 +313,12 @@ export default {
                 this.btns[btn] = false;
             }
             this.btns.dataActive = true;
+        },
+        eventsOn() {
+            for (let btn in this.btns) { // выключение всех кнопок
+                this.btns[btn] = false;
+            }
+            this.btns.eventsActive = true;
         },
         chooseAccessLevel() {
             this.selectortimeVisible = !this.selectortimeVisible;
@@ -433,11 +461,6 @@ export default {
                     // обработка ошибки
                     console.log(error);
                 });
-            // if (!document.getElementById('map-dashboard').firstChild) {
-            //     this.drawControllerMap();
-            // } else {
-            this.btns.loading = false;
-            // }
         },
         drawControllerMap(lastdata) {
 
@@ -559,7 +582,6 @@ export default {
         }
     },
     mounted() {
-
         // Информация об устройстве
         axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/`,
             {
@@ -834,7 +856,10 @@ export default {
 }
 
 .info-block__errors-container {
-    padding: 16px;
+    padding: 16px 16px 0px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .dashboard-container h4 {
@@ -866,6 +891,8 @@ export default {
     font-size: 13px !important;
     font-weight: 500;
     justify-content: flex-start;
+    padding-left: 28px;
+    width: 92%;
 }
 
 .info-line__title-errors div {
@@ -1021,6 +1048,9 @@ export default {
 
 .dashboard-map div {
     padding: 0;
+}
+
+.dashboard-map__container-map {
     height: 346px !important;
 }
 
@@ -1058,13 +1088,13 @@ export default {
 }
 
 .info-line__title-errors div:first-child {
-    padding-left: 34px;
-    justify-content: flex-start;
+    width: 146px !important;
 }
 
 .controller-data__dashboard-errors div {
     justify-content: flex-start;
     padding: 0 6px;
+    text-align: left;
 }
 
 .ymaps-2-1-79-map,
@@ -1074,6 +1104,7 @@ export default {
 
 .error-desc {
     padding: 0 6px;
+    width: 200px !important;
 }
 
 .dashboard-event-line {
@@ -1104,6 +1135,7 @@ export default {
     .measured-at__dashboard {
         font-size: 11px !important;
     }
+
 }
 
 @media (min-width: 1700px) {
@@ -1156,6 +1188,10 @@ export default {
     .pie-energy {
         top: 37%;
     }
+
+    .measured-at__dashboard-name {
+        width: 250px !important;
+    }
 }
 
 @media (min-width: 1900px) {
@@ -1186,6 +1222,10 @@ export default {
     .pie-container canvas {
         width: 75% !important;
         height: 75% !important;
+    }
+
+    .measured-at__dashboard-name {
+        width: 370px !important;
     }
 }
 
