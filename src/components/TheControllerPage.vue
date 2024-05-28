@@ -94,24 +94,29 @@
                         </div>
                     </div>
                 </div>
-                <div class="info-block__block info-block__half info-block__errors">
-                    <div class="info-block__errors-container">
-                        <h4>события</h4>
-                        <button class="save-btn more-btn" @click="eventsOn()">больше →</button>
-                    </div>
-                    <div className="info-line info-line__title info-line__title-errors">
-                        <div class="measured_at measured-at__dashboard-errors">дата/время</div>
-                        <div class="error-desc measured-at__dashboard-errors_code">Код</div>
-                        <div class="error-desc measured-at__dashboard-name">Описание</div>
-                        <div class="error-desc">Тип</div>
-                    </div>
-                    <div class="controller-data__dashboard-errors">
-                        <div className="info-line info-line__table dashboard-event-line" v-for="info in lastEvents"
-                            :key="info" :style="{ backgroundColor: info.color }">
-                            <div class="measured_at measured-at__dashboard-errors">{{ info.measured_at }}</div>
-                            <div class="measured-at__dashboard-errors_code">{{ info.code }}</div>
-                            <div class="measured-at__dashboard-code measured-at__dashboard-name">{{ info.name }}</div>
-                            <div class="measured-at__dashboard-code">{{ info.type }}</div>
+                <div class="info-block__block info-block__half info-block__errors dashboard-table">
+                    <div v-if="thereIsEvents" class="there-is-data">Нет событий за период</div>
+                    <div>
+                        <div class="info-block__errors-container">
+                            <h4>события</h4>
+                            <button class="save-btn more-btn" @click="eventsOn()">больше →</button>
+                        </div>
+                        <div className="info-line info-line__title info-line__title-errors">
+                            <div class="measured_at measured-at__dashboard-errors">дата/время</div>
+                            <div class="error-desc measured-at__dashboard-errors_code">Код</div>
+                            <div class="error-desc measured-at__dashboard-name">Описание</div>
+                            <div class="error-desc">Тип</div>
+                        </div>
+                        <div class="controller-data__dashboard-errors">
+                            <div className="info-line info-line__table dashboard-event-line"
+                                v-for="info in dashboardLastEvents" :key="info"
+                                :style="{ backgroundColor: info.color }">
+                                <div class="measured_at measured-at__dashboard-errors">{{ info.measured_at }}</div>
+                                <div class="measured-at__dashboard-errors_code">{{ info.code }}</div>
+                                <div class="measured-at__dashboard-code measured-at__dashboard-name">{{ info.name }}
+                                </div>
+                                <div class="measured-at__dashboard-code">{{ info.type }}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -205,19 +210,20 @@
             </div>
         </div>
         <div v-if="btns.eventsActive" class="dashboard-table">
-            <div v-if="thereIsData" class="there-is-data">Нет данных за период</div>
+            <div v-if="thereIsEvents" class="there-is-data">Нет данных за период</div>
             <div className="info-line info-line__title">
                 <div class="measured_at">дата/время</div>
                 <div>Код</div>
-                <div>Описание</div>
-                <div>Тип</div>
+                <div class="eventstable-desc">Описание</div>
+                <div class="eventstable-type">Тип</div>
             </div>
             <div class="controller-data">
-                <div className="info-line" v-for="info in receivedData" :key="info">
-                    <div class="measured_at">дата/время</div>
-                    <div>код</div>
-                    <div>описание</div>
-                    <div>тип</div>
+                <div className="info-line" v-for="event in lastEvents" :key="event"
+                    :style="{ backgroundColor: event.color }">
+                    <div class="measured_at">{{ event.measured_at }}</div>
+                    <div>{{ event.code }}</div>
+                    <div class="eventstable-desc">{{ event.name }}</div>
+                    <div class="eventstable-type">{{ event.type }}</div>
                 </div>
             </div>
         </div>
@@ -286,8 +292,10 @@ export default {
 
             visibleChart: false,
             thereIsData: false,
+            thereIsEvents: false,
 
             lastEvents: [],
+            dashboardLastEvents: [],
 
             coord: null, // координаты для дашборда
             coordinates: { latitude: 55.76, longitude: 37.64 }
@@ -367,6 +375,7 @@ export default {
             this.btns.loading = true; // показать загрузку
             this.visibleChart = false; // скрыть графики
             this.thereIsData = false; // скрыть блок «Нет данных за этот период»
+            this.thereIsEvents = false;
 
             this.selectortimeVisible = false; // закрыть селектор
 
@@ -422,40 +431,40 @@ export default {
             this.getErrors();
         },
         getErrors() {
-            // 
-            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/event/`,
+            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/event/?date_start=${this.dateStart}`,
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     if (response.status === 200) {
                         this.lastEvents = response.data.reverse();
 
-                        if (this.lastEvents.length > 17) {
-                            this.lastEvents = this.lastEvents.slice(0, 17);
+                        if (this.lastEvents.length === 0) {
+                            this.thereIsEvents = true; // показать блок «Нет событий за период
+                        } else {
+                            this.lastEvents.forEach((el) => {
+                                let date = el.measured_at;
+                                let formatDate = date.split(',');
+                                el.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+
+                                const codeToTypeMap = {
+                                    '900': 'Информация',
+                                    '901': 'Предупреждение',
+                                    '906': 'Ошибка'
+                                };
+
+                                el.type = codeToTypeMap[el.code] || 'Неизвестный тип события';
+
+                                const colorToTypeMap = {
+                                    '900': '#F8F6F4',
+                                    '901': '#F4CA8D',
+                                    '906': '#f57878'
+                                };
+
+                                el.color = colorToTypeMap[el.code] || '#F8F6F4';
+                            })
+
+                            this.dashboardLastEvents = this.lastEvents.slice(0, 17)
                         }
-
-                        this.lastEvents.forEach((el) => {
-                            let date = el.measured_at;
-                            let formatDate = date.split(',');
-                            el.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
-
-                            const codeToTypeMap = {
-                                '900': 'Информация',
-                                '901': 'Предупреждение',
-                                '906': 'Ошибка'
-                            };
-
-                            el.type = codeToTypeMap[el.code] || 'Неизвестный тип события';
-
-                            const colorToTypeMap = {
-                                '900': '#F8F6F4',
-                                '901': '#F4CA8D',
-                                '906': '#f57878'
-                            };
-
-                            el.color = colorToTypeMap[el.code] || '#F8F6F4';
-
-                        })
                     }
                 }).catch((error) => {
                     // обработка ошибки
@@ -463,7 +472,6 @@ export default {
                 });
         },
         drawControllerMap(lastdata) {
-
             if (this.controllerInfo.gps !== null) {
                 this.coord = this.convertCoordinates(this.controllerInfo.gps);
             }
@@ -707,6 +715,7 @@ export default {
     width: 100%;
     justify-content: space-between;
     font-size: 14px;
+    background-color: #F8F6F4;
 }
 
 .info-line:hover {
@@ -715,6 +724,7 @@ export default {
 
 .info-line__title {
     margin-bottom: 8px;
+    background-color: transparent;
 }
 
 .info-line__title:hover {
@@ -824,8 +834,19 @@ export default {
 }
 
 .controller-data {
-    height: 50vh;
+    height: 55vh;
     overflow-y: scroll;
+    overflow-x: hidden;
+    border-radius: 12px;
+}
+
+.controller-data .info-line:last-child {
+    border-radius: 0 0 12px 12px;
+    padding-bottom: 4px;
+}
+
+.controller-data .info-line:first-child {
+    padding-top: 4px;
 }
 
 .info-block__first {
@@ -856,7 +877,7 @@ export default {
 }
 
 .info-block__errors-container {
-    padding: 16px 16px 0px 20px;
+    padding: 16px 16px 0px 26px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1111,8 +1132,28 @@ export default {
     width: 96%;
 }
 
+.dashboard-event-line:first-child {
+    border-radius: 8px 8px 0 0;
+    padding-top: 4px;
+}
+
+.dashboard-event-line:last-child {
+    border-radius: 0 0 8px 8px;
+    padding-bottom: 4px;
+}
+
 .measured-at__dashboard-errors_code {
     width: 40px !important;
+}
+
+.eventstable-desc {
+    width: 480px !important;
+    justify-content: flex-start !important;
+}
+
+.eventstable-type {
+    width: 350px !important;
+    justify-content: flex-start !important;
 }
 
 @media (min-width: 1600px) {

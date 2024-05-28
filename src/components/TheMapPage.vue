@@ -609,6 +609,7 @@ export default {
 
 .info-line__widget {
     justify-content: flex-start !important;
+    background-color: transparent !important;
 }
 
 .ymaps-2-1-79-balloon {
