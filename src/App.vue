@@ -81,28 +81,28 @@
                         <div class="icon-list" v-bind:class="{ iconlist_active: pages.listPageVisibility }"></div>Список
                         контроллеров
                     </button>
-                    <button id="sidenav__subscription" @click="openSubscription()"
+                    <!-- <button id="sidenav__subscription" @click="openSubscription()"
                         v-bind:class="{ sidebtn_active: pages.subscriptionPageVisibility }">
                         <div class="icon-subscription"
                             v-bind:class="{ iconsub_active: pages.subscriptionPageVisibility }"></div>Подписка
-                    </button>
+                    </button> -->
                     <div class="separator"></div>
                     <button id="sidenav__events" @click="openEvents()"
                         v-bind:class="{ sidebtn_active: pages.eventsPageVisibility }">
                         <div class="icon-events" v-bind:class="{ iconevents_active: pages.eventsPageVisibility }"></div>
                         События
                     </button>
-                    <button id="sidenav__commands" @click="openCommands()"
+                    <!-- <button id="sidenav__commands" @click="openCommands()"
                         v-bind:class="{ sidebtn_active: pages.commandsPageVisibility }">
                         <div class="icon-commands" v-bind:class="{ iconcom_active: pages.commandsPageVisibility }">
                         </div>
                         Команды
-                    </button>
-                    <button id="sidenav__reports" @click="openReports()"
+                    </button> -->
+                    <!-- <button id="sidenav__reports" @click="openReports()"
                         v-bind:class="{ sidebtn_active: pages.reportsPageVisibility }">
                         <div class="icon-reports" v-bind:class="{ iconreports_active: pages.reportsPageVisibility }">
                         </div>Отчёты
-                    </button>
+                    </button> -->
                 </nav>
             </div>
             <div id="page-content" class="page-content" v-bind:class="{ content_compressed: contentIsCompressed }">

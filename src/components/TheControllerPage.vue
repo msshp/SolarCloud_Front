@@ -96,6 +96,11 @@
                 </div>
                 <div class="info-block__block info-block__half info-block__errors dashboard-table">
                     <div v-if="thereIsEvents" class="there-is-data">Нет событий за период</div>
+                    <div v-if="btns.loadingDashboard" class="loading loading-dashboard_events">
+                        <div>
+                            <div class="loader"></div>
+                        </div>
+                    </div>
                     <div>
                         <div class="info-block__errors-container">
                             <h4>события</h4>
@@ -210,7 +215,7 @@
             </div>
         </div>
         <div v-if="btns.eventsActive" class="dashboard-table">
-            <div v-if="thereIsEvents" class="there-is-data">Нет данных за период</div>
+            <div v-if="thereIsEventsTable" class="there-is-data">Нет событий за период</div>
             <div className="info-line info-line__title">
                 <div class="measured_at">дата/время</div>
                 <div>Код</div>
@@ -257,7 +262,8 @@ export default {
                 settingsActive: false,
                 dataActive: false,
                 eventsActive: false,
-                loading: true
+                loading: true,
+                loadingDashboard: true
             },
             batCChart: false,
             selectortimeContent: '',
@@ -293,12 +299,14 @@ export default {
             visibleChart: false,
             thereIsData: false,
             thereIsEvents: false,
+            thereIsEventsTable: false,
 
             lastEvents: [],
             dashboardLastEvents: [],
 
             coord: null, // координаты для дашборда
-            coordinates: { latitude: 55.76, longitude: 37.64 }
+            coordinates: { latitude: 55.76, longitude: 37.64 },
+            mapIndication: false
         }
     },
     methods: {
@@ -376,6 +384,8 @@ export default {
             this.visibleChart = false; // скрыть графики
             this.thereIsData = false; // скрыть блок «Нет данных за этот период»
             this.thereIsEvents = false;
+            this.thereIsEventsTable = false;
+            this.btns.loadingDashboard = true;
 
             this.selectortimeVisible = false; // закрыть селектор
 
@@ -392,7 +402,9 @@ export default {
                     if (response.status === 200) {
                         this.controllerInfoStorage = response.data;
 
-                        this.drawControllerMap(this.controllerInfoStorage[0]); // нарисовать карту
+                        if (!this.mapIndication) {
+                            this.drawControllerMap(this.controllerInfoStorage[0]);
+                        }
 
                         if (this.controllerInfoStorage.length === 0) {
                             this.indicatorSearchLastEntry = true; // найти последнюю запись
@@ -431,7 +443,7 @@ export default {
             this.getErrors();
         },
         getErrors() {
-            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/event/?date_start=${this.dateStart}`,
+            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/event/?date_start=${this.dateStart}`, // вкладка «События»
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
@@ -439,7 +451,9 @@ export default {
                         this.lastEvents = response.data.reverse();
 
                         if (this.lastEvents.length === 0) {
-                            this.thereIsEvents = true; // показать блок «Нет событий за период
+                            this.thereIsEventsTable = true; // показать блок «Нет событий за период
+                            this.btns.loading = false;
+                            this.getEventsForDashbard();
                         } else {
                             this.lastEvents.forEach((el) => {
                                 let date = el.measured_at;
@@ -462,8 +476,58 @@ export default {
 
                                 el.color = colorToTypeMap[el.code] || '#F8F6F4';
                             })
+                            this.btns.loading = false;
+                            this.getEventsForDashbard();
+                        }
+                    }
+                }).catch((error) => {
+                    // обработка ошибки
+                    console.log(error);
+                });
+        },
+        getEventsForDashbard() {
+            let currentDate = new Date();
 
-                            this.dashboardLastEvents = this.lastEvents.slice(0, 17)
+            // Вычитаем две недели (14 дней)
+            currentDate.setDate(currentDate.getDate() - 14);
+
+            // Форматируем дату в виде 'гггг-мм-дд'
+            let formattedDate = currentDate.toISOString().slice(0, 10);
+
+            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/event/?date_start=${formattedDate}`,
+                {
+                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+                }).then((response) => {
+                    if (response.status === 200) {
+                        this.dashboardLastEvents = response.data.reverse().slice(0, 17);
+
+                        if (this.dashboardLastEvents.length === 0) {
+                            this.thereIsEvents = true; // показать блок «Нет событий за период
+                            this.btns.loadingDashboard = false;
+                        } else {
+                            this.dashboardLastEvents.forEach((el) => {
+                                let date = el.measured_at;
+                                let formatDate = date.split(',');
+                                el.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+
+                                const codeToTypeMap = {
+                                    '900': 'Информация',
+                                    '901': 'Предупреждение',
+                                    '906': 'Ошибка'
+                                };
+
+                                el.type = codeToTypeMap[el.code] || 'Неизвестный тип события';
+
+                                const colorToTypeMap = {
+                                    '900': '#F8F6F4',
+                                    '901': '#F4CA8D',
+                                    '906': '#f57878'
+                                };
+
+                                el.color = colorToTypeMap[el.code] || '#F8F6F4';
+                            })
+
+                            this.btns.loadingDashboard = false;
                         }
                     }
                 }).catch((error) => {
@@ -523,10 +587,10 @@ export default {
                         hideIconOnBalloonOpen: false
                     });
                     dashMap.geoObjects.add(myPlacemark);
+
+                    this.mapIndication = true;
                 }
             });
-
-            this.btns.loading = false;
         },
         convertCoordinates(coordinates) {
             const parts = coordinates.split(',');
@@ -557,7 +621,7 @@ export default {
             return { latitude: latDecimal, longitude: lonDecimal };
         },
         searchLastEntry() {
-            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/fixdata/?date_start=2024-02-01&limit=1`,
+            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/fixdata/?date_start=2024-05-01&limit=10000`,
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
@@ -1134,12 +1198,10 @@ export default {
 
 .dashboard-event-line:first-child {
     border-radius: 8px 8px 0 0;
-    padding-top: 4px;
 }
 
 .dashboard-event-line:last-child {
     border-radius: 0 0 8px 8px;
-    padding-bottom: 4px;
 }
 
 .measured-at__dashboard-errors_code {
@@ -1154,6 +1216,14 @@ export default {
 .eventstable-type {
     width: 350px !important;
     justify-content: flex-start !important;
+}
+
+.loading-dashboard_events {
+    height: 92%;
+    margin-top: 50px;
+    background-color: #f8f6f4;
+    z-index: 90;
+    border-radius: 24px;
 }
 
 @media (min-width: 1600px) {

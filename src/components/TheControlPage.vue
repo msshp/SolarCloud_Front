@@ -6,17 +6,17 @@
         </div>
         <div class="control-page__container">
             <div class="info-block__block control-diagram">
-                <h4 class="charge-level">Пользователи</h4>
-                <div class="pie-container">
+                <h4>Пользователи</h4>
+                <div>
                     <canvas id="usersChart"></canvas>
                 </div>
             </div>
-            <!-- <div class="info-block__block control-diagram">
-                <h4 class="charge-level">Статус контроллеров</h4>
-                <div class="pie-container">
+            <div class="info-block__block control-diagram">
+                <h4>Статус контроллеров</h4>
+                <div>
                     <canvas id="controllersChart"></canvas>
                 </div>
-            </div> -->
+            </div>
         </div>
     </div>
 </template>
@@ -28,7 +28,33 @@ import Chart from 'chart.js/auto';
 export default {
     data() {
         return {
-            controlUserList: []
+            controlUserList: [],
+            currentDate: ''
+        }
+    },
+    methods: {
+        checkConnection(date) {
+            let thisdate = this.formatDate(date);
+            let targetDate = new Date(thisdate); // Целевая дата
+
+            let diffInHours = Math.abs(targetDate - this.currentDate) / (1000 * 60 * 60); // Вычисляем разницу в часах между целевой датой и текущим временем
+
+            if (diffInHours >= 3) { // Проверяем, больше ли разница 3 часов
+                return false;
+            } else {
+                return true;
+            }
+        },
+        formatDate(date) {
+            let dateString = date;
+            let [datePart, timePart] = dateString.split(',');
+
+            let [day, month, year] = datePart.split('.');
+            let [hours, minutes, seconds] = timePart.split(':');
+
+            let formattedDate = new Date(year, month - 1, day, hours, minutes, seconds);
+
+            return formattedDate.toString();
         }
     },
     mounted() {
@@ -68,10 +94,19 @@ export default {
                     type: 'doughnut',
                     data: chartdata,
                     options: {
-                        cutout: 120,
                         plugins: {
                             tooltip: {
                                 enabled: true
+                            },
+                            legend: {
+                                labels: {
+                                    font: {
+                                        size: 16
+                                    },
+                                    color: '#293B5F',
+                                    padding: 24
+                                },
+                                position: 'right'
                             }
                         }
                     }
@@ -83,58 +118,76 @@ export default {
             });
 
         // статус контроллеров
-        // axios.get('http://cloud.io-tech.ru/api/users/?limit=10000',
-        // {
-        //     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
-        // }).then((response) => {
-        //     // обработка успешного запроса
-        //     this.controlUserList = response.data.results;
-        //     console.log(this.controlUserList);
+        axios.get('http://cloud.io-tech.ru/api/devices/limited/?limit=10000',
+            {
+                headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+            }).then((response) => {
+                // обработка успешного запроса
+                this.controlList = response.data.results;
+                // ок
+                // разряд аккум
+                // нет связи
 
-        //     let admins = this.controlUserList.filter(user => user.profile.role === 'Admin').length;
-        //     let moderators = this.controlUserList.filter(user => user.profile.role === 'Moderator').length;
-        //     let regularUsers = this.controlUserList.filter(user => user.profile.role === 'User').length;
+                let okStorage = [];
+                // let dischargedStorage = []; // на связь выходил менее 3 часов назад и батарея разряжена
+                let noСonnectionStorage = [];
+                this.currentDate = new Date(); // Текущее время
 
-        //     console.log(admins, moderators, regularUsers);
+                this.controlList.forEach(element => {
+                    let connection = this.checkConnection(element.status.last_session);
+                    // let battery = this.checkBattery(element.status.bat_v)
 
-        //     let usersC = document.getElementById('controllersChart');
+                    if (connection) { // на связь выходил менее 3 часов назад и батарея в норме
+                        okStorage.push(element);
+                    } else { // на связь выходил больше 3 часов назад
+                        noСonnectionStorage.push(element);
+                    }
+                });
 
-        //     const chartdata = {
-        //         labels: ['Админ', 'Модератор', 'Наблюдатель'],
-        //         datasets: [{
-        //             data: [admins, moderators, regularUsers],
-        //             borderWidth: [0, 0, 0],
-        //             backgroundColor: [
-        //                 '#293B5F',
-        //                 '#86A5E3',
-        //                 '#8DE386'
-        //             ],
-        //             hoverBackgroundColor: [
-        //                 '#293B5F',
-        //                 '#86A5E3',
-        //                 '#8DE386'
-        //             ]
-        //         }]
-        //     }
+                let contrC = document.getElementById('controllersChart');
 
-        //     new Chart(usersC, {
-        //         type: 'doughnut',
-        //         data: chartdata,
-        //         options: {
-        //             cutout: 90,
-        //             plugins: {
-        //                 tooltip: {
-        //                     enabled: true
-        //                 }
-        //             }
-        //         }
-        //     });
+                const chartdata = {
+                    labels: ['OK', 'Нет связи'],
+                    datasets: [{
+                        data: [okStorage.length, noСonnectionStorage.length],
+                        borderWidth: [0, 0],
+                        backgroundColor: [
+                            '#B6DE14',
+                            '#E94B4B'
+                        ],
+                        hoverBackgroundColor: [
+                            '#B6DE14',
+                            '#E94B4B'
+                        ]
+                    }]
+                }
 
-        // }).catch((error) => {
-        //     // обработка ошибки
-        //     console.log(error);
-        // });
+                new Chart(contrC, {
+                    type: 'doughnut',
+                    data: chartdata,
+                    options: {
+                        plugins: {
+                            tooltip: {
+                                enabled: true
+                            },
+                            legend: {
+                                labels: {
+                                    font: {
+                                        size: 16
+                                    },
+                                    color: '#293B5F',
+                                    padding: 24
+                                },
+                                position: 'right'
+                            }
+                        }
+                    }
+                });
 
+            }).catch((error) => {
+                // обработка ошибки
+                console.log(error);
+            });
     }
 }
 
@@ -147,6 +200,26 @@ export default {
 }
 
 .control-diagram {
-    width: 46%;
+    width: 45%;
+    padding: 24px !important;
+}
+
+.control-diagram div {
+    display: flex;
+    justify-content: center;
+}
+
+.control-diagram h4 {
+    font-weight: 500;
+    margin: 0;
+    font-size: 14px;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 0;
+}
+
+.control-diagram canvas {
+    width: 85% !important;
+    height: 85% !important;
 }
 </style>
