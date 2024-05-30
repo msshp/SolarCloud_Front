@@ -653,7 +653,7 @@ export default {
 @media (max-width: 1460px) {
     .lastdate_widget {
         margin-left: 8px;
-    }    
+    }
 }
 
 @media (max-width: 1600px) {

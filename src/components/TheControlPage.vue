@@ -17,6 +17,12 @@
                     <canvas id="controllersChart"></canvas>
                 </div>
             </div>
+            <!-- <div class="info-block__block control-diagram">
+                <h4>Общая выработка энергии</h4>
+                <div>
+                    <canvas id="pgenChart"></canvas>
+                </div>
+            </div> -->
         </div>
     </div>
 </template>
@@ -29,7 +35,8 @@ export default {
     data() {
         return {
             controlUserList: [],
-            currentDate: ''
+            currentDate: '',
+            pgenStorage: []
         }
     },
     methods: {
@@ -72,7 +79,7 @@ export default {
 
                 let usersC = document.getElementById('usersChart');
 
-                const chartdata = {
+                const usersdata = {
                     labels: ['Админ', 'Модератор', 'Наблюдатель'],
                     datasets: [{
                         data: [admins, moderators, regularUsers],
@@ -92,7 +99,7 @@ export default {
 
                 new Chart(usersC, {
                     type: 'doughnut',
-                    data: chartdata,
+                    data: usersdata,
                     options: {
                         plugins: {
                             tooltip: {
@@ -146,7 +153,7 @@ export default {
 
                 let contrC = document.getElementById('controllersChart');
 
-                const chartdata = {
+                const statusdata = {
                     labels: ['OK', 'Нет связи'],
                     datasets: [{
                         data: [okStorage.length, noСonnectionStorage.length],
@@ -164,7 +171,7 @@ export default {
 
                 new Chart(contrC, {
                     type: 'doughnut',
-                    data: chartdata,
+                    data: statusdata,
                     options: {
                         plugins: {
                             tooltip: {
@@ -188,6 +195,75 @@ export default {
                 // обработка ошибки
                 console.log(error);
             });
+
+        // // статус контроллеров
+        // axios.get('http://cloud.io-tech.ru/api/devices/limited/?limit=10000',
+        //     {
+        //         headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+        //     }).then((response) => {
+        //         // обработка успешного запроса
+        //         this.pgenStorage = response.data.results;
+
+        //         let pgenC = document.getElementById('pgenChart');
+
+        //         const labels = [1, 2, 3, 4, 5, 6, 7];
+        //         const data = {
+        //             labels: labels,
+        //             datasets: [{
+        //                 label: 'My First Dataset',
+        //                 data: [65, 59, 80, 81, 56, 55, 40],
+        //                 backgroundColor: [
+        //                     'rgba(255, 99, 132, 0.2)',
+        //                     'rgba(255, 159, 64, 0.2)',
+        //                     'rgba(255, 205, 86, 0.2)',
+        //                     'rgba(75, 192, 192, 0.2)',
+        //                     'rgba(54, 162, 235, 0.2)',
+        //                     'rgba(153, 102, 255, 0.2)',
+        //                     'rgba(201, 203, 207, 0.2)'
+        //                 ],
+        //                 borderColor: [
+        //                     'rgb(255, 99, 132)',
+        //                     'rgb(255, 159, 64)',
+        //                     'rgb(255, 205, 86)',
+        //                     'rgb(75, 192, 192)',
+        //                     'rgb(54, 162, 235)',
+        //                     'rgb(153, 102, 255)',
+        //                     'rgb(201, 203, 207)'
+        //                 ],
+        //                 borderWidth: 1
+        //             }]
+        //         };
+
+        //         new Chart(pgenC, {
+        //             type: 'bar',
+        //             data: data,
+        //             options: {
+        //                 scales: {
+        //                     y: {
+        //                         beginAtZero: true
+        //                     }
+        //                 },
+        //                 plugins: {
+        //                     tooltip: {
+        //                         enabled: true
+        //                     },
+        //                     legend: {
+        //                         labels: {
+        //                             font: {
+        //                                 size: 16
+        //                             },
+        //                             color: '#293B5F',
+        //                             padding: 24
+        //                         },
+        //                         position: 'right'
+        //                     }
+        //                 }
+        //             },
+        //         });
+        //     }).catch((error) => {
+        //         // обработка ошибки
+        //         console.log(error);
+        //     });
     }
 }
 
@@ -201,6 +277,7 @@ export default {
 
 .control-diagram {
     width: 45%;
+    /* width: 28%;  */
     padding: 24px !important;
 }
 

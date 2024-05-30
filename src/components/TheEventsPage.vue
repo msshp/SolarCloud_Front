@@ -4,42 +4,49 @@
             <p>События</p>
             <div></div>
         </div>
-        <table>
-            <thead>
-                <tr>
-                    <th class="tr-id">
-                        <!-- <input v-model.trim="searchUserID" type="number" placeholder="ID"
-                            v-on:input="searchUser"> -->
-                    </th>
-                    <th>
-                        <!-- <input v-model.trim="searchUserName" type="text" placeholder="Имя"
-                            v-on:input="searchUserByName"> -->
-                    </th>
-                    <th>
-                        <!-- <input v-model.trim="searchUserEmail" type="text" placeholder="email"
-                            v-on:input="searchUserByEmail"> -->
-                    </th>
-                    <th class="select_role">
-                        <!-- <button class="select__button" @click="selectRole()"
-                            v-bind:class="{ opened_button: selectorTableVisible }">{{ selectorTableContent }}<i
-                                class="delta" v-bind:class="{ inverted_delta: selectorTableVisible }"></i></button>
-                        <ul class="dropdown__list_table"
-                            v-bind:class="{ dropdown__list_visible: selectorTableVisible }">
-                            <li class="dropdown__list-item_table" @click="selectTableAllRoles()">все роли</li>
-                            <li class="dropdown__list-item_table" @click="selectTableObserver()">наблюдатель</li>
-                            <li class="dropdown__list-item_table" @click="selectTableModer()">модератор</li>
-                            <li class="dropdown__list-item_table" @click="selectTableAdmin()">администратор</li>
-                        </ul> -->
-                    </th>
-                    <th class="sort-by-date">дата создания</th>
-                    <th class="sort-by-date">дата обновления</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                </tr>
-            </tbody>
-        </table>
+        <div class="dashboard-table"><!--v-if-->
+            <div class="info-line info-line__title">
+                <div class="measured_at">дата/время</div>
+                <div>Код</div>
+                <div class="eventstable-desc">Описание</div>
+                <div class="eventstable-type">Тип</div>
+            </div>
+            <div class="controller-data">
+                <div class="info-line" style="background-color: rgb(245, 120, 120);">
+                    <div class="measured_at">30.05.2024 13:59</div>
+                    <div>906</div>
+                    <div class="eventstable-desc">Потеря связи с контроллером</div>
+                    <div class="eventstable-type">Ошибка</div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
+
+<!-- <script>
+
+import axios from 'axios';
+
+export default {
+    data() {
+        return {
+        }
+    },
+    mounted() {
+        // // Информация об устройстве
+        // axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/`,
+        //     {
+        //         headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+        //     }).then((response) => {
+        //         if (response.status === 200) {
+        //             this.controllerInfo = response.data;
+        //             this.showDay();
+        //         }
+        //     }).catch((error) => {
+        //         // обработка ошибки
+        //         console.log(error);
+        //     });
+    }
+}
+
+</script> -->

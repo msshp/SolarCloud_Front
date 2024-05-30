@@ -488,6 +488,12 @@ export default {
         getEventsForDashbard() {
             let currentDate = new Date();
 
+            // gps: {
+            //     auto: 'координаты авто',
+            //     manual: 'координаты ручные',
+            //     use: 'auto'/'manual'
+            // }
+
             // Вычитаем две недели (14 дней)
             currentDate.setDate(currentDate.getDate() - 14);
 
@@ -495,6 +501,7 @@ export default {
             let formattedDate = currentDate.toISOString().slice(0, 10);
 
             axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/event/?date_start=${formattedDate}`,
+                // axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/event/?limit=17`, // to do брать последние 17 штук!! не привязывать к дате
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {

@@ -86,12 +86,12 @@
                         <div class="icon-subscription"
                             v-bind:class="{ iconsub_active: pages.subscriptionPageVisibility }"></div>Подписка
                     </button> -->
-                    <div class="separator"></div>
-                    <button id="sidenav__events" @click="openEvents()"
+                    <!-- <div class="separator"></div> -->
+                    <!-- <button id="sidenav__events" @click="openEvents()"
                         v-bind:class="{ sidebtn_active: pages.eventsPageVisibility }">
                         <div class="icon-events" v-bind:class="{ iconevents_active: pages.eventsPageVisibility }"></div>
                         События
-                    </button>
+                    </button> -->
                     <!-- <button id="sidenav__commands" @click="openCommands()"
                         v-bind:class="{ sidebtn_active: pages.commandsPageVisibility }">
                         <div class="icon-commands" v-bind:class="{ iconcom_active: pages.commandsPageVisibility }">
