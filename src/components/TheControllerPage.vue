@@ -189,7 +189,33 @@
                 <p><span>Тип устройства</span> {{ controllerInfo.device_type.device_type }}</p>
                 <p><span>Дата создания</span> {{ controllerInfo.created_at }}</p>
             </div>
-            <div class="controller-map">Карта</div>
+            <div class="controller-map">
+                <div id="map-settings" style="width: 100%; height: 70%;"></div>
+                <div class="controller-map__set-coords">
+                    <div class="options-block__coords-inpcont">
+                        <div>
+                            <div class="options-block__coords-inp">
+                                <div class="options-block__coords-inptitle">Координаты от прибора</div><input
+                                    class="options-block__input" type="text" v-model.trim="autoCoords" readonly>
+                            </div>
+                            <div class="options-block__coords-inp">
+                                <div class="options-block__coords-inptitle">Установить вручную</div><input
+                                    class="options-block__input" id="manual" v-model.trim="manualCoords"
+                                    v-bind:class="{ manual_color: this.manualColor }" type="text">
+                            </div>
+                        </div>
+                        <div class="options-block__coords-btn">
+                            <button class="save-btn" @click="listenMap()">Указать на
+                                карте</button>
+                            <button class="save-btn" @click="saveNewCoords()">Сохранить</button>
+                        </div>
+                    </div>
+                    <!-- <div class="options-block__coords-check" @click="switchCoordinates()">
+                        Использовать координаты, установленные вручную<div class="icon-checkbox-blank"
+                            v-bind:class="{ manual_coords: this.manualCoords }"></div>
+                    </div> -->
+                </div>
+            </div>
         </div>
         <div v-if="btns.dataActive" class="dashboard-table">
             <div v-if="thereIsData" class="there-is-data">Нет данных за период</div>
@@ -306,7 +332,14 @@ export default {
 
             coord: null, // координаты для дашборда
             coordinates: { latitude: 55.76, longitude: 37.64 },
-            mapIndication: false
+            mapIndication: false,
+
+            manualCoords: false,
+            coordNow: '',
+
+            autoCoords: '',
+            newManualCoords: [],
+            manualColor: false
         }
     },
     methods: {
@@ -323,6 +356,7 @@ export default {
                 this.btns[btn] = false;
             }
             this.btns.settingsActive = true;
+            this.drawSettingsMap(this.controllerInfoStorage[0]);
         },
         dataOn() {
             for (let btn in this.btns) { // выключение всех кнопок
@@ -416,6 +450,7 @@ export default {
                             let date = this.receivedData[0].created_at;
                             let formatDate = date.split(',');
 
+
                             this.receivedData.forEach((el) => {
                                 let a = el.created_at.split(',')
                                 el.created_at = a[0].slice(0, -5) + ' ' + a[1].slice(0, -3); // дата без вывода секунд
@@ -448,7 +483,7 @@ export default {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     if (response.status === 200) {
-                        this.lastEvents = response.data.reverse();
+                        this.lastEvents = response.data;
 
                         if (this.lastEvents.length === 0) {
                             this.thereIsEventsTable = true; // показать блок «Нет событий за период
@@ -506,7 +541,7 @@ export default {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     if (response.status === 200) {
-                        this.dashboardLastEvents = response.data.reverse().slice(0, 17);
+                        this.dashboardLastEvents = response.data.slice(0, 17);
 
                         if (this.dashboardLastEvents.length === 0) {
                             this.thereIsEvents = true; // показать блок «Нет событий за период
@@ -543,16 +578,76 @@ export default {
                 });
         },
         drawControllerMap(lastdata) {
-            if (this.controllerInfo.gps !== null) {
-                this.coord = this.convertCoordinates(this.controllerInfo.gps);
+            if (this.coordNow !== null) {
+                this.coord = this.convertCoordinates(this.coordNow);
             }
+            if (this.coord) {
+                if ((this.coord.latitude !== 0)) {
+                    this.coordinates = this.coord;
+                    this.autoCoords = this.coordinates.latitude + ', ' + this.coordinates.longitude;
+                    // happy yandex map api day
+                }
+            }
+            ymaps.ready(() => {
+                const dashMap = new ymaps.Map('map-dashboard', {
+                    center: [this.coordinates.latitude, this.coordinates.longitude],
+                    zoom: 10
+                });
+                if (this.coord !== null) {
+                    // установить цвет метки
+
+                    // Красный – нет связи
+                    // Желтый – низкое напряжение АКБ (ниже 11.5В)
+                    // Зеленый – все ок
+
+                    let icon = 'greencircle.svg';
+                    if (lastdata !== undefined) {
+                        let thisdate = this.formatDate(lastdata.measured_at);
+                        let targetDate = new Date(thisdate); // Целевая дата
+                        let currentDate = new Date(); // Текущее время
+
+                        let diffInHours = Math.abs(targetDate - currentDate) / (1000 * 60 * 60); // Вычисляем разницу в часах между целевой датой и текущим временем
+
+                        if (diffInHours >= 3) { // Проверяем, больше ли разница 3 часов
+                            icon = 'redcircle.svg';
+                        } else {
+                            if (lastdata.bat_v !== null && lastdata.bat_v < 11.5) {
+                                icon = 'yellowcircle.svg';
+                            }
+                        }
+                    } else {
+                        icon = 'redcircle.svg';
+                    }
+
+                    let myPlacemark = new ymaps.Placemark([this.coord.latitude, this.coord.longitude], {
+                        hintContent: this.controllerInfo.name,
+                        balloonContent: `<div class="ballon-name">${this.controllerInfo.name}</div><div class="ballon-sn">${this.controllerInfo.sn}</div>`
+                    }, {
+                        iconLayout: 'default#image',
+                        iconImageHref: `../${icon}`,
+                        iconImageSize: [20, 20],
+                        iconImageOffset: [-8, -5],
+                        hideIconOnBalloonOpen: false
+                    });
+                    dashMap.geoObjects.add(myPlacemark);
+
+                    this.mapIndication = true;
+                }
+            });
+        },
+        drawSettingsMap(lastdata) {
+            this.manualColor = false; // выкл цвет у инпута с ручными
+            if (this.coordNow !== null) {
+                this.coord = this.convertCoordinates(this.coordNow);
+            }
+
             if (this.coord) {
                 if ((this.coord.latitude !== 0)) {
                     this.coordinates = this.coord;
                 }
             }
             ymaps.ready(() => {
-                const dashMap = new ymaps.Map('map-dashboard', {
+                const settingsMap = new ymaps.Map('map-settings', {
                     center: [this.coordinates.latitude, this.coordinates.longitude],
                     zoom: 10
                 });
@@ -593,9 +688,26 @@ export default {
                         iconImageOffset: [-8, -5],
                         hideIconOnBalloonOpen: false
                     });
-                    dashMap.geoObjects.add(myPlacemark);
+                    settingsMap.geoObjects.add(myPlacemark);
 
-                    this.mapIndication = true;
+                    settingsMap.events.add('click', function (e) {
+                        // Код обработчика события
+                        document.getElementById('manual').value = e.get('coords');
+                        let newCoord = e.get('coords');
+                        settingsMap.geoObjects.removeAll();
+
+                        let newPlacemark = new ymaps.Placemark([newCoord[0], newCoord[1]], {
+
+                        }, {
+                            iconLayout: 'default#image',
+                            iconImageHref: `../${icon}`,
+                            iconImageSize: [20, 20],
+                            iconImageOffset: [-8, -5],
+                            hideIconOnBalloonOpen: false
+                        });
+                        settingsMap.geoObjects.add(newPlacemark);
+                    });
+
                 }
             });
         },
@@ -658,9 +770,48 @@ export default {
             let formattedDate = new Date(year, month - 1, day, hours, minutes, seconds);
 
             return formattedDate.toString();
+        },
+        switchCoordinates() {
+            this.manualCoords = !this.manualCoords;
+        },
+        listenMap() {
+            this.manualColor = true;
+        },
+        saveNewCoords() {
+            let sendCoord = document.getElementById('manual').value;
+            let f = sendCoord.split(',');
+
+            axios.post(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`,
+                {
+                    "gps": `${f[0]}, ${f[1]},`,
+                    "coordinates_manually": true
+                }, {
+                headers: {
+                    'Authorization': `Token ${sessionStorage.getItem('token')}`,
+                    'Content-Type': 'application/json; charset=utf-8'
+                }
+            }).then((response) => { // обработка ошибок
+                if (response.status === 201) { // данные обновлены
+                    console.log('ok')
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
         }
     },
     mounted() {
+        axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`,
+            {
+                headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+            }).then((response) => {
+                if (response.status === 200) {
+                    this.coordNow = response.data[0].value;
+                }
+            }).catch((error) => {
+                // обработка ошибки
+                console.log(error);
+            });
+
         // Информация об устройстве
         axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/`,
             {
@@ -674,6 +825,8 @@ export default {
                 // обработка ошибки
                 console.log(error);
             });
+
+
     }
 }
 </script>
@@ -817,7 +970,7 @@ export default {
 }
 
 .controller-nav {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -878,6 +1031,7 @@ export default {
 .controller-settings {
     display: flex;
     justify-content: space-between;
+    height: 63vh;
 }
 
 .controller-info span {
@@ -898,6 +1052,10 @@ export default {
     font-size: 14px;
     line-height: 129%;
     color: #0E1626;
+}
+
+.controller-map {
+    padding: 0;
 }
 
 .controller-nav__btns button {
@@ -1233,6 +1391,104 @@ export default {
     border-radius: 24px;
 }
 
+/* карта в настройках (менять координаты) */
+
+.controller-map__set-coords {
+    padding: 16px;
+}
+
+.options-block__coords-inpcont {
+    display: flex;
+}
+
+.options-block__coords-inp {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.options-block__coords-btn {
+    display: flex;
+    flex-direction: column;
+}
+
+.options-block__coords-btn button {
+    border-radius: 8px;
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    margin-left: 8px;
+    height: 100%;
+}
+
+.options-block__coords-inptitle {
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 129%;
+    color: #0E1626;
+    width: 180px;
+}
+
+.options-block__input {
+    background-color: transparent;
+    color: #0E1626;
+    border: 1px solid rgba(14, 22, 38, 0.5);
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    width: 200px;
+    line-height: 112%;
+    height: 16px;
+}
+
+#manual {
+    color: transparent;
+}
+
+.manual_color {
+    color: #0E1626 !important;
+}
+
+.options-block__coords-check {
+    margin-top: 6px;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 129%;
+    color: #0E1626;
+    display: flex;
+    align-items: center;
+}
+
+.icon-checkbox-blank {
+    background-image: url(../checkbox/blank.svg);
+    width: 20px;
+    height: 20px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin-left: 8px;
+    cursor: pointer;
+}
+
+.manual_coords {
+    background-image: url(../checkbox/done.svg);
+}
+
+@media (max-width: 1600px) {
+
+    .options-block__coords-btn button,
+    .options-block__coords-check {
+        font-size: 12px;
+    }
+
+    .options-block__coords-inptitle {
+        font-size: 12px;
+        width: 155px;
+    }
+
+    .options-block__input {
+        width: 135px;
+    }
+}
+
 @media (min-width: 1600px) {
     .controller-data {
         height: 55vh;
@@ -1254,6 +1510,9 @@ export default {
         font-size: 11px !important;
     }
 
+    .controller-settings {
+        height: 68vh;
+    }
 }
 
 @media (min-width: 1700px) {

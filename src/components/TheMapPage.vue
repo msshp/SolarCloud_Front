@@ -202,8 +202,21 @@ export default {
                 });
 
                 this.newArrayWithMergedObjects.forEach((el) => {
+
                     if (el.gps !== null) {
-                        const result = this.convertCoordinates(el.gps);
+                        let result;
+                        let lastCharacter = el.gps.slice(-1);
+
+                        if (lastCharacter === ',') {
+                            result = el.gps;
+                            const latitude = 55.823966980820266;
+                            const longitude = 37.50593900570508;
+
+                            result = { latitude, longitude };
+
+                        } else {
+                            result = this.convertCoordinates(el.gps);
+                        }
 
                         // установить цвет метки
 
@@ -535,7 +548,6 @@ export default {
     margin-left: 16px;
     line-height: 122%;
     color: #293b5f;
-    cursor: pointer;
 }
 
 .lastdate_widget {
