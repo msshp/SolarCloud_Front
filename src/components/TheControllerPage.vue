@@ -210,10 +210,10 @@
                             <button class="save-btn" @click="saveNewCoords()">Сохранить</button>
                         </div>
                     </div>
-                    <!-- <div class="options-block__coords-check" @click="switchCoordinates()">
+                    <div class="options-block__coords-check" @click="switchCoordinates()">
                         Использовать координаты, установленные вручную<div class="icon-checkbox-blank"
                             v-bind:class="{ manual_coords: this.manualCoords }"></div>
-                    </div> -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -427,8 +427,6 @@ export default {
             let end = this.dateEnd.split('-'); // ['2024', '04', '17']
 
             this.dateText = `${start[2]}.${start[1]} – ${end[2]}.${end[1]}`;
-
-            // ?date_start=2024-02-01
             axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/fixdata/?date_start=${this.dateStart}&limit=100000`,
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
@@ -593,7 +591,7 @@ export default {
                     center: [this.coordinates.latitude, this.coordinates.longitude],
                     zoom: 10
                 });
-                if (this.coord !== null) {
+                if (this.coord !== null && this.coord !== undefined) {
                     // установить цвет метки
 
                     // Красный – нет связи
@@ -637,22 +635,21 @@ export default {
         },
         drawSettingsMap(lastdata) {
             this.manualColor = false; // выкл цвет у инпута с ручными
-            if (this.coordNow !== null) {
-                this.coord = this.convertCoordinates(this.coordNow);
-            }
+            this.coord = this.convertCoordinates(this.coordNow);
 
             if (this.coord) {
                 if ((this.coord.latitude !== 0)) {
                     this.coordinates = this.coord;
                 }
             }
+
             ymaps.ready(() => {
                 const settingsMap = new ymaps.Map('map-settings', {
                     center: [this.coordinates.latitude, this.coordinates.longitude],
                     zoom: 10
                 });
 
-                if (this.coord !== null) {
+                if (this.coord !== null && this.coord !== undefined) {
                     // установить цвет метки
 
                     // Красный – нет связи
@@ -712,32 +709,18 @@ export default {
             });
         },
         convertCoordinates(coordinates) {
-            const parts = coordinates.split(',');
-
-            const latDegreesMinutes = parts[0];
-            const lonDegreesMinutes = parts[2];
-
-            const latDegrees = parseInt(latDegreesMinutes.substr(0, 2));
-            const latMinutes = parseFloat(latDegreesMinutes.substr(2));
-
-            const lonDegrees = parseInt(lonDegreesMinutes.substr(0, 3));
-            const lonMinutes = parseFloat(lonDegreesMinutes.substr(3));
-
-            const latDirection = parts[1];
-            const lonDirection = parts[3];
-
-            let latDecimal = latDegrees + latMinutes / 60;
-            let lonDecimal = lonDegrees + lonMinutes / 60;
-
-            if (latDirection === 'S') {
-                latDecimal = -latDecimal;
+            if (this.controllerInfo.gps !== null) {
+                let lastCharacter = this.controllerInfo.gps.slice(-1);
+                if (lastCharacter === ',') {
+                    const [lat, long] = this.controllerInfo.gps.split(',');
+                    return { latitude: lat, longitude: long };
+                }
+            } else {
+                const [lat, dirLat, lon, dirLon] = coordinates.split(',');
+                const latitude = [lat, dirLat];
+                const longitude = [lon, dirLon];
+                return { latitude: latitude[0], longitude: longitude[0] };
             }
-
-            if (lonDirection === 'W') {
-                lonDecimal = -lonDecimal;
-            }
-
-            return { latitude: latDecimal, longitude: lonDecimal };
         },
         searchLastEntry() {
             axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/fixdata/?date_start=2024-05-01&limit=10000`,
@@ -773,6 +756,42 @@ export default {
         },
         switchCoordinates() {
             this.manualCoords = !this.manualCoords;
+
+            if (this.manualCoords) {
+                console.log('вкл ручные')
+                axios.post(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`, // вкл ручные координаты
+                    {
+                        "coordinates_manually": true
+                    }, {
+                    headers: {
+                        'Authorization': `Token ${sessionStorage.getItem('token')}`,
+                        'Content-Type': 'application/json; charset=utf-8'
+                    }
+                }).then((response) => { // обработка ошибок
+                    if (response.status === 201) { // данные обновлены
+                        console.log('ok ручные');
+                    }
+                }).catch((error) => {
+                    console.log(error);
+                });
+            } else {
+                console.log('вкл авто')
+                axios.post(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`, // вкл авто координаты
+                    {
+                        "coordinates_manually": false
+                    }, {
+                    headers: {
+                        'Authorization': `Token ${sessionStorage.getItem('token')}`,
+                        'Content-Type': 'application/json; charset=utf-8'
+                    }
+                }).then((response) => { // обработка ошибок
+                    if (response.status === 201) { // данные обновлены
+                        console.log('ok авто');
+                    }
+                }).catch((error) => {
+                    console.log(error);
+                });
+            }
         },
         listenMap() {
             this.manualColor = true;
@@ -792,7 +811,7 @@ export default {
                 }
             }).then((response) => { // обработка ошибок
                 if (response.status === 201) { // данные обновлены
-                    console.log('ok')
+                    console.log('ok');
                 }
             }).catch((error) => {
                 console.log(error);
@@ -800,17 +819,17 @@ export default {
         }
     },
     mounted() {
-        axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`,
-            {
-                headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
-            }).then((response) => {
-                if (response.status === 200) {
-                    this.coordNow = response.data[0].value;
-                }
-            }).catch((error) => {
-                // обработка ошибки
-                console.log(error);
-            });
+        // axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`,
+        //     {
+        //         headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+        //     }).then((response) => {
+        //         if (response.status === 200) {
+        //             this.coordNow = response.data[0].value;
+        //         }
+        //     }).catch((error) => {
+        //         // обработка ошибки
+        //         console.log(error);
+        //     });
 
         // Информация об устройстве
         axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/`,
@@ -819,14 +838,20 @@ export default {
             }).then((response) => {
                 if (response.status === 200) {
                     this.controllerInfo = response.data;
+
+                    this.coordNow = this.controllerInfo.gps;
+
+                    if (this.controllerInfo.coordinates_manually) {
+                        this.manualCoords = true;
+                    } else {
+                        this.manualCoords = false;
+                    }
                     this.showDay();
                 }
             }).catch((error) => {
                 // обработка ошибки
                 console.log(error);
             });
-
-
     }
 }
 </script>

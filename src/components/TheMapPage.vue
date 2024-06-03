@@ -204,19 +204,7 @@ export default {
                 this.newArrayWithMergedObjects.forEach((el) => {
 
                     if (el.gps !== null) {
-                        let result;
-                        let lastCharacter = el.gps.slice(-1);
-
-                        if (lastCharacter === ',') {
-                            result = el.gps;
-                            const latitude = 55.823966980820266;
-                            const longitude = 37.50593900570508;
-
-                            result = { latitude, longitude };
-
-                        } else {
-                            result = this.convertCoordinates(el.gps);
-                        }
+                        let result = this.convertCoordinates(el.gps);
 
                         // установить цвет метки
 
@@ -261,14 +249,17 @@ export default {
             });
         },
         convertCoordinates(coordinates) {
+            let lastCharacter = coordinates.slice(-1);
+            if (lastCharacter === ',') {
+                const [lat, long] = coordinates.split(',');
+                return { latitude: lat, longitude: long };
+            } else {
+                const [lat, dirLat, lon, dirLon] = coordinates.split(',');
+                const latitude = [lat, dirLat];
+                const longitude = [lon, dirLon];
 
-            const [lat, dirLat, lon, dirLon] = coordinates.split(',');
-            const latitude = [lat, dirLat];
-            const longitude = [lon, dirLon];
-
-            // return [latitude, longitude];
-            return { latitude: latitude[0], longitude: longitude[0] };
-
+                return { latitude: latitude[0], longitude: longitude[0] };
+            }
 
             // const parts = coordinates.split(',');
 
