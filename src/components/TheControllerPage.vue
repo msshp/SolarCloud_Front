@@ -182,7 +182,6 @@
             <div class="controller-info">
                 <p><span>ID</span> {{ controllerInfo.id }}</p>
                 <p><span>Название</span> {{ controllerInfo.name }}</p>
-                <p><span>Название</span> {{ controllerInfo.name }}</p>
                 <p><span>Описание</span> {{ controllerInfo.description }}</p>
                 <p><span>Серийный номер</span> {{ controllerInfo.sn }}</p>
                 <p><span>Пин-код</span> {{ controllerInfo.pin }}</p>
@@ -200,7 +199,7 @@
                             </div>
                             <div class="options-block__coords-inp">
                                 <div class="options-block__coords-inptitle">Установить вручную</div><input
-                                    class="options-block__input" id="manual" v-model.trim="manualCoords"
+                                    class="options-block__input" id="manual" v-model.trim="manCoordsInput"
                                     v-bind:class="{ manual_color: this.manualColor }" type="text">
                             </div>
                         </div>
@@ -338,6 +337,7 @@ export default {
             coordNow: '',
 
             autoCoords: '',
+            manCoordsInput: '',
             newManualCoords: [],
             manualColor: false
         }
@@ -534,7 +534,6 @@ export default {
             let formattedDate = currentDate.toISOString().slice(0, 10);
 
             axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/event/?date_start=${formattedDate}`,
-                // axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/event/?limit=17`, // to do брать последние 17 штук!! не привязывать к дате
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
@@ -577,15 +576,23 @@ export default {
         },
         drawControllerMap(lastdata) {
             if (this.coordNow !== null) {
+                console.log(this.coordNow)
                 this.coord = this.convertCoordinates(this.coordNow);
+                console.log(this.coord)
             }
+
             if (this.coord) {
                 if ((this.coord.latitude !== 0)) {
                     this.coordinates = this.coord;
-                    this.autoCoords = this.coordinates.latitude + ', ' + this.coordinates.longitude;
-                    // happy yandex map api day
+                    console.log(this.controllerInfo.coordinates_manually)
+                    if (this.controllerInfo.coordinates_manually) {
+                        this.manCoordsInput = this.coordinates.latitude + ', ' + this.coordinates.longitude;
+                    } else {
+                        this.autoCoords = this.coordinates.latitude + ', ' + this.coordinates.longitude;
+                    }
                 }
             }
+
             ymaps.ready(() => {
                 const dashMap = new ymaps.Map('map-dashboard', {
                     center: [this.coordinates.latitude, this.coordinates.longitude],
@@ -634,8 +641,11 @@ export default {
             });
         },
         drawSettingsMap(lastdata) {
+
+            if (this.coordNow !== null) {
+                this.coord = this.convertCoordinates(this.coordNow);
+            }
             this.manualColor = false; // выкл цвет у инпута с ручными
-            this.coord = this.convertCoordinates(this.coordNow);
 
             if (this.coord) {
                 if ((this.coord.latitude !== 0)) {
@@ -647,6 +657,8 @@ export default {
                 const settingsMap = new ymaps.Map('map-settings', {
                     center: [this.coordinates.latitude, this.coordinates.longitude],
                     zoom: 10
+                }, {
+                    cursor: 'pointer'
                 });
 
                 if (this.coord !== null && this.coord !== undefined) {
@@ -709,12 +721,10 @@ export default {
             });
         },
         convertCoordinates(coordinates) {
-            if (this.controllerInfo.gps !== null) {
-                let lastCharacter = this.controllerInfo.gps.slice(-1);
-                if (lastCharacter === ',') {
-                    const [lat, long] = this.controllerInfo.gps.split(',');
-                    return { latitude: lat, longitude: long };
-                }
+            let lastCharacter = this.coordNow.slice(-1);
+            if (lastCharacter === ',') {
+                const [lat, long] = this.controllerInfo.gps.split(',');
+                return { latitude: lat, longitude: long };
             } else {
                 const [lat, dirLat, lon, dirLon] = coordinates.split(',');
                 const latitude = [lat, dirLat];
@@ -795,6 +805,7 @@ export default {
         },
         listenMap() {
             this.manualColor = true;
+            document.querySelector('.ymaps-2-1-79-events-pane').classList.add('put-label');
         },
         saveNewCoords() {
             let sendCoord = document.getElementById('manual').value;
@@ -1465,10 +1476,6 @@ export default {
     height: 16px;
 }
 
-#manual {
-    color: transparent;
-}
-
 .manual_color {
     color: #0E1626 !important;
 }
@@ -1495,6 +1502,10 @@ export default {
 
 .manual_coords {
     background-image: url(../checkbox/done.svg);
+}
+
+.put-label {
+    cursor: pointer !important;
 }
 
 @media (max-width: 1600px) {
