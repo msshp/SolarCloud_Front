@@ -331,7 +331,7 @@ export default {
                     this.errorMessageVisibility = true;
                 }
             }).catch((error) => {
-                console.log(error);
+        
                 this.errorMessageVisibility = true;
             });
 

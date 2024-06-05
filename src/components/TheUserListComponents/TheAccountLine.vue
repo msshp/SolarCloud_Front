@@ -62,7 +62,7 @@ export default {
             this.$emit('deleteUserFromMainUserList', idUser);
         },
         editUserFromUserList(data) { // обновить информацию о юзере, который отредактировали
-            this.$emit('editUserFromMainUserList', data);            
+            this.$emit('editUserFromMainUserList', data);
         }
     }
 }
@@ -70,7 +70,6 @@ export default {
 
 
 <style>
-
 .window-delete {
     left: 0;
     background-color: rgb(14 22 38 / 25%) !important;

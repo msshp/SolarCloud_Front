@@ -339,7 +339,8 @@ export default {
             autoCoords: '',
             manCoordsInput: '',
             newManualCoords: [],
-            manualColor: false
+            manualColor: false,
+            newCoordSaved: false
         }
     },
     methods: {
@@ -575,16 +576,13 @@ export default {
                 });
         },
         drawControllerMap(lastdata) {
-            if (this.coordNow !== null) {
-                console.log(this.coordNow)
+            if (!this.newCoordSaved && this.coordNow !== null) {
                 this.coord = this.convertCoordinates(this.coordNow);
-                console.log(this.coord)
             }
 
             if (this.coord) {
                 if ((this.coord.latitude !== 0)) {
                     this.coordinates = this.coord;
-                    console.log(this.controllerInfo.coordinates_manually)
                     if (this.controllerInfo.coordinates_manually) {
                         this.manCoordsInput = this.coordinates.latitude + ', ' + this.coordinates.longitude;
                     } else {
@@ -642,7 +640,7 @@ export default {
         },
         drawSettingsMap(lastdata) {
 
-            if (this.coordNow !== null) {
+            if (!this.newCoordSaved && this.coordNow !== null) {
                 this.coord = this.convertCoordinates(this.coordNow);
             }
             this.manualColor = false; // выкл цвет у инпута с ручными
@@ -768,7 +766,6 @@ export default {
             this.manualCoords = !this.manualCoords;
 
             if (this.manualCoords) {
-                console.log('вкл ручные')
                 axios.post(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`, // вкл ручные координаты
                     {
                         "coordinates_manually": true
@@ -785,7 +782,6 @@ export default {
                     console.log(error);
                 });
             } else {
-                console.log('вкл авто')
                 axios.post(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`, // вкл авто координаты
                     {
                         "coordinates_manually": false
@@ -796,7 +792,8 @@ export default {
                     }
                 }).then((response) => { // обработка ошибок
                     if (response.status === 201) { // данные обновлены
-                        console.log('ok авто');
+                        // перерисовать карту
+                        this.drawAutoCoord();
                     }
                 }).catch((error) => {
                     console.log(error);
@@ -810,6 +807,9 @@ export default {
         saveNewCoords() {
             let sendCoord = document.getElementById('manual').value;
             let f = sendCoord.split(',');
+            this.coord = { latitude: f[0], longitude: f[1] };
+            this.newCoordSaved = true; // индикатор для прорисовки карт с новыми координатами
+            this.manualCoords = true;
 
             axios.post(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`,
                 {
@@ -827,21 +827,27 @@ export default {
             }).catch((error) => {
                 console.log(error);
             });
+        },
+        drawAutoCoord() {
+            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`,
+                {
+                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+                }).then((response) => {
+                    if (response.status === 200) {
+                        this.coordNow = response.data[0].value;
+                        var element = document.getElementById("map-settings");
+                        while (element.firstChild) {
+                            element.removeChild(element.firstChild);
+                        }
+                        this.drawSettingsMap(this.controllerInfoStorage[0]);
+                    }
+                }).catch((error) => {
+                    // обработка ошибки
+                    console.log(error);
+                });
         }
     },
     mounted() {
-        // axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`,
-        //     {
-        //         headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
-        //     }).then((response) => {
-        //         if (response.status === 200) {
-        //             this.coordNow = response.data[0].value;
-        //         }
-        //     }).catch((error) => {
-        //         // обработка ошибки
-        //         console.log(error);
-        //     });
-
         // Информация об устройстве
         axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/`,
             {
