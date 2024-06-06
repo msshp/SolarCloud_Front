@@ -136,7 +136,8 @@
                 <TheUserListPage v-if="pages.listUsersPageVisibility" :saveUserData="saveUserData" :access="access" />
                 <TheMapPage v-if="pages.mapPageVisibility" :saveUserData="saveUserData"
                     @openMainControllerPage="openMainControllerPage" />
-                <TheListPage v-if="pages.listPageVisibility" @openMainControllerPage="openMainControllerPage" />
+                <TheListPage v-if="pages.listPageVisibility" @openMainControllerPage="openMainControllerPage"
+                    :access="access" :saveUserData="saveUserData" />
                 <ThePersonalArea v-if="pages.personalAreaPageVisibility" :saveUserData="saveUserData"
                     @editAuthorizedUser="editAuthorizedUser" />
                 <TheSubscriptionPage v-if="pages.subscriptionPageVisibility" />
@@ -331,7 +332,7 @@ export default {
                     this.errorMessageVisibility = true;
                 }
             }).catch((error) => {
-        
+
                 this.errorMessageVisibility = true;
             });
 

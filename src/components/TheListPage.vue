@@ -2,6 +2,8 @@
     <div class="page-content__container">
         <div className="page-content__title page-content__title_list">
             <p>Список контроллеров</p>
+            <button v-if="access" class="account__add-users" @click="addController()"><span>+</span> Добавить
+                контроллер</button>
         </div>
         <div class="account-separator"></div>
         <table>
@@ -41,19 +43,29 @@
             </tbody>
         </table>
     </div>
+    <TheAddControllerWindow v-if="addControllerWindowVis" @closeAddWindow="closeAddWindow"
+        @newControllerLine="addNewControllerToList" :saveUserData="saveUserData" />
 </template>
 
 <script>
 
 import TheControllerLine from './TheControllerLine.vue'
+import TheAddControllerWindow from './TheControllerListComponents/TheAddControllerWindow.vue'
 import axios from 'axios';
 
 export default {
     components: {
-        TheControllerLine
+        TheControllerLine,
+        TheAddControllerWindow
+    },
+    props: {
+        access: Boolean,
+        saveUserData: Object
     },
     data() {
         return {
+            addControllerWindowVis: false,
+
             searchIdControllerById: '',
             searchValControllerByControllerName: '',
             searchValControllerBySn: '',
@@ -167,41 +179,53 @@ export default {
             });
 
             rows.forEach(row => table.appendChild(row));
+        },
+        addController() {
+            this.addControllerWindowVis = true;
+            document.getElementById('page-content').classList.add('overflow_hidden');
+        },
+        closeAddWindow() {
+            this.addControllerWindowVis = false; // закрытие окна «Добавление пользователя»
+        },
+        addNewControllerToList() {
+            this.getControllerList();
+        },
+        getControllerList() {
+            axios.get('http://cloud.io-tech.ru/api/devices/limited/?limit=10000',
+                {
+                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+                }).then((response) => {
+                    // обработка успешного запроса
+                    this.controllerList = response.data.results;
+
+                    this.controllerList.forEach(el => {
+                        let date = el.status.last_session;
+                        if (date !== null) {
+                            let formatDate = date.split(',');
+                            el.status.created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+                        }
+                    })
+
+                    this.controllerList.sort(function (a, b) { // сортировка controllerList по id
+                        if (a.id > b.id) {
+                            return 1;
+                        }
+                        if (a.id < b.id) {
+                            return -1;
+                        }
+                        return 0;
+                    });
+
+                    this.list.loading = false;
+                    this.list.listTable = true;
+                }).catch((error) => {
+                    // обработка ошибки
+                    console.log(error);
+                });
         }
     },
-    // вывести список контроллеров
     mounted() {
-        axios.get('http://cloud.io-tech.ru/api/devices/limited/?limit=10000',
-            {
-                headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
-            }).then((response) => {
-                // обработка успешного запроса
-                this.controllerList = response.data.results;
-
-                this.controllerList.forEach(el => {
-                    let date = el.status.last_session;
-                    if (date !== null) {
-                        let formatDate = date.split(',');
-                        el.status.created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
-                    }
-                })
-
-                this.controllerList.sort(function (a, b) { // сортировка controllerList по id
-                    if (a.id > b.id) {
-                        return 1;
-                    }
-                    if (a.id < b.id) {
-                        return -1;
-                    }
-                    return 0;
-                });
-
-                this.list.loading = false;
-                this.list.listTable = true;
-            }).catch((error) => {
-                // обработка ошибки
-                console.log(error);
-            });
+        this.getControllerList(); // вывести список контроллеров
     }
 }
 </script>
@@ -210,6 +234,13 @@ export default {
 .page-content__title_list {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.page-content__title_list button,
+.page-content__title_list p {
+    margin-bottom: 0 !important;
 }
 
 .tr-sn input {
