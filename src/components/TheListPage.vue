@@ -39,7 +39,8 @@
                 </div>
             </div>
             <tbody class="list-tbody" v-if="list.listTable">
-                <TheControllerLine :controllerList="controllerList" @openMainControllerPage="openMainControllerPage" />
+                <TheControllerLine :controllerList="controllerList" @openMainControllerPage="openMainControllerPage"
+                    @deleteControllerFromList="deleteControllerFromList" />
             </tbody>
         </table>
     </div>
@@ -222,6 +223,9 @@ export default {
                     // обработка ошибки
                     console.log(error);
                 });
+        },
+        deleteControllerFromList(id) {
+            this.controllerList = this.controllerList.filter((controller) => controller.id !== id);
         }
     },
     mounted() {
@@ -278,15 +282,11 @@ tr th input {
     background-image: url(../sorticon_active.svg);
 }
 
-@media (max-width: 1560px) {
-    .sortlist-by-voltage {
-        width: 26px;
-        height: 26px;
-        margin-left: 8px;
-    }
+.controller-btn td {
+    padding: 0 0 0 20px !important;
 }
 
-@media (max-width: 1540px) {
+@media (max-width: 1600px) {
     .list-tr th {
         font-size: 12px;
     }
@@ -295,6 +295,12 @@ tr th input {
     .select__button,
     .sort-by-creation {
         font-size: 12px;
+    }
+
+    .sortlist-by-voltage {
+        width: 26px;
+        height: 26px;
+        margin-left: 8px;
     }
 }
 </style>

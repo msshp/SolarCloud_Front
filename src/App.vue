@@ -144,7 +144,8 @@
                 <TheEventsPage v-if="pages.eventsPageVisibility" />
                 <TheCommandsPage v-if="pages.commandsPageVisibility" />
                 <TheReportsPage v-if="pages.reportsPageVisibility" />
-                <TheControllerPage v-if="pages.controllerPageVisibility" :controllerId="controllerId" />
+                <TheControllerPage v-if="pages.controllerPageVisibility" :controllerId="controllerId"
+                    @deleteControllerFromList="openList" />
             </div>
         </div>
     </div>

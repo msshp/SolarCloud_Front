@@ -187,6 +187,10 @@
                 <p><span>Пин-код</span> {{ controllerInfo.pin }}</p>
                 <p><span>Тип устройства</span> {{ controllerInfo.device_type.device_type }}</p>
                 <p><span>Дата создания</span> {{ controllerInfo.created_at }}</p>
+                <div class="controller-info__delete" @click="deleteControllerFromSettings()"><button>Удалить
+                        контроллер</button>
+                    <div></div>
+                </div>
             </div>
             <div class="controller-map">
                 <div id="map-settings" style="width: 100%; height: 70%;"></div>
@@ -258,6 +262,8 @@
             </div>
         </div>
     </div>
+    <TheDeleteController v-if="deleteControllerVis" @closeDeleteWindow="closeDeleteWindow"
+        :controllerIdDel="controllerIdDel" @deleteControllerFromList="deleteControllerFromList"></TheDeleteController>
 </template>
 <script>
 import axios from 'axios';
@@ -267,6 +273,7 @@ import ThePieChart from './charts/ThePieChart.vue';
 import ThePieChartTwo from './charts/ThePieChartTwo.vue';
 import ThePieChartThree from './charts/ThePieChartThree.vue';
 import ThePieVoltage from './charts/ThePieVoltage.vue';
+import TheDeleteController from './TheControllerListComponents/TheDeleteController.vue';
 
 export default {
     components: {
@@ -275,7 +282,8 @@ export default {
         ThePieChart,
         ThePieChartTwo,
         ThePieChartThree,
-        ThePieVoltage
+        ThePieVoltage,
+        TheDeleteController
     },
     props: {
         controllerId: Text
@@ -340,7 +348,9 @@ export default {
             manCoordsInput: '',
             newManualCoords: [],
             manualColor: false,
-            newCoordSaved: false
+            newCoordSaved: false,
+
+            deleteControllerVis: false
         }
     },
     methods: {
@@ -845,6 +855,18 @@ export default {
                     // обработка ошибки
                     console.log(error);
                 });
+        },
+        deleteControllerFromSettings() {
+            this.deleteControllerVis = true;
+            document.getElementById('page-content').classList.add('overflow_hidden');
+        },
+        closeDeleteWindow(data) {
+            this.deleteControllerVis = data; // закрытие окна «Добавление пользователя»
+            document.getElementById('page-content').classList.remove('overflow_hidden');
+        },
+        deleteControllerFromList(id) {
+            // удаление пользователя из списка
+            this.$emit('deleteControllerFromList', id);
         }
     },
     mounted() {
@@ -1512,6 +1534,32 @@ export default {
 
 .put-label {
     cursor: pointer !important;
+}
+
+.controller-info__delete {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(90deg, #294b8e 27%, #2384c5 100%);
+    border-radius: 8px;
+    padding: 8px 10px 8px 16px;
+    width: 165px;
+    margin-top: 24px;
+}
+
+.controller-info__delete button {
+    color: #F8F6F4;
+    background-color: transparent;
+    font-size: 14px;
+}
+
+.controller-info__delete div {
+    width: 24px;
+    height: 24px;
+    background-size: contain;
+    background-image: url(../img/account/basket-white.svg);
+    background-repeat: no-repeat;
+    margin-left: 8px;
+    cursor: pointer;
 }
 
 @media (max-width: 1600px) {

@@ -429,6 +429,7 @@ td p {
     height: 32px;
     background-repeat: no-repeat;
     background-color: transparent;
+    background-size: contain;
 }
 
 .select_role {
