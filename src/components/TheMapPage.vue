@@ -651,7 +651,8 @@ export default {
     font-size: 13px;
     line-height: 129%;
     color: #293b5f;
-    margin-right: 56px;
+    margin-right: 24px;
+    height: 40px !important;
 }
 
 .measured-at__widget-errval {
@@ -677,12 +678,7 @@ export default {
     .measured-at__widget-errors {
         margin-right: 16px;
     }
-}
 
-@media (max-width: 1515px) {
-
-    .accordeon-item__content-info,
-    .measured-at__widget-errors,
     .measured-at__dashboard-code {
         font-size: 11px !important;
     }

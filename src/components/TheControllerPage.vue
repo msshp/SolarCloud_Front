@@ -120,7 +120,8 @@
                                 <div class="measured-at__dashboard-errors_code">{{ info.code }}</div>
                                 <div class="measured-at__dashboard-code measured-at__dashboard-name">{{ info.name }}
                                 </div>
-                                <div class="measured-at__dashboard-code">{{ info.type }}</div>
+                                <div class="measured-at__dashboard-code measured-at__dashboard-type">{{ info.type }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -180,13 +181,30 @@
         </div>
         <div class="controller-settings" v-if="btns.settingsActive">
             <div class="controller-info">
-                <p><span>ID</span> {{ controllerInfo.id }}</p>
-                <p><span>Название</span> {{ controllerInfo.name }}</p>
-                <p><span>Описание</span> {{ controllerInfo.description }}</p>
-                <p><span>Серийный номер</span> {{ controllerInfo.sn }}</p>
-                <p><span>Пин-код</span> {{ controllerInfo.pin }}</p>
-                <p><span>Тип устройства</span> {{ controllerInfo.device_type.device_type }}</p>
-                <p><span>Дата создания</span> {{ controllerInfo.created_at }}</p>
+                <div class="controller-info__name">
+                    <p>Название</p>
+                    <input type="text" v-model="controllerInfo.name"><button
+                        @click="updateInfo('name')">Обновить</button>
+                </div>
+                <div>
+                    <p>Описание</p>
+                    <input type="text" v-model="controllerInfo.description"><button
+                        @click="updateInfo('description')">Обновить</button>
+                </div>
+                <div>
+                    <p>Серийный номер</p>
+                    <input type="text" v-model="controllerInfo.sn"><button @click="updateInfo('sn')">Обновить</button>
+                </div>
+                <div>
+                    <p>Пин-код</p>
+                    <input type="text" v-model="controllerInfo.pin"><button @click="updateInfo('pin')">Обновить</button>
+                </div>
+                <p class="controller-info__created"><span>ID</span> {{ controllerInfo.id }}</p>
+                <p class="controller-info__created"><span>Тип устройства</span> {{
+                    controllerInfo.device_type.device_type }}</p>
+                <p class="controller-info__created"><span>Дата создания</span> {{ controllerInfo.created_at }}</p>
+                <p class="update" v-bind:class="{ update_visible: updateVisible, update_error: updateError }">{{
+                    updateText }}</p>
                 <div class="controller-info__delete" @click="deleteControllerFromSettings()"><button>Удалить
                         контроллер</button>
                     <div></div>
@@ -350,7 +368,10 @@ export default {
             manualColor: false,
             newCoordSaved: false,
 
-            deleteControllerVis: false
+            deleteControllerVis: false,
+            updateVisible: false,
+            updateError: false,
+            updateText: ''
         }
     },
     methods: {
@@ -769,7 +790,6 @@ export default {
             let [hours, minutes, seconds] = timePart.split(':');
 
             let formattedDate = new Date(year, month - 1, day, hours, minutes, seconds);
-
             return formattedDate.toString();
         },
         switchCoordinates() {
@@ -867,6 +887,59 @@ export default {
         deleteControllerFromList(id) {
             // удаление пользователя из списка
             this.$emit('deleteControllerFromList', id);
+        },
+        updateInfo(parameter) {
+            let obj;
+            if (parameter === 'name') {
+                obj = {
+                    "name": this.controllerInfo.name,
+                }
+            } else if (parameter === 'description') {
+                obj = {
+                    "description": this.controllerInfo.description,
+                }
+            } else if (parameter === 'sn') {
+                obj = {
+                    "sn": this.controllerInfo.sn,
+                }
+            } else if (parameter === 'pin') {
+                obj = {
+                    "pin": this.controllerInfo.pin,
+                }
+            }
+
+            axios.patch(`http://cloud.io-tech.ru/api/devices/${this.controllerInfo.id}/`, obj, {
+                headers: {
+                    'Authorization': `Token ${sessionStorage.getItem('token')}`,
+                    'Content-Type': 'application/json; charset=utf-8'
+                }
+            }).then((response) => { // обработка ошибок
+                if (response.status === 200) { // данные обновлены
+                    this.controllerInfo = response.data;
+
+                    let date = this.controllerInfo.created_at;
+                    let formatDate = date.split(',');
+                    this.controllerInfo.created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+
+                    this.updateText = 'Обновлено';
+                    this.updateVisible = true; // показать «обновлено»
+                    setTimeout(() => {
+                        this.updateVisible = false; // показать «обновлено»
+                    }, 5000)
+                } else if (response.status === 401 || response.status === 404) {
+                    this.updateText = response.data.detail;
+                    this.updateError = true; // показать «обновлено»
+                    setTimeout(() => {
+                        this.updateError = false; // показать «обновлено»
+                    }, 5000)
+                }
+            }).catch((error) => {
+                this.updateText = error;
+                this.updateError = true; // показать «обновлено»
+                setTimeout(() => {
+                    this.updateError = false; // показать «обновлено»
+                }, 5000)
+            });
         }
     },
     mounted() {
@@ -877,6 +950,10 @@ export default {
             }).then((response) => {
                 if (response.status === 200) {
                     this.controllerInfo = response.data;
+
+                    let date = this.controllerInfo.created_at;
+                    let formatDate = date.split(',');
+                    this.controllerInfo.created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
 
                     this.coordNow = this.controllerInfo.gps;
 
@@ -1011,7 +1088,7 @@ export default {
 }
 
 .info-line__title {
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     background-color: transparent;
 }
 
@@ -1095,31 +1172,56 @@ export default {
 .controller-settings {
     display: flex;
     justify-content: space-between;
-    height: 63vh;
+    height: 65vh;
 }
 
-.controller-info span {
-    font-weight: 500;
+.controller-info p:last-child {
+    margin-top: 20px;
 }
 
-.controller-info {
-    margin-right: 24px;
+.controller-info input {
+    background-color: transparent;
+    color: #0E1626;
+    border: 1px solid rgba(14, 22, 38, 0.5);
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    width: 240px;
+    line-height: 112%;
+    height: 16px;
+}
+
+.controller-info button {
+    border-radius: 8px;
+    padding: 7px 14px;
+    margin-left: 8px;
+    height: 100%;
+    background: #294b8e;
+    color: #f8f6f4;
+    margin-right: 8px;
 }
 
 .controller-info,
 .controller-map {
-    width: 50%;
     background-color: #F8F6F4;
     border-radius: 8px;
-    padding: 32px;
+    padding: 24px;
     font-weight: 400;
     font-size: 14px;
     line-height: 129%;
     color: #0E1626;
 }
 
+.controller-info {
+    margin-right: 24px;
+    position: relative;
+    width: 36%;
+    padding: 24px;
+}
+
 .controller-map {
     padding: 0;
+    width: 60%;
 }
 
 .controller-nav__btns button {
@@ -1127,7 +1229,7 @@ export default {
 }
 
 .controller-data {
-    height: 55vh;
+    height: 57vh;
     overflow-y: scroll;
     overflow-x: hidden;
     border-radius: 12px;
@@ -1199,6 +1301,12 @@ export default {
 
 .measured-at__dashboard-code {
     width: 200px !important;
+    text-align: left !important;
+    height: 40px !important;
+}
+
+.measured-at__dashboard-type {
+    width: 172px !important;
 }
 
 .info-line__title-errors {
@@ -1225,7 +1333,7 @@ export default {
 .controller-data__dashboard-errors {
     overflow-y: hidden;
     overflow-x: hidden;
-    padding: 0 0 0 16px;
+    padding: 0 0 0 10px;
 }
 
 .info-block__second div {
@@ -1409,6 +1517,7 @@ export default {
     justify-content: flex-start;
     padding: 0 6px;
     text-align: left;
+    align-items: center;
 }
 
 .ymaps-2-1-79-map,
@@ -1423,6 +1532,10 @@ export default {
 
 .dashboard-event-line {
     width: 96%;
+}
+
+.dashboard-event-line div {
+    height: 32px !important;
 }
 
 .dashboard-event-line:first-child {
@@ -1458,7 +1571,7 @@ export default {
 /* карта в настройках (менять координаты) */
 
 .controller-map__set-coords {
-    padding: 16px;
+    padding: 24px;
 }
 
 .options-block__coords-inpcont {
@@ -1541,25 +1654,51 @@ export default {
     align-items: center;
     background: linear-gradient(90deg, #294b8e 27%, #2384c5 100%);
     border-radius: 8px;
-    padding: 8px 10px 8px 16px;
+    padding: 6px 10px 6px 16px;
     width: 165px;
-    margin-top: 24px;
+    position: absolute;
+    bottom: 24px;
+    font-size: 13px;
 }
 
 .controller-info__delete button {
     color: #F8F6F4;
     background-color: transparent;
     font-size: 14px;
+    padding: 0;
+    margin: 0;
 }
 
 .controller-info__delete div {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     background-size: contain;
     background-image: url(../img/account/basket-white.svg);
     background-repeat: no-repeat;
-    margin-left: 8px;
+    margin-left: 10px;
     cursor: pointer;
+}
+
+.controller-info__name p {
+    margin-top: 0;
+}
+
+.controller-info__created span {
+    color: #294b8e;
+}
+
+.update {
+    display: none;
+}
+
+.update_error {
+    display: block;
+    color: #F21616;
+}
+
+.update_visible {
+    display: block;
+    color: #86a312;
 }
 
 @media (max-width: 1600px) {
@@ -1581,7 +1720,7 @@ export default {
 
 @media (min-width: 1600px) {
     .controller-data {
-        height: 55vh;
+        height: 63vh;
     }
 
     .loader {
@@ -1602,6 +1741,18 @@ export default {
 
     .controller-settings {
         height: 68vh;
+    }
+
+    .dashboard-event-line div {
+        height: 34px !important;
+    }
+
+    .controller-data__dashboard-errors {
+        padding: 0 0 0 12px;
+    }
+
+    .controller-info input {
+        width: 280px;
     }
 }
 
@@ -1629,11 +1780,19 @@ export default {
     .info-line__table div {
         font-size: 13px;
     }
+
+    .info-line__title-errors div:first-child {
+        width: 134px !important;
+    }
+
+    .dashboard-event-line div {
+        height: 39px !important;
+    }
 }
 
 @media (min-width: 1800px) {
     .controller-data {
-        height: 60vh;
+        height: 67vh;
     }
 
     .info-line__title-dashboard {
@@ -1659,11 +1818,15 @@ export default {
     .measured-at__dashboard-name {
         width: 250px !important;
     }
+
+    .controller-info input {
+        width: 360px;
+    }
 }
 
 @media (min-width: 1900px) {
     .controller-data {
-        height: 63vh;
+        height: 69vh;
     }
 
     .measured-at__dashboard {
@@ -1694,6 +1857,28 @@ export default {
     .measured-at__dashboard-name {
         width: 370px !important;
     }
+
+    .info-line__table div:first-child {
+        font-size: 12px;
+    }
+
+    .info-line__title-errors div:first-child {
+        width: 110px !important;
+    }
+
+    .dashboard-event-line div {
+        height: 35px !important;
+    }
+
+    .controller-info input {
+        width: 400px;
+    }
+}
+
+@media (min-width: 2000px) {
+    .controller-data {
+        height: 70vh;
+    }
 }
 
 @media (min-width: 2200px) {
@@ -1707,6 +1892,50 @@ export default {
     .pie-container canvas {
         width: 50% !important;
         height: 50% !important;
+    }
+}
+
+@media (max-width: 1515px) {
+
+    .accordeon-item__content-info,
+    .measured-at__widget-errors,
+    .measured-at__dashboard-code {
+        font-size: 11px !important;
+    }
+}
+
+@media (min-width: 1700px) {
+    .measured-at__widget-errors {
+        width: 116px !important;
+        margin-right: 32px;
+        height: 44px !important;
+    }
+
+    .measured-at__dashboard-code {
+        width: 215px !important;
+        height: 44px !important;
+    }
+}
+
+@media (min-width: 1800px) {
+    .measured-at__dashboard-code {
+        width: 250px !important;
+    }
+}
+
+@media (min-width: 1900px) {
+    .measured-at__dashboard-code {
+        width: 350px !important;
+    }
+
+    .measured-at__widget-errors {
+        width: 142px !important;
+    }
+}
+
+@media (min-width: 2500px) {
+    .dashboard-event-line div {
+        height: 32px !important;
     }
 }
 </style>
