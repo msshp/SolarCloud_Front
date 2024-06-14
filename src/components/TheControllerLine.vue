@@ -7,7 +7,9 @@
         <td @click="openControllerPage(controller.id)">{{ controller.status.dbi }}</td>
         <td @click="openControllerPage(controller.id)">{{ controller.status.created_at }}</td>
         <td @click="openControllerPage(controller.id)">{{ controller.status.event }}</td>
-        <td class="controller-delete" @click="deleteController(controller.id)"></td>
+        <td v-if="access" class="controller-delete__container" @click="deleteController(controller.id)">
+            <div class="controller-delete"></div>
+        </td>
     </tr>
     <TheDeleteController v-if="deleteControllerVis" @closeDeleteWindow="closeDeleteWindow"
         :controllerIdDel="controllerIdDel" @deleteControllerFromList="deleteControllerFromList" />
@@ -28,7 +30,8 @@ export default {
         }
     },
     props: {
-        controllerList: Array
+        controllerList: Array,
+        access: Boolean
     },
     methods: {
         openControllerPage(id) {
@@ -56,11 +59,17 @@ export default {
     cursor: pointer;
 }
 
+.controller-delete__container {
+    border-radius: 0 8px 8px 0;
+    padding-right: 12px !important;
+}
+
 .controller-delete {
     background-image: url(../../img/account/basket.svg);
-    width: 32px;
-    padding: 0 20px 0 0;
+    padding: 0 20px 0 0 !important;
     background-position: center;
     background-repeat: no-repeat;
+    background-size: contain;
+    height: 30px;
 }
 </style>

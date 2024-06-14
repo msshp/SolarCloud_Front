@@ -40,7 +40,7 @@
             </div>
             <tbody class="list-tbody" v-if="list.listTable">
                 <TheControllerLine :controllerList="controllerList" @openMainControllerPage="openMainControllerPage"
-                    @deleteControllerFromList="deleteControllerFromList" />
+                    @deleteControllerFromList="deleteControllerFromList" :access="access" />
             </tbody>
         </table>
     </div>
@@ -283,7 +283,7 @@ tr th input {
 }
 
 .controller-btn td {
-    padding: 0 0 0 20px !important;
+    padding: 0 0 0 20px;
 }
 
 @media (max-width: 1600px) {

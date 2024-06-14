@@ -340,7 +340,7 @@ export default {
 
 .account__add-users {
     border-radius: 8px;
-    width: 310px;
+    width: 280px;
     height: 47px;
     background: #f4ca8d;
     font-weight: 500;

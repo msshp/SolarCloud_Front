@@ -192,20 +192,17 @@
                         @click="updateInfo('description')">Обновить</button>
                 </div>
                 <div>
-                    <p>Серийный номер</p>
-                    <input type="text" v-model="controllerInfo.sn"><button @click="updateInfo('sn')">Обновить</button>
-                </div>
-                <div>
                     <p>Пин-код</p>
                     <input type="text" v-model="controllerInfo.pin"><button @click="updateInfo('pin')">Обновить</button>
                 </div>
                 <p class="controller-info__created"><span>ID</span> {{ controllerInfo.id }}</p>
-                <p class="controller-info__created"><span>Тип устройства</span> {{
+                <p class="controller-info__created"><span>Тип контроллера</span> {{
                     controllerInfo.device_type.device_type }}</p>
                 <p class="controller-info__created"><span>Дата создания</span> {{ controllerInfo.created_at }}</p>
                 <p class="update" v-bind:class="{ update_visible: updateVisible, update_error: updateError }">{{
                     updateText }}</p>
-                <div class="controller-info__delete" @click="deleteControllerFromSettings()"><button>Удалить
+                <div v-if="access" class="controller-info__delete" @click="deleteControllerFromSettings()">
+                    <button>Удалить
                         контроллер</button>
                     <div></div>
                 </div>
@@ -304,7 +301,8 @@ export default {
         TheDeleteController
     },
     props: {
-        controllerId: Text
+        controllerId: Text,
+        access: Boolean
     },
     data() {
         return {
@@ -898,10 +896,6 @@ export default {
                 obj = {
                     "description": this.controllerInfo.description,
                 }
-            } else if (parameter === 'sn') {
-                obj = {
-                    "sn": this.controllerInfo.sn,
-                }
             } else if (parameter === 'pin') {
                 obj = {
                     "pin": this.controllerInfo.pin,
@@ -950,6 +944,7 @@ export default {
             }).then((response) => {
                 if (response.status === 200) {
                     this.controllerInfo = response.data;
+                    console.log(this.controllerInfo);
 
                     let date = this.controllerInfo.created_at;
                     let formatDate = date.split(',');
