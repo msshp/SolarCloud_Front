@@ -260,33 +260,6 @@ export default {
 
                 return { latitude: latitude[0], longitude: longitude[0] };
             }
-
-            // const parts = coordinates.split(',');
-
-            // const latDegreesMinutes = parts[0];
-            // const lonDegreesMinutes = parts[2];
-
-            // const latDegrees = parseInt(latDegreesMinutes.substr(0, 2));
-            // const latMinutes = parseFloat(latDegreesMinutes.substr(2));
-
-            // const lonDegrees = parseInt(lonDegreesMinutes.substr(0, 3));
-            // const lonMinutes = parseFloat(lonDegreesMinutes.substr(3));
-
-            // const latDirection = parts[1];
-            // const lonDirection = parts[3];
-
-            // let latDecimal = latDegrees + latMinutes / 60;
-            // let lonDecimal = lonDegrees + lonMinutes / 60;
-
-            // if (latDirection === 'S') {
-            //     latDecimal = -latDecimal;
-            // }
-
-            // if (lonDirection === 'W') {
-            //     lonDecimal = -lonDecimal;
-            // }
-
-            // return { latitude: latDecimal, longitude: lonDecimal };
         },
         getController(id) {
             this.widget.loading = true;

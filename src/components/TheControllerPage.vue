@@ -44,7 +44,7 @@
                             v-bind:class="{ inverted_white_delta: selectortimeVisible }"></i></button>
                     <ul class="dropdown__list dropdown__list-data-filter"
                         v-bind:class="{ dropdown__list_visible: selectortimeVisible }">
-                        <div class="datafilter-separator"></div>
+                        <div class=" .datafilter-separator datafilter-separator_set"></div>
                         <li class="dropdown__list-item" @click="showDay()">Последний день</li>
                         <li class="dropdown__list-item" @click="showWeek()">Последние 7 дней</li>
                         <li class="dropdown__list-item" @click="showMonth()">Последние 30 дней</li>
@@ -213,24 +213,38 @@
                     <div class="options-block__coords-inpcont">
                         <div>
                             <div class="options-block__coords-inp">
-                                <div class="options-block__coords-inptitle">Координаты от прибора</div><input
-                                    class="options-block__input" type="text" v-model.trim="autoCoords" readonly>
+                                <div @click="switchCoordinates()" class="icon-checkbox-blank"
+                                    v-bind:class="{ manual_coords: this.autoSwitchCoords }">
+                                </div>
+                                <div class="options-block__coords-inptitle">Координаты от устройства</div>
+                                <div class="controller-nav__data-filter">
+                                    <button class="dropdown__button dropdown__button-data-filter dropdown__set"
+                                        @click="chooseCoords()" v-bind:class="{ opened_button: selectorCoord }">{{
+                                            selectorCoordContent
+                                        }}<i class="white_delta"
+                                            v-bind:class="{ inverted_white_delta: selectorCoord }"></i></button>
+                                    <ul class="dropdown__list dropdown__list-data-filter dropdown__list-set"
+                                        v-bind:class="{ dropdown__list_visible: selectorCoord }">
+                                        <div class="datafilter-separator datafilter-separator_set"></div>
+                                        <li v-for="coord in recordedСoordinates" :key="coord"
+                                            class="dropdown__list-item" @click="chooseCoordAuto(coord.value)">{{
+                                                coord.value }}</li>
+                                    </ul>
+                                </div>
                             </div>
                             <div class="options-block__coords-inp">
+                                <div @click="switchCoordinates()" class="icon-checkbox-blank"
+                                    v-bind:class="{ manual_coords: this.manualCoords }">
+                                </div>
                                 <div class="options-block__coords-inptitle">Установить вручную</div><input
                                     class="options-block__input" id="manual" v-model.trim="manCoordsInput"
                                     v-bind:class="{ manual_color: this.manualColor }" type="text">
+                                <button class="save-btn save-set" @click="saveNewCoords()">Сохранить</button>
                             </div>
+                            <p class="update" v-bind:class="{ update_visible: setVisible, update_error: updateError }">
+                                {{
+                                    updateText }}{{ setUpdateText }}</p>
                         </div>
-                        <div class="options-block__coords-btn">
-                            <button class="save-btn" @click="listenMap()">Указать на
-                                карте</button>
-                            <button class="save-btn" @click="saveNewCoords()">Сохранить</button>
-                        </div>
-                    </div>
-                    <div class="options-block__coords-check" @click="switchCoordinates()">
-                        Использовать координаты, установленные вручную<div class="icon-checkbox-blank"
-                            v-bind:class="{ manual_coords: this.manualCoords }"></div>
                     </div>
                 </div>
             </div>
@@ -358,9 +372,9 @@ export default {
             mapIndication: false,
 
             manualCoords: false,
+            autoSwitchCoords: false,
             coordNow: '',
 
-            autoCoords: '',
             manCoordsInput: '',
             newManualCoords: [],
             manualColor: false,
@@ -368,8 +382,15 @@ export default {
 
             deleteControllerVis: false,
             updateVisible: false,
+            setVisible: false,
             updateError: false,
-            updateText: ''
+            setError: false,
+            updateText: '',
+            setUpdateText: '',
+
+            selectorCoord: false,
+            recordedСoordinates: [],
+            selectorCoordContent: '–'
         }
     },
     methods: {
@@ -613,9 +634,7 @@ export default {
                 if ((this.coord.latitude !== 0)) {
                     this.coordinates = this.coord;
                     if (this.controllerInfo.coordinates_manually) {
-                        this.manCoordsInput = this.coordinates.latitude + ', ' + this.coordinates.longitude;
-                    } else {
-                        this.autoCoords = this.coordinates.latitude + ', ' + this.coordinates.longitude;
+                        this.manCoordsInput = this.coordinates.latitude + ',N,' + this.coordinates.longitude + ',E';
                     }
                 }
             }
@@ -623,7 +642,7 @@ export default {
             ymaps.ready(() => {
                 const dashMap = new ymaps.Map('map-dashboard', {
                     center: [this.coordinates.latitude, this.coordinates.longitude],
-                    zoom: 10
+                    zoom: 15
                 });
                 if (this.coord !== null && this.coord !== undefined) {
                     // установить цвет метки
@@ -667,23 +686,30 @@ export default {
                 }
             });
         },
-        drawSettingsMap(lastdata) {
-
-            if (!this.newCoordSaved && this.coordNow !== null) {
+        drawSettingsMap(lastdata) { // lastdata undefined (если нет данных за период)
+            if (this.coordNow !== null) {
                 this.coord = this.convertCoordinates(this.coordNow);
             }
+            // if (!this.newCoordSaved && this.coordNow !== null) {
+            //     this.coord = this.convertCoordinates(this.coordNow);
+            // }
             this.manualColor = false; // выкл цвет у инпута с ручными
 
             if (this.coord) {
                 if ((this.coord.latitude !== 0)) {
                     this.coordinates = this.coord;
+                    this.selectorCoordContent = `${this.coordinates.latitude}` + ',N,' + `${this.coordinates.longitude}` + ',E'; // по факту какие координаты установлены?
                 }
             }
+
+            let autoSwitchCoords = this.autoSwitchCoords;
+
+            let self = this; // Сохраняем ссылку на this
 
             ymaps.ready(() => {
                 const settingsMap = new ymaps.Map('map-settings', {
                     center: [this.coordinates.latitude, this.coordinates.longitude],
-                    zoom: 10
+                    zoom: 17
                 }, {
                     cursor: 'pointer'
                 });
@@ -711,7 +737,7 @@ export default {
                             }
                         }
                     } else {
-                        icon = 'redcircle.svg';
+                        icon = 'redcircle.svg'; // lastdata undefined (нет данных за период)
                     }
 
                     let myPlacemark = new ymaps.Placemark([this.coord.latitude, this.coord.longitude], {
@@ -727,25 +753,32 @@ export default {
                     settingsMap.geoObjects.add(myPlacemark);
 
                     settingsMap.events.add('click', function (e) {
-                        // Код обработчика события
-                        document.getElementById('manual').value = e.get('coords');
-                        let newCoord = e.get('coords');
-                        settingsMap.geoObjects.removeAll();
 
-                        let newPlacemark = new ymaps.Placemark([newCoord[0], newCoord[1]], {
+                        if (self.manualCoords) { // если ручные
+                            // Код обработчика события
+                            let newCoord = e.get('coords');
+                            document.getElementById('manual').value = `${newCoord[0]},N,${newCoord[1]},E`;
+                            settingsMap.geoObjects.removeAll();
 
-                        }, {
-                            iconLayout: 'default#image',
-                            iconImageHref: `../${icon}`,
-                            iconImageSize: [20, 20],
-                            iconImageOffset: [-8, -5],
-                            hideIconOnBalloonOpen: false
-                        });
-                        settingsMap.geoObjects.add(newPlacemark);
+                            let newPlacemark = new ymaps.Placemark([newCoord[0], newCoord[1]], {}, {
+                                iconLayout: 'default#image',
+                                iconImageHref: `../${icon}`,
+                                iconImageSize: [20, 20],
+                                iconImageOffset: [-8, -5],
+                                hideIconOnBalloonOpen: false
+                            });
+                            settingsMap.geoObjects.add(newPlacemark);
+                        }
                     });
-
                 }
             });
+            setTimeout(() => {
+                if (!this.autoSwitchCoords) { // если ручные, то вкл курсор
+                    this.listenMap();
+                } else {
+                    this.turnOffMap();
+                }
+            }, 1000)
         },
         convertCoordinates(coordinates) {
             let lastCharacter = this.coordNow.slice(-1);
@@ -792,25 +825,18 @@ export default {
         },
         switchCoordinates() {
             this.manualCoords = !this.manualCoords;
+            this.autoSwitchCoords = !this.autoSwitchCoords;
 
             if (this.manualCoords) {
-                axios.post(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`, // вкл ручные координаты
-                    {
-                        "coordinates_manually": true
-                    }, {
-                    headers: {
-                        'Authorization': `Token ${sessionStorage.getItem('token')}`,
-                        'Content-Type': 'application/json; charset=utf-8'
-                    }
-                }).then((response) => { // обработка ошибок
-                    if (response.status === 201) { // данные обновлены
-                        console.log('ok ручные');
-                    }
-                }).catch((error) => {
-                    console.log(error);
-                });
+                this.listenMap();
             } else {
-                axios.post(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`, // вкл авто координаты
+                this.turnOffMap();
+            }
+
+            if (this.manualCoords) {
+                this.manCoordsInput = 'Поставьте точку на карте';
+            } else {
+                axios.post(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`, // вкл авто
                     {
                         "coordinates_manually": false
                     }, {
@@ -820,7 +846,6 @@ export default {
                     }
                 }).then((response) => { // обработка ошибок
                     if (response.status === 201) { // данные обновлены
-                        // перерисовать карту
                         this.drawAutoCoord();
                     }
                 }).catch((error) => {
@@ -832,7 +857,11 @@ export default {
             this.manualColor = true;
             document.querySelector('.ymaps-2-1-79-events-pane').classList.add('put-label');
         },
-        saveNewCoords() {
+        turnOffMap() {
+            this.manualColor = false;
+            document.querySelector('.ymaps-2-1-79-events-pane').classList.remove('put-label');
+        },
+        saveNewCoords() { // отправить ручные координаты
             let sendCoord = document.getElementById('manual').value;
             let f = sendCoord.split(',');
             this.coord = { latitude: f[0], longitude: f[1] };
@@ -841,7 +870,7 @@ export default {
 
             axios.post(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`,
                 {
-                    "gps": `${f[0]}, ${f[1]},`,
+                    "gps": `${sendCoord}`,
                     "coordinates_manually": true
                 }, {
                 headers: {
@@ -850,29 +879,35 @@ export default {
                 }
             }).then((response) => { // обработка ошибок
                 if (response.status === 201) { // данные обновлены
-                    console.log('ok');
+                    this.setUpdateText = 'Сохранено';
+                    this.setVisible = true; // показать «обновлено»
+                    setTimeout(() => {
+                        this.setVisible = false; // показать «обновлено»
+                    }, 5000)
+                } else {
+                    this.setUpdateText = response.data.detail;
+                    this.setError = true; // показать «обновлено»
+                    setTimeout(() => {
+                        this.setError = false; // показать «обновлено»
+                    }, 5000)
                 }
             }).catch((error) => {
-                console.log(error);
+                this.setUpdateText = error;
+                this.setError = true; // показать «обновлено»
+                setTimeout(() => {
+                    this.setError = false; // показать «обновлено»
+                }, 5000)
             });
         },
         drawAutoCoord() {
-            axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`,
-                {
-                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
-                }).then((response) => {
-                    if (response.status === 200) {
-                        this.coordNow = response.data[0].value;
-                        var element = document.getElementById("map-settings");
-                        while (element.firstChild) {
-                            element.removeChild(element.firstChild);
-                        }
-                        this.drawSettingsMap(this.controllerInfoStorage[0]);
-                    }
-                }).catch((error) => {
-                    // обработка ошибки
-                    console.log(error);
-                });
+            if (this.autoSwitchCoords) { // если авто
+                this.coordNow = this.selectorCoordContent;
+                var element = document.getElementById("map-settings");
+                while (element.firstChild) {
+                    element.removeChild(element.firstChild);
+                }
+                this.drawSettingsMap(this.controllerInfoStorage[0]);
+            }
         },
         deleteControllerFromSettings() {
             this.deleteControllerVis = true;
@@ -885,6 +920,9 @@ export default {
         deleteControllerFromList(id) {
             // удаление пользователя из списка
             this.$emit('deleteControllerFromList', id);
+        },
+        chooseCoords() {
+            this.selectorCoord = !this.selectorCoord;
         },
         updateInfo(parameter) {
             let obj;
@@ -934,6 +972,27 @@ export default {
                     this.updateError = false; // показать «обновлено»
                 }, 5000)
             });
+        },
+        chooseCoordAuto(coord) {
+            this.selectorCoordContent = coord;
+            if (this.autoSwitchCoords) { // отправить в базу, если стоит галочка на авто
+                axios.post(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`,
+                    {
+                        "gps": `${coord}`,
+                        "coordinates_manually": false
+                    }, {
+                    headers: {
+                        'Authorization': `Token ${sessionStorage.getItem('token')}`,
+                        'Content-Type': 'application/json; charset=utf-8'
+                    }
+                }).then((response) => { // обработка ошибок
+                    if (response.status === 201) { // данные обновлены
+                        this.drawAutoCoord(); // если успешно, переставить метку
+                    }
+                }).catch((error) => {
+                    console.log(error);
+                });
+            }
         }
     },
     mounted() {
@@ -944,20 +1003,30 @@ export default {
             }).then((response) => {
                 if (response.status === 200) {
                     this.controllerInfo = response.data;
-                    console.log(this.controllerInfo);
 
                     let date = this.controllerInfo.created_at;
                     let formatDate = date.split(',');
                     this.controllerInfo.created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
-
                     this.coordNow = this.controllerInfo.gps;
 
                     if (this.controllerInfo.coordinates_manually) {
-                        this.manualCoords = true;
+                        this.manualCoords = true; // ручное
                     } else {
-                        this.manualCoords = false;
+                        this.autoSwitchCoords = true; // авто
                     }
                     this.showDay();
+                }
+            }).catch((error) => {
+                // обработка ошибки
+                console.log(error);
+            });
+
+        axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/gps/`,
+            {
+                headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+            }).then((response) => {
+                if (response.status === 200) {
+                    this.recordedСoordinates = response.data.slice(0, 3);
                 }
             }).catch((error) => {
                 // обработка ошибки
@@ -1118,6 +1187,7 @@ export default {
     line-height: 125%;
     color: #293b5f;
     margin-right: 32px;
+    font-family: 'Inter', sans-serif;
 }
 
 .controller_btn_active {
@@ -1136,12 +1206,30 @@ export default {
     color: #F8F6F4 !important;
 }
 
+.dropdown__set {
+    height: 30px;
+    font-size: 14px;
+    width: 258px;
+    padding: 0px 10px;
+    font-family: 'Inter', sans-serif;
+}
+
 .dropdown__list-data-filter {
     top: 40px;
 }
 
 .datafilter-separator {
     margin: 0px 16px 8px 16px;
+}
+
+.datafilter-separator_set {
+    margin: 0px;
+}
+
+.dropdown__list-set li {
+    font-size: 14px;
+    margin: 0 !important;
+    height: 30px !important;
 }
 
 .dropdown__list-data-filter li {
@@ -1151,6 +1239,19 @@ export default {
 .dropdown__button-data-filter i {
     width: 16px;
     height: 16px;
+}
+
+.dropdown__set i {
+    width: 14px;
+    height: 14px;
+    width: 14px;
+    height: 100%;
+    position: absolute;
+    right: -50px;
+    border-radius: 13px;
+    background-color: #294b8e;
+    padding: 0 7px;
+    background-size: auto;
 }
 
 .data-filter__container {
@@ -1597,7 +1698,7 @@ export default {
     font-size: 14px;
     line-height: 129%;
     color: #0E1626;
-    width: 180px;
+    width: 200px;
 }
 
 .options-block__input {
@@ -1607,7 +1708,7 @@ export default {
     padding: 6px 8px;
     border-radius: 8px;
     font-size: 13px;
-    width: 200px;
+    width: 240px;
     line-height: 112%;
     height: 16px;
 }
@@ -1632,7 +1733,7 @@ export default {
     height: 20px;
     background-size: cover;
     background-repeat: no-repeat;
-    margin-left: 8px;
+    margin-right: 8px;
     cursor: pointer;
 }
 
@@ -1650,7 +1751,7 @@ export default {
     background: linear-gradient(90deg, #294b8e 27%, #2384c5 100%);
     border-radius: 8px;
     padding: 6px 10px 6px 16px;
-    width: 165px;
+    width: 173px;
     position: absolute;
     bottom: 24px;
     font-size: 13px;
@@ -1662,6 +1763,7 @@ export default {
     font-size: 14px;
     padding: 0;
     margin: 0;
+    font-family: 'Inter', sans-serif;
 }
 
 .controller-info__delete div {
@@ -1696,20 +1798,25 @@ export default {
     color: #86a312;
 }
 
+.save-set {
+    border-radius: 8px;
+    padding: 7px 14px;
+    margin-left: 8px;
+    font-family: 'Inter', sans-serif;
+}
+
+.dropdown__list-set {
+    top: 29px;
+    padding-top: 4px;
+    padding-bottom: 2px;
+    width: 258px;
+}
+
 @media (max-width: 1600px) {
 
     .options-block__coords-btn button,
     .options-block__coords-check {
         font-size: 12px;
-    }
-
-    .options-block__coords-inptitle {
-        font-size: 12px;
-        width: 155px;
-    }
-
-    .options-block__input {
-        width: 135px;
     }
 }
 
