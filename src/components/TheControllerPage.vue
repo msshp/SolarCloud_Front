@@ -1398,7 +1398,7 @@ export default {
 .measured-at__dashboard-code {
     width: 200px !important;
     text-align: left !important;
-    height: 40px !important;
+    height: 24px !important;
 }
 
 .measured-at__dashboard-type {
@@ -1411,6 +1411,8 @@ export default {
     justify-content: flex-start;
     padding-left: 28px;
     width: 92%;
+    padding-top: 4px;
+    margin-bottom: 0px;
 }
 
 .info-line__title-errors div {
@@ -1999,7 +2001,6 @@ export default {
 
 @media (max-width: 1515px) {
 
-    .accordeon-item__content-info,
     .measured-at__widget-errors,
     .measured-at__dashboard-code {
         font-size: 11px !important;
@@ -2010,12 +2011,11 @@ export default {
     .measured-at__widget-errors {
         width: 116px !important;
         margin-right: 32px;
-        height: 44px !important;
     }
 
     .measured-at__dashboard-code {
         width: 215px !important;
-        height: 44px !important;
+        height: 24px !important;
     }
 }
 

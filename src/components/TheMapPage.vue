@@ -361,7 +361,7 @@ export default {
         getErrorsForWidget(id) {
             // Ошибки
             this.lastErrorsForWidget = [];
-            axios.get(`http://cloud.io-tech.ru/api/devices/${id}/event/?type=3&limit=3`,
+            axios.get(`http://cloud.io-tech.ru/api/devices/${id}/event/?limit=3`,
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
@@ -438,7 +438,7 @@ export default {
 }
 
 .map-widget__padding {
-    padding: 80px 24px;
+    padding: 80px 20px;
 }
 
 .map-widget__title {
@@ -490,6 +490,7 @@ export default {
     font-size: 13px;
     line-height: 129%;
     color: #293b5f;
+    width: 45%;
 }
 
 .accordeon-item__content-info:last-child {
@@ -563,7 +564,7 @@ export default {
 }
 
 .slider-container div {
-    width: 80px;
+    width: 70px;
 }
 
 .slider-container span,
@@ -625,7 +626,9 @@ export default {
     line-height: 129%;
     color: #293b5f;
     margin-right: 24px;
-    height: 40px !important;
+    height: 24px !important;
+    align-items: flex-start;
+    justify-content: flex-start !important;
 }
 
 .measured-at__widget-errval {
@@ -644,8 +647,8 @@ export default {
 
 @media (max-width: 1600px) {
     .accordeon-item__content-info {
-        margin-right: 16px !important;
-        font-size: 12px !important;
+        margin-right: 11px !important;
+        font-size: 11.1px !important;
     }
 
     .measured-at__widget-errors {
@@ -654,6 +657,22 @@ export default {
 
     .measured-at__dashboard-code {
         font-size: 11px !important;
+    }
+}
+
+@media (min-width: 1600px) {
+    .accordeon-item__content-info:first-child {
+        width: 42%;
+    }
+
+    .slider-container div {
+        width: 80px;
+    }
+}
+
+@media (min-width: 1700px) {
+    .slider-container div {
+        width: 93px;
     }
 }
 </style>

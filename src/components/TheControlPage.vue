@@ -80,7 +80,7 @@ export default {
                 let usersC = document.getElementById('usersChart');
 
                 const usersdata = {
-                    labels: ['Админ', 'Модератор', 'Наблюдатель'],
+                    labels: [`Админ (${admins})`, `Модератор (${moderators})`, `Наблюдатель (${regularUsers})`],
                     datasets: [{
                         data: [admins, moderators, regularUsers],
                         borderWidth: [0, 0, 0],
@@ -154,7 +154,7 @@ export default {
                 let contrC = document.getElementById('controllersChart');
 
                 const statusdata = {
-                    labels: ['OK', 'Нет связи'],
+                    labels: [`OK (${okStorage.length})`, `Нет связи (${noСonnectionStorage.length})`],
                     datasets: [{
                         data: [okStorage.length, noСonnectionStorage.length],
                         borderWidth: [0, 0],
