@@ -99,19 +99,26 @@
                 </div>
             </div>
         </div>
-        <nav>
+        <nav class="events-pagination">
             <ul class="pagination">
-                <li><button id="prevBtn" @click="prevPage()">Назад</button></li>
-                <li v-for="btn in pagesCountArr" :key="btn"><button @click="goToPage(btn)">{{ btn }}</button></li>
-                <li><button id="nextBtn" @click="nextPage()">Вперёд</button></li>
+                <li><button @click="prevmorePage()">
+                        <div class="pagination-delta pagination-delta_more more_back"></div>
+                    </button>
+                    <button @click="prevPage()">
+                        <div class="pagination-delta pagination-delta_back"></div>
+                    </button>
+                </li>
+                <li class="page-btn" v-for="btn in visiblePages" :key="btn"><button
+                        v-bind:class="{ pagebtn_active: btn.active }" @click="goToPage(btn)">{{
+                            btn.number }}</button></li>
+                <li><button @click="nextPage()">
+                        <div class="pagination-delta pagination-delta_next"></div>
+                    </button>
+                    <button @click="nextmorePage()">
+                        <div class="pagination-delta pagination-delta_more"></div>
+                    </button>
+                </li>
             </ul>
-
-            Всего страниц: {{ pagesCount }}<br>
-            Текущая страница: {{ page }}
-
-            <!--<paginate v-model="page" :pageCount="pagesCount" :clickHandler="functionName" :prevText="'Prev'"
-                :nextText="'Next'" :containerClass="'className'">
-            </paginate> -->
         </nav>
     </div>
 </template>
@@ -123,7 +130,6 @@ import axios from 'axios';
 export default {
     data() {
         return {
-
             // loading
 
             loadingEventsTable: true,
@@ -173,6 +179,11 @@ export default {
 
             pagesCount: 0,
             pagesCountArr: [],
+
+            visiblePages: [],
+
+            prev: 0,
+            next: 5,
             page: 1
         }
     },
@@ -391,8 +402,10 @@ export default {
             this.thereIsEventsTable = false; // скрыть «Нет событий за период»
             this.loadingEventsTable = true; // показать loading
 
-            this.pagesCount = 0;
-            this.pagesCountArr = [];
+            if (this.pagesCount === 0) {
+                this.pagesCount = 0;
+                this.pagesCountArr = [];
+            }
 
             // // закрыть все фильтры
             // this.selectorController = false;
@@ -427,15 +440,27 @@ export default {
                                 this.thereIsEventsTableText = 'Нет событий за период';
                             } else { // обработать массив (на русский перевести тип события и задать цвет)
 
-                                // выстроить пагинацию
-                                this.pagesCount = response.data.count / 20;
-                                if (this.pagesCount % 1 !== 0) { // Проверяем, есть ли у числа дробная часть
-                                    this.pagesCount = Math.ceil(this.pagesCount); // 
+                                if (this.pagesCount === 0) {
+                                    // выстроить пагинацию
+                                    this.pagesCount = response.data.count / 20;
+                                    if (this.pagesCount % 1 !== 0) { // Проверяем, есть ли у числа дробная часть
+                                        this.pagesCount = Math.ceil(this.pagesCount); // 
+                                    }
+
+                                    for (let i = 1; i < this.pagesCount + 1; i++) {
+                                        this.pagesCountArr.push({
+                                            number: i,
+                                            active: false
+                                        });
+                                    }
+
+                                    this.visiblePages = this.pagesCountArr.slice(0, 5);
                                 }
 
-                                for (let i = 1; i < this.pagesCount + 1; i++) {
-                                    this.pagesCountArr.push(i);
-                                }
+                                // Выделить активную кнопку в пагинации
+                                const selectedPage = this.pagesCountArr.find(page => page.number === this.page);
+                                // Установить свойство active на true у найденного объекта
+                                selectedPage.active = true;
 
                                 this.events.forEach((el) => {
                                     let date = el.measured_at;
@@ -471,21 +496,39 @@ export default {
             }
         },
         goToPage(page) {
-            this.page = page;
+            this.page = page.number;
+
+            this.pagesCountArr.forEach(el => el.active = false);
+            page.active = true;
             this.getEvents();
+        },
+        prevmorePage() {
+            console.log('prevmorePage');
+
+            let prev = this.prev;
+            this.prev = this.prev - 5;
+            this.visiblePages = this.pagesCountArr.slice(prev, this.prev);
         },
         prevPage() {
             if (this.page > 1) {
+                this.pagesCountArr.forEach(el => el.active = false);
                 this.page--;
                 this.getEvents();
             }
         },
         nextPage() {
             // В реальном проекте здесь нужно учитывать общее количество страниц
-            if (this.page < this.pagesCount) { // Здесь 4 - это общее количество страниц
+            if (this.page < this.pagesCount) { // это общее количество страниц
+                this.pagesCountArr.forEach(el => el.active = false);
                 this.page++;
                 this.getEvents();
             }
+        },
+        nextmorePage() {
+            console.log('nextmorePage');
+            let next = this.next;
+            this.next = this.next + 5;
+            this.visiblePages = this.pagesCountArr.slice(next, this.next);
         }
     },
     mounted() {
@@ -559,17 +602,61 @@ export default {
     display: flex;
     list-style-type: none;
     padding: 0;
+    align-items: center;
 }
 
 .pagination li {
     margin-right: 5px;
+    align-items: center;
+    display: flex;
 }
 
 .pagination button {
-    padding: 5px 10px;
+    padding: 5px 8px;
     cursor: pointer;
+    border-radius: 4px;
 }
 
+.events-pagination {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pagination-delta {
+    background-image: url(../img/delta.svg);
+    background-repeat: no-repeat;
+    width: 17px;
+    background-size: contain;
+    height: 11px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.pagination-delta_more {
+    background-image: url(../img/more.svg);
+    width: 14px;
+    height: 18px;
+}
+
+.more_back {
+    transform: rotate(180deg);
+}
+
+.pagination-delta_back {
+    transform: rotate(90deg);
+}
+
+.pagination-delta_next {
+    transform: rotate(-90deg);
+}
+
+.pagebtn_active,
+.page-btn button:hover {
+    background-color: #293b5f;
+    color: #f8f6f4;
+}
 
 @media (min-width: 1900px) {
     .controller-data__events {
