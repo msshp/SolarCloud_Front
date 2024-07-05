@@ -502,12 +502,12 @@ export default {
             page.active = true;
             this.getEvents();
         },
-        prevmorePage() {
-            console.log('prevmorePage');
-
-            let prev = this.prev;
-            this.prev = this.prev - 5;
-            this.visiblePages = this.pagesCountArr.slice(prev, this.prev);
+        prevmorePage() { // переключение в пагинации (5 кнопок назад)
+            if (this.prev > 0) {
+                this.next = this.next - 5;
+                this.prev = this.next - 5;
+                this.visiblePages = this.pagesCountArr.slice(this.prev, this.next);
+            }
         },
         prevPage() {
             if (this.page > 1) {
@@ -517,7 +517,6 @@ export default {
             }
         },
         nextPage() {
-            // В реальном проекте здесь нужно учитывать общее количество страниц
             if (this.page < this.pagesCount) { // это общее количество страниц
                 this.pagesCountArr.forEach(el => el.active = false);
                 this.page++;
@@ -525,10 +524,11 @@ export default {
             }
         },
         nextmorePage() {
-            console.log('nextmorePage');
-            let next = this.next;
-            this.next = this.next + 5;
-            this.visiblePages = this.pagesCountArr.slice(next, this.next);
+            if (this.next < this.pagesCount) {
+                this.next = this.next + 5;
+                this.prev = this.next - 5;
+                this.visiblePages = this.pagesCountArr.slice(this.prev, this.next);
+            }
         }
     },
     mounted() {
@@ -546,7 +546,7 @@ export default {
 }
 
 .events-filters button {
-    height: 40px;
+    height: 32px;
     font-size: 14px;
 }
 
@@ -559,7 +559,7 @@ export default {
 }
 
 .events-filters ul {
-    top: 32px;
+    top: 28px;
 }
 
 .events-filters ul li {
@@ -603,6 +603,7 @@ export default {
     list-style-type: none;
     padding: 0;
     align-items: center;
+    margin: 20px 0 0;
 }
 
 .pagination li {
@@ -658,9 +659,31 @@ export default {
     color: #f8f6f4;
 }
 
+.controller-data__events {
+    height: 59vh !important;
+}
+
+@media (min-width: 1500px) {
+    .controller-data__events {
+        height: 62vh !important;
+    }
+}
+
+@media (min-width: 1600px) {
+    .controller-data__events {
+        height: 67vh !important;
+    }
+}
+
 @media (min-width: 1900px) {
     .controller-data__events {
         height: 63vh !important;
+    }
+}
+
+@media (min-width: 2000px) {
+    .controller-data__events {
+        height: 56vh !important;
     }
 }
 </style>

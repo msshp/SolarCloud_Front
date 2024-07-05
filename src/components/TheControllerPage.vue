@@ -545,20 +545,20 @@ export default {
                                 el.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
 
                                 const codeToTypeMap = {
-                                    '900': 'Информация',
-                                    '901': 'Предупреждение',
-                                    '906': 'Ошибка'
+                                    'Info': 'Информация',
+                                    'Warning': 'Предупреждение',
+                                    'Error': 'Ошибка'
                                 };
 
-                                el.type = codeToTypeMap[el.code] || 'Неизвестный тип события';
+                                el.type = codeToTypeMap[el.event_type];
 
                                 const colorToTypeMap = {
-                                    '900': '#F8F6F4',
-                                    '901': '#F4CA8D',
-                                    '906': '#f57878'
+                                    'Info': '#F8F6F4',
+                                    'Warning': '#F4CA8D',
+                                    'Error': '#f57878'
                                 };
 
-                                el.color = colorToTypeMap[el.code] || '#F8F6F4';
+                                el.color = colorToTypeMap[el.event_type];
                             })
                             this.btns.loading = false;
                             this.getEventsForDashbard();
@@ -601,20 +601,20 @@ export default {
                                 el.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
 
                                 const codeToTypeMap = {
-                                    '900': 'Информация',
-                                    '901': 'Предупреждение',
-                                    '906': 'Ошибка'
+                                    'Info': 'Информация',
+                                    'Warning': 'Предупреждение',
+                                    'Error': 'Ошибка'
                                 };
 
-                                el.type = codeToTypeMap[el.code] || 'Неизвестный тип события';
+                                el.type = codeToTypeMap[el.event_type];
 
                                 const colorToTypeMap = {
-                                    '900': '#F8F6F4',
-                                    '901': '#F4CA8D',
-                                    '906': '#f57878'
+                                    'Info': '#F8F6F4',
+                                    'Warning': '#F4CA8D',
+                                    'Error': '#f57878'
                                 };
 
-                                el.color = colorToTypeMap[el.code] || '#F8F6F4';
+                                el.color = colorToTypeMap[el.event_type];
                             })
 
                             this.btns.loadingDashboard = false;
