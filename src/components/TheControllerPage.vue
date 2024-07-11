@@ -12,7 +12,7 @@
                 </div>
                 <div class="controller-page__info-block">
                     <p>тип контроллера</p>
-                    <span>{{ controllerInfo.device_type.device_type }}</span>
+                    <span>{{ dParameters.type }}</span>
                 </div>
                 <div class="controller-page__info-block">
                     <p>уровень сигнала</p>
@@ -180,70 +180,96 @@
             </div>
         </div>
         <div class="controller-settings" v-if="btns.settingsActive">
-            <div class="controller-info">
-                <div class="controller-info__name">
-                    <p>Название</p>
-                    <input type="text" v-model="controllerInfo.name"><button
-                        @click="updateInfo('name')">Обновить</button>
+            <div class="controller-info__containerone">
+                <div class="controller-info">
+                    <p class="controller-info__block-title">Данные</p>
+                    <div class="controller-info__name">
+                        <p>Название</p>
+                        <input type="text" v-model="controllerInfo.name">
+                    </div>
+                    <div>
+                        <p>Описание</p>
+                        <input type="text" v-model="controllerInfo.description">
+                    </div>
+                    <p class="controller-info__created"><span>ID</span> {{ controllerInfo.id }}</p>
+                    <!-- <p class="controller-info__created"><span>Тип контроллера</span> {{
+                        controllerInfo.device_type.device_type }}</p> -->
+                    <p class="controller-info__created"><span>Тип контроллера</span>{{ dParameters.type }}</p>
+                    <p class="controller-info__created"><span>Версия контроллера</span>{{ dParameters.cversion }}</p>
+                    <p class="controller-info__created"><span>Версия модема</span>{{ dParameters.mversion }}</p>
+                    <p class="controller-info__created"><span>Тип связи</span>{{ dParameters.typeconnect }}</p>
+                    <p class="controller-info__created"><span>Дата создания</span> {{ controllerInfo.created_at }}</p>
+                    <div class="settings-btns_container">
+                        <div v-if="access" class="controller-info__delete" @click="deleteControllerFromSettings()">
+                            <button>Удалить
+                                контроллер</button>
+                            <div></div>
+                        </div><button @click="updateInfo()">Обновить</button>
+                        <div class="update" v-bind:class="{ update_visible: updateVisible, update_error: updateError }">
+                            {{ updateText
+                            }}</div>
+                    </div>
                 </div>
-                <div>
-                    <p>Описание</p>
-                    <input type="text" v-model="controllerInfo.description"><button
-                        @click="updateInfo('description')">Обновить</button>
-                </div>
-                <div>
-                    <p>Пин-код</p>
-                    <input type="text" v-model="controllerInfo.pin"><button @click="updateInfo('pin')">Обновить</button>
-                </div>
-                <p class="controller-info__created"><span>ID</span> {{ controllerInfo.id }}</p>
-                <p class="controller-info__created"><span>Тип контроллера</span> {{
-                    controllerInfo.device_type.device_type }}</p>
-                <p class="controller-info__created"><span>Дата создания</span> {{ controllerInfo.created_at }}</p>
-                <p class="update" v-bind:class="{ update_visible: updateVisible, update_error: updateError }">{{
-                    updateText }}</p>
-                <div v-if="access" class="controller-info__delete" @click="deleteControllerFromSettings()">
-                    <button>Удалить
-                        контроллер</button>
-                    <div></div>
+                <div class="controller-info controller-map">
+                    <div id="map-settings" style="width: 100%; height: 82%;"></div>
+                    <div class="controller-map__set-coords">
+                        <div class="options-block__coords-inpcont">
+                            <div>
+                                <div class="options-block__coords-inp">
+                                    <div @click="switchCoordinates()" class="icon-checkbox-blank"
+                                        v-bind:class="{ manual_coords: this.autoSwitchCoords }">
+                                    </div>
+                                    <div class="options-block__coords-inptitle">Координаты от устройства</div>
+                                    <div class="controller-nav__data-filter">
+                                        <button
+                                            class="dropdown__button dropdown__button-data-filter dropdown__set dropdown__set-coord"
+                                            @click="chooseCoords()" v-bind:class="{ opened_button: selectorCoord }">{{
+                                                selectorCoordContent
+                                            }}<i class="white_delta"
+                                                v-bind:class="{ inverted_white_delta: selectorCoord }"></i></button>
+                                        <ul class="dropdown__list dropdown__list-data-filter dropdown__list-set"
+                                            v-bind:class="{ dropdown__list_visible: selectorCoord }">
+                                            <div class="datafilter-separator datafilter-separator_set"></div>
+                                            <li v-for="coord in recordedСoordinates" :key="coord"
+                                                class="dropdown__list-item" @click="chooseCoordAuto(coord.value)">{{
+                                                    coord.value }}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="options-block__coords-inp options-block__coords-inp_m">
+                                    <div @click="switchCoordinates()" class="icon-checkbox-blank"
+                                        v-bind:class="{ manual_coords: this.manualCoords }">
+                                    </div>
+                                    <div class="options-block__coords-inptitle">Установить вручную</div><input
+                                        class="options-block__input options-block__input-manual" id="manual"
+                                        v-model.trim="manCoordsInput" v-bind:class="{ manual_color: this.manualColor }"
+                                        type="text">
+                                    <button class="save-btn save-set" @click="saveNewCoords()">Сохранить</button>
+                                </div>
+                                <div class="update update-gps"
+                                    v-bind:class="{ update_visible: setVisible, update_error: updateError }">{{
+                                        setUpdateText }}</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="controller-map">
-                <div id="map-settings" style="width: 100%; height: 70%;"></div>
-                <div class="controller-map__set-coords">
-                    <div class="options-block__coords-inpcont">
-                        <div>
-                            <div class="options-block__coords-inp">
-                                <div @click="switchCoordinates()" class="icon-checkbox-blank"
-                                    v-bind:class="{ manual_coords: this.autoSwitchCoords }">
-                                </div>
-                                <div class="options-block__coords-inptitle">Координаты от устройства</div>
-                                <div class="controller-nav__data-filter">
-                                    <button class="dropdown__button dropdown__button-data-filter dropdown__set"
-                                        @click="chooseCoords()" v-bind:class="{ opened_button: selectorCoord }">{{
-                                            selectorCoordContent
-                                        }}<i class="white_delta"
-                                            v-bind:class="{ inverted_white_delta: selectorCoord }"></i></button>
-                                    <ul class="dropdown__list dropdown__list-data-filter dropdown__list-set"
-                                        v-bind:class="{ dropdown__list_visible: selectorCoord }">
-                                        <div class="datafilter-separator datafilter-separator_set"></div>
-                                        <li v-for="coord in recordedСoordinates" :key="coord"
-                                            class="dropdown__list-item" @click="chooseCoordAuto(coord.value)">{{
-                                                coord.value }}</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="options-block__coords-inp">
-                                <div @click="switchCoordinates()" class="icon-checkbox-blank"
-                                    v-bind:class="{ manual_coords: this.manualCoords }">
-                                </div>
-                                <div class="options-block__coords-inptitle">Установить вручную</div><input
-                                    class="options-block__input" id="manual" v-model.trim="manCoordsInput"
-                                    v-bind:class="{ manual_color: this.manualColor }" type="text">
-                                <button class="save-btn save-set" @click="saveNewCoords()">Сохранить</button>
-                            </div>
-                            <p class="update" v-bind:class="{ update_visible: setVisible, update_error: updateError }">
-                                {{
-                                    updateText }}{{ setUpdateText }}</p>
+            <div class="controller-info controller-info__param">
+                <p class="controller-info__block-title controller-info__block-title_par">Параметры</p>
+                <div className="info-line info-line__title info-line__par">
+                    <div class="num-reg">№ регистра</div>
+                    <div class="name-par">название параметра</div>
+                    <div class="val-par">значение</div>
+                    <div class="history-par"></div>
+                </div>
+                <div>
+                    <div className="info-line info-line__par_line" v-for="parameter in parametersStorage"
+                        :key="parameter">
+                        <div class="num-reg">{{ parameter.num }}</div>
+                        <div class="name-par">{{ parameter.namepar }}</div>
+                        <div class="val-par">{{ parameter.val }}
+                        </div>
+                        <div class="history-par">{{ parameter.history }}
                         </div>
                     </div>
                 </div>
@@ -367,6 +393,8 @@ export default {
             lastEvents: [],
             dashboardLastEvents: [],
 
+            parametersStorage: [],
+
             coord: null, // координаты для дашборда
             coordinates: { latitude: 55.76, longitude: 37.64 },
             mapIndication: false,
@@ -390,7 +418,14 @@ export default {
 
             selectorCoord: false,
             recordedСoordinates: [],
-            selectorCoordContent: '–'
+            selectorCoordContent: '–',
+
+            dParameters: {
+                type: '',
+                cversion: '',
+                mversion: '',
+                typeconnect: ''
+            }
         }
     },
     methods: {
@@ -702,7 +737,7 @@ export default {
                 }
             }
 
-            let autoSwitchCoords = this.autoSwitchCoords;
+            // let autoSwitchCoords = this.autoSwitchCoords;
 
             let self = this; // Сохраняем ссылку на this
 
@@ -924,20 +959,10 @@ export default {
         chooseCoords() {
             this.selectorCoord = !this.selectorCoord;
         },
-        updateInfo(parameter) {
-            let obj;
-            if (parameter === 'name') {
-                obj = {
-                    "name": this.controllerInfo.name,
-                }
-            } else if (parameter === 'description') {
-                obj = {
-                    "description": this.controllerInfo.description,
-                }
-            } else if (parameter === 'pin') {
-                obj = {
-                    "pin": this.controllerInfo.pin,
-                }
+        updateInfo() {
+            let obj = {
+                "name": this.controllerInfo.name,
+                "description": this.controllerInfo.description
             }
 
             axios.patch(`http://cloud.io-tech.ru/api/devices/${this.controllerInfo.id}/`, obj, {
@@ -1027,6 +1052,47 @@ export default {
             }).then((response) => {
                 if (response.status === 200) {
                     this.recordedСoordinates = response.data.slice(0, 3);
+                }
+            }).catch((error) => {
+                // обработка ошибки
+                console.log(error);
+            });
+
+        // Параметры устройства (таблица с номерами регистра)
+        axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/flexdata/`,
+            {
+                headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+            }).then((response) => {
+                if (response.status === 200) {
+                    let arr = response.data;
+
+                    for (let key in arr) {
+                        if (arr[key] !== null) {
+                            this.parametersStorage.push({
+                                'num': Number(key),
+                                'namepar': arr[key].name,
+                                'val': arr[key].value,
+                                'history': ''
+                            })
+                        } else {
+                            this.parametersStorage.push({
+                                'num': Number(key),
+                                'namepar': '',
+                                'val': arr[key],
+                                'history': ''
+                            });
+                        }
+
+                        if (Number(key) === 12 && arr[key] !== null) {
+                            this.dParameters.type = arr[key].value;
+                        } else if (Number(key) === 14 && arr[key] !== null) {
+                            this.dParameters.cversion = arr[key].value;
+                        } else if (Number(key) === 41043 && arr[key] !== null) {
+                            this.dParameters.mversion = arr[key].value;
+                        } else if (Number(key) === 41042 && arr[key] !== null) {
+                            this.dParameters.typeconnect = arr[key].value;
+                        }
+                    }
                 }
             }).catch((error) => {
                 // обработка ошибки
@@ -1208,10 +1274,11 @@ export default {
 
 .dropdown__set {
     height: 30px;
-    font-size: 14px;
-    width: 258px;
-    padding: 0px 10px;
+    font-size: 13px;
+    width: 220px;
+    padding: 6px 20px 6px 8px !important;
     font-family: 'Inter', sans-serif;
+    margin-left: 0px !important;
 }
 
 .dropdown__list-data-filter {
@@ -1247,8 +1314,8 @@ export default {
     width: 14px;
     height: 100%;
     position: absolute;
-    right: -50px;
-    border-radius: 13px;
+    right: -86px;
+    border-radius: 8px;
     background-color: #294b8e;
     padding: 0 7px;
     background-size: auto;
@@ -1268,7 +1335,6 @@ export default {
 .controller-settings {
     display: flex;
     justify-content: space-between;
-    height: 65vh;
 }
 
 .controller-info p:last-child {
@@ -1282,7 +1348,7 @@ export default {
     padding: 6px 8px;
     border-radius: 8px;
     font-size: 13px;
-    width: 240px;
+    width: 94%;
     line-height: 112%;
     height: 16px;
 }
@@ -1297,6 +1363,10 @@ export default {
     margin-right: 8px;
 }
 
+.controller-info__containerone {
+    width: 50%;
+}
+
 .controller-info,
 .controller-map {
     background-color: #F8F6F4;
@@ -1309,15 +1379,15 @@ export default {
 }
 
 .controller-info {
-    margin-right: 24px;
+    margin-right: 16px;
     position: relative;
-    width: 36%;
     padding: 24px;
 }
 
 .controller-map {
     padding: 0;
-    width: 60%;
+    margin-top: 16px;
+    height: 630px;
 }
 
 .controller-nav__btns button {
@@ -1374,12 +1444,17 @@ export default {
     align-items: center;
 }
 
-.dashboard-container h4 {
+.dashboard-container h4,
+.controller-info__block-title {
     font-weight: 500;
     margin: 0;
     font-size: 14px;
     text-transform: uppercase;
     text-align: center;
+}
+
+.controller-info__block-title_par {
+    margin: 0 !important;
 }
 
 .info-line__title-dashboard {
@@ -1537,7 +1612,7 @@ export default {
     line-height: 112%;
     color: #f8f6f4;
     padding: 16px;
-    margin: -12px 16px 24px 0;
+    margin: -12px 16px 16px 0;
 }
 
 .controller-page__info-block:last-child {
@@ -1669,7 +1744,8 @@ export default {
 /* карта в настройках (менять координаты) */
 
 .controller-map__set-coords {
-    padding: 24px;
+    padding: 0px 16px;
+    margin-top: 20px;
 }
 
 .options-block__coords-inpcont {
@@ -1680,6 +1756,10 @@ export default {
     display: flex;
     align-items: center;
     margin-bottom: 8px;
+}
+
+.options-block__coords-inp_m {
+    margin-bottom: 0px;
 }
 
 .options-block__coords-btn {
@@ -1697,10 +1777,11 @@ export default {
 
 .options-block__coords-inptitle {
     font-weight: 500;
-    font-size: 14px;
+    font-size: 13px;
     line-height: 129%;
     color: #0E1626;
-    width: 200px;
+    width: 176px;
+    margin-right: 8px;
 }
 
 .options-block__input {
@@ -1752,9 +1833,8 @@ export default {
     align-items: center;
     background: linear-gradient(90deg, #294b8e 27%, #2384c5 100%);
     border-radius: 8px;
-    padding: 6px 10px 6px 16px;
+    padding: 5px 10px 5px 16px;
     width: 173px;
-    position: absolute;
     bottom: 24px;
     font-size: 13px;
 }
@@ -1788,6 +1868,15 @@ export default {
 
 .update {
     display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.update-gps {
+    font-size: 13px;
+    margin-top: 4px;
+    margin-right: 21px;
+    justify-content: flex-end;
 }
 
 .update_error {
@@ -1796,7 +1885,7 @@ export default {
 }
 
 .update_visible {
-    display: block;
+    display: flex;
     color: #86a312;
 }
 
@@ -1809,9 +1898,63 @@ export default {
 
 .dropdown__list-set {
     top: 29px;
-    padding-top: 4px;
+    padding-top: 0px;
     padding-bottom: 2px;
-    width: 258px;
+    width: 294px;
+}
+
+.controller-info__block-title {
+    margin-bottom: 16px;
+    text-align: left;
+}
+
+.controller-info__param {
+    width: 45%;
+    margin: 0;
+}
+
+.options-block__input-manual {
+    width: 170px !important;
+}
+
+.dropdown__set-coord {
+    width: 294px;
+}
+
+.info-line__par {
+    padding: 8px 0 0 0;
+}
+
+.num-reg {
+    width: 84px !important;
+    padding: 0 8px;
+}
+
+.history-par {
+    width: 40px !important;
+}
+
+.name-par {
+    width: 148px !important;
+}
+
+.val-par {
+    width: 180px !important;
+}
+
+.info-line__par_line div {
+    text-align: left;
+    justify-content: flex-start;
+    font-size: 14px;
+}
+
+.info-line__par div {
+    text-align: center;
+    justify-content: flex-start;
+}
+
+.settings-btns_container {
+    display: flex;
 }
 
 @media (max-width: 1600px) {
@@ -1843,20 +1986,12 @@ export default {
         font-size: 11px !important;
     }
 
-    .controller-settings {
-        height: 68vh;
-    }
-
     .dashboard-event-line div {
         height: 34px !important;
     }
 
     .controller-data__dashboard-errors {
         padding: 0 0 0 12px;
-    }
-
-    .controller-info input {
-        width: 280px;
     }
 }
 
@@ -1922,10 +2057,6 @@ export default {
     .measured-at__dashboard-name {
         width: 250px !important;
     }
-
-    .controller-info input {
-        width: 360px;
-    }
 }
 
 @media (min-width: 1900px) {
@@ -1972,10 +2103,6 @@ export default {
 
     .dashboard-event-line div {
         height: 35px !important;
-    }
-
-    .controller-info input {
-        width: 400px;
     }
 }
 

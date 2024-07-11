@@ -667,7 +667,7 @@ input::placeholder {
 /* структура страниц */
 
 .page-content__container {
-    padding: 80px 36px 24px 36px;
+    padding: 80px 32px 24px 32px;
     background-color: #EEEEEE;
     position: relative;
 }

@@ -137,9 +137,9 @@ export default {
         openMainControllerPage(id) {
             this.$emit('openMainControllerPage', id);
         },
-        sortListByVoltageToggle() { // сортировка по напряжению акб
-            this.sortlistByVoltageActive = !this.sortlistByVoltageActive; // цвет иконки сортировки
-            this.sortlistByLastTimeActive = false; // цвет иконки сортировки
+        sortListByVoltageToggle() {
+            this.sortlistByVoltageActive = !this.sortlistByVoltageActive;
+            this.sortlistByLastTimeActive = false;
 
             const table = document.querySelector('.list-tbody');
             const rows = Array.from(table.querySelectorAll('tr'));
@@ -147,16 +147,26 @@ export default {
             rows.sort((a, b) => {
                 const cellIndex = this.sortlistByVoltageActive ? 4 : 1;
 
-                const aValue = parseFloat(a.querySelector(`td:nth-child(${cellIndex})`).textContent);
-                const bValue = parseFloat(b.querySelector(`td:nth-child(${cellIndex})`).textContent);
+                const cellA = a.querySelector(`td:nth-child(${cellIndex})`).textContent;
+                const cellB = b.querySelector(`td:nth-child(${cellIndex})`).textContent;
+
+                if (cellA === '' || cellB === '') {
+                    if (cellA === '') {
+                        return 1;
+                    } else if (cellB === '') {
+                        return -1;
+                    }
+                }
+
+                const aValue = parseFloat(cellA);
+                const bValue = parseFloat(cellB);
 
                 return this.sortlistByVoltageActive ? bValue - aValue : aValue - bValue;
             });
 
             rows.forEach(row => table.appendChild(row));
         },
-        sortListByLastTimeToggle() { // сотировка по последнему выходу на связь
-
+        sortListByLastTimeToggle() {
             this.sortlistByLastTimeActive = !this.sortlistByLastTimeActive;
             this.sortlistByVoltageActive = false;
 
@@ -166,14 +176,25 @@ export default {
             rows.sort((a, b) => {
                 const cellIndex = this.sortlistByLastTimeActive ? 6 : 1;
 
+                const cellA = a.querySelector(`td:nth-child(${cellIndex})`).textContent;
+                const cellB = b.querySelector(`td:nth-child(${cellIndex})`).textContent;
+
+                if (cellA === '' || cellB === '') {
+                    if (cellA === '') {
+                        return 1;
+                    } else if (cellB === '') {
+                        return -1;
+                    }
+                }
+
                 if (this.sortlistByLastTimeActive) {
-                    const dateA = new Date(a.querySelector(`td:nth-child(${cellIndex})`).textContent.replace(/(\d{2}).(\d{2}).(\d{4}) (\d{2}):(\d{2})/, '$3-$2-$1T$4:$5'));
-                    const dateB = new Date(b.querySelector(`td:nth-child(${cellIndex})`).textContent.replace(/(\d{2}).(\d{2}).(\d{4}) (\d{2}):(\d{2})/, '$3-$2-$1T$4:$5'));
+                    const dateA = new Date(cellA.replace(/(\d{2}).(\d{2}).(\d{4}) (\d{2}):(\d{2})/, '$3-$2-$1T$4:$5'));
+                    const dateB = new Date(cellB.replace(/(\d{2}).(\d{2}).(\d{4}) (\d{2}):(\d{2})/, '$3-$2-$1T$4:$5'));
 
                     return dateB - dateA;
                 } else {
-                    const aValue = parseFloat(a.querySelector(`td:nth-child(${cellIndex})`).textContent);
-                    const bValue = parseFloat(b.querySelector(`td:nth-child(${cellIndex})`).textContent);
+                    const aValue = parseFloat(cellA);
+                    const bValue = parseFloat(cellB);
 
                     return aValue - bValue;
                 }
@@ -201,6 +222,7 @@ export default {
 
                     this.controllerList.forEach(el => {
                         let date = el.status.last_session;
+
                         if (date !== null) {
                             let formatDate = date.split(',');
                             el.status.created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
