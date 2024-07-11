@@ -194,10 +194,10 @@
                     <p class="controller-info__created"><span>ID</span> {{ controllerInfo.id }}</p>
                     <!-- <p class="controller-info__created"><span>Тип контроллера</span> {{
                         controllerInfo.device_type.device_type }}</p> -->
-                    <p class="controller-info__created"><span>Тип контроллера</span>{{ dParameters.type }}</p>
-                    <p class="controller-info__created"><span>Версия контроллера</span>{{ dParameters.cversion }}</p>
-                    <p class="controller-info__created"><span>Версия модема</span>{{ dParameters.mversion }}</p>
-                    <p class="controller-info__created"><span>Тип связи</span>{{ dParameters.typeconnect }}</p>
+                    <p class="controller-info__created"><span>Тип контроллера</span> {{ dParameters.type }}</p>
+                    <p class="controller-info__created"><span>Версия контроллера</span> {{ dParameters.cversion }}</p>
+                    <p class="controller-info__created"><span>Версия модема</span> {{ dParameters.mversion }}</p>
+                    <p class="controller-info__created"><span>Тип связи</span> {{ dParameters.typeconnect }}</p>
                     <p class="controller-info__created"><span>Дата создания</span> {{ controllerInfo.created_at }}</p>
                     <div class="settings-btns_container">
                         <div v-if="access" class="controller-info__delete" @click="deleteControllerFromSettings()">
@@ -430,19 +430,23 @@ export default {
     },
     methods: {
         dashBoardOn() {
-            for (let btn in this.btns) { // выключение всех кнопок
-                this.btns[btn] = false;
+            if (!this.btns.dashBoardActive) {
+                for (let btn in this.btns) { // выключение всех кнопок
+                    this.btns[btn] = false;
+                }
+                this.btns.dashBoardActive = true;
+                this.drawControllerMap(this.controllerInfoStorage[0]);
             }
-            this.btns.dashBoardActive = true;
-
-            this.drawControllerMap(this.controllerInfoStorage[0]);
         },
         settingsOn() {
-            for (let btn in this.btns) { // выключение всех кнопок
-                this.btns[btn] = false;
+
+            if (!this.btns.settingsActive) {
+                for (let btn in this.btns) { // выключение всех кнопок
+                    this.btns[btn] = false;
+                }
+                this.btns.settingsActive = true;
+                this.drawSettingsMap(this.controllerInfoStorage[0]);
             }
-            this.btns.settingsActive = true;
-            this.drawSettingsMap(this.controllerInfoStorage[0]);
         },
         dataOn() {
             for (let btn in this.btns) { // выключение всех кнопок
@@ -1059,12 +1063,14 @@ export default {
             });
 
         // Параметры устройства (таблица с номерами регистра)
+        console.log(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/flexdata/`)
         axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/flexdata/`,
             {
                 headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
             }).then((response) => {
                 if (response.status === 200) {
                     let arr = response.data;
+                    console.log(arr);
 
                     for (let key in arr) {
                         if (arr[key] !== null) {
@@ -1314,7 +1320,7 @@ export default {
     width: 14px;
     height: 100%;
     position: absolute;
-    right: -86px;
+    right: -78px;
     border-radius: 8px;
     background-color: #294b8e;
     padding: 0 7px;
@@ -1355,7 +1361,7 @@ export default {
 
 .controller-info button {
     border-radius: 8px;
-    padding: 7px 14px;
+    padding: 7px 10px;
     margin-left: 8px;
     height: 100%;
     background: #294b8e;
@@ -1364,7 +1370,7 @@ export default {
 }
 
 .controller-info__containerone {
-    width: 50%;
+    width: 47%;
 }
 
 .controller-info,
@@ -1744,7 +1750,7 @@ export default {
 /* карта в настройках (менять координаты) */
 
 .controller-map__set-coords {
-    padding: 0px 16px;
+    padding: 0px 12px;
     margin-top: 20px;
 }
 
@@ -1777,10 +1783,10 @@ export default {
 
 .options-block__coords-inptitle {
     font-weight: 500;
-    font-size: 13px;
+    font-size: 12px;
     line-height: 129%;
     color: #0E1626;
-    width: 176px;
+    width: 163px;
     margin-right: 8px;
 }
 
@@ -1900,7 +1906,7 @@ export default {
     top: 29px;
     padding-top: 0px;
     padding-bottom: 2px;
-    width: 294px;
+    width: 286px;
 }
 
 .controller-info__block-title {
@@ -1909,8 +1915,9 @@ export default {
 }
 
 .controller-info__param {
-    width: 45%;
+    width: 50%;
     margin: 0;
+    padding: 24px 16px;
 }
 
 .options-block__input-manual {
@@ -1918,38 +1925,40 @@ export default {
 }
 
 .dropdown__set-coord {
-    width: 294px;
+    width: 286px;
 }
 
 .info-line__par {
     padding: 8px 0 0 0;
+    font-size: 13px !important;
 }
 
 .num-reg {
-    width: 84px !important;
-    padding: 0 8px;
+    width: 120px !important;
+    padding: 0 8px 0 0;
 }
 
 .history-par {
-    width: 40px !important;
+    width: 1px !important;
 }
 
 .name-par {
-    width: 148px !important;
+    width: 446px !important;
 }
 
 .val-par {
-    width: 180px !important;
+    width: 210px !important;
 }
 
 .info-line__par_line div {
     text-align: left;
     justify-content: flex-start;
-    font-size: 14px;
+    font-size: 13px;
+    padding: 4px;
 }
 
 .info-line__par div {
-    text-align: center;
+    text-align: left;
     justify-content: flex-start;
 }
 
@@ -1962,6 +1971,17 @@ export default {
     .options-block__coords-btn button,
     .options-block__coords-check {
         font-size: 12px;
+    }
+}
+
+@media (min-width: 1500px) {
+    .options-block__coords-inptitle {
+        font-size: 13px;
+        width: 180px;
+    }
+
+    .info-line__par_line div {
+        font-size: 14px;
     }
 }
 
@@ -1992,6 +2012,31 @@ export default {
 
     .controller-data__dashboard-errors {
         padding: 0 0 0 12px;
+    }
+
+    .options-block__coords-inptitle {
+        font-size: 14px;
+        width: 193px;
+    }
+
+    .dropdown__set-coord {
+        width: 316px;
+    }
+
+    .dropdown__set i {
+        right: -105px;
+    }
+
+    .save-set {
+        padding: 7px 16px !important;
+    }
+
+    .dropdown__list-set {
+        width: 316px;
+    }
+
+    .options-block__input-manual {
+        width: 187px !important;
     }
 }
 
@@ -2026,6 +2071,10 @@ export default {
 
     .dashboard-event-line div {
         height: 39px !important;
+    }
+
+    .val-par {
+        width: 225px !important;
     }
 }
 
