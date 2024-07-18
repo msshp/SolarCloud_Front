@@ -7,8 +7,8 @@
         <div class="events-filters">
             <div class="events-filters">
                 <div class="events-filter__contrllers">Контроллеры</div>
-                <div class="controller-nav__data-filter">
-                    <button class="dropdown__button dropdown__button-data-filter dropdown__set"
+                <div class="controller-nav__data-filter events-filter__delta">
+                    <button class="dropdown__button dropdown__button-data-filter dropdown__set "
                         @click="chooseControllers()" v-bind:class="{ opened_button: selectorController }">{{
                             selectorControllerContent
                         }}<i class="white_delta"
@@ -34,7 +34,7 @@
             </div>
             <div class="events-filters">
                 <div class="events-filter__contrllers">Тип события</div>
-                <div class="controller-nav__data-filter">
+                <div class="controller-nav__data-filter events-filter__delta">
                     <button class="dropdown__button dropdown__button-data-filter dropdown__set" @click="chooseCType()"
                         v-bind:class="{ opened_button: selectorCType }">{{ selectorCTypeTitle }}
                         <i class="white_delta" v-bind:class="{ inverted_white_delta: selectorCType }"></i></button>
@@ -559,7 +559,7 @@ export default {
 }
 
 .events-filters ul {
-    top: 28px;
+    top: 30px;
 }
 
 .events-filters ul li {
@@ -580,7 +580,7 @@ export default {
 }
 
 .ul-controller {
-    height: 450px;
+    max-height: 450px;
     overflow-y: scroll;
     margin: 0;
 }
@@ -661,6 +661,14 @@ export default {
 
 .controller-data__events {
     height: 59vh !important;
+}
+
+.events-filter__delta i {
+    right: -10px !important;
+}
+
+.events-filter__delta ul {
+    width: 220px;
 }
 
 @media (min-width: 1500px) {
