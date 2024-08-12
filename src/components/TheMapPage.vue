@@ -287,7 +287,7 @@ export default {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     if (response.status === 200) {
-                        this.lastDataForWidget = response.data[0];
+                        this.lastDataForWidget = response.data[1];
 
                         let date = this.lastDataForWidget.measured_at;
                         let formatDate = date.split(',');
@@ -425,6 +425,7 @@ export default {
     height: 20px;
     color: #293B5F;
     font-weight: 500;
+    text-align: center;
 }
 
 .map-widget {
@@ -637,6 +638,16 @@ export default {
     line-height: 129%;
     color: #0e1626;
     justify-content: flex-start !important;
+}
+
+.ymaps-2-1-79-balloon__close+.ymaps-2-1-79-balloon__content {
+    width: 160px;
+    justify-content: center;
+    display: flex;
+}
+
+.ymaps-2-1-79-balloon__content ymaps {
+    width: 100% !important;
 }
 
 @media (max-width: 1460px) {

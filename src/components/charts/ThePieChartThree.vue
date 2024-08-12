@@ -11,7 +11,8 @@ import Chart from 'chart.js/auto';
 
 export default {
     props: {
-        controllerInfoStorage: Array,
+        // controllerInfoStorage: Array,
+        energyStorage: Object
     },
     data() {
         return {
@@ -21,13 +22,15 @@ export default {
     mounted() {
         let ctx = document.getElementById('p_conChart');
 
-        if (this.controllerInfoStorage.length === 0) {
-            this.value = 0;
-        } else {
-            this.controllerInfoStorage.forEach(el => {
-                this.value = this.value + el.p_con;
-            })
-        }
+        // if (this.controllerInfoStorage.length === 0) {
+        //     this.value = 0;
+        // } else {
+        //     this.controllerInfoStorage.forEach(el => {
+        //         this.value = this.value + el.p_con;
+        //     })
+        // }
+
+        this.value = this.energyStorage.total_p_con;
 
         const chartdata = {
             datasets: [{

@@ -82,14 +82,16 @@
                             <div class="info-block__block">
                                 <h4 class="charge-level">Сгенерированно энергии</h4>
                                 <p class="pie-last-time">{{ dateText }}</p>
-                                <ThePieChartTwo v-if="visibleChart" :controllerInfoStorage="receivedData" />
+                                <ThePieChartTwo v-if="visibleChart" :controllerInfoStorage="receivedData"
+                                    :energyStorage="energyStorage" />
                             </div>
                         </div>
                         <div class="info-block__half">
                             <div class="info-block__block">
                                 <h4 class="charge-level">Потрачено энергии</h4>
                                 <p class="pie-last-time">{{ dateText }}</p>
-                                <ThePieChartThree v-if="visibleChart" :controllerInfoStorage="receivedData" />
+                                <ThePieChartThree v-if="visibleChart" :controllerInfoStorage="receivedData"
+                                    :energyStorage="energyStorage" />
                             </div>
                         </div>
                     </div>
@@ -192,8 +194,6 @@
                         <input type="text" v-model="controllerInfo.description">
                     </div>
                     <p class="controller-info__created"><span>ID</span> {{ controllerInfo.id }}</p>
-                    <!-- <p class="controller-info__created"><span>Тип контроллера</span> {{
-                        controllerInfo.device_type.device_type }}</p> -->
                     <p class="controller-info__created"><span>Тип контроллера</span> {{ dParameters.type }}</p>
                     <p class="controller-info__created"><span>Версия контроллера</span> {{ dParameters.cversion }}</p>
                     <p class="controller-info__created"><span>Версия модема</span> {{ dParameters.mversion }}</p>
@@ -425,7 +425,9 @@ export default {
                 cversion: '',
                 mversion: '',
                 typeconnect: ''
-            }
+            },
+
+            energyStorage: null // хранилище энергии (сгенерированно)
         }
     },
     methods: {
@@ -439,7 +441,6 @@ export default {
             }
         },
         settingsOn() {
-
             if (!this.btns.settingsActive) {
                 for (let btn in this.btns) { // выключение всех кнопок
                     this.btns[btn] = false;
@@ -522,7 +523,10 @@ export default {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     if (response.status === 200) {
+                        // this.controllerInfoStorage = response.data;
                         this.controllerInfoStorage = response.data;
+                        this.energyStorage = this.controllerInfoStorage[0];
+                        this.controllerInfoStorage.shift();
 
                         if (!this.mapIndication) {
                             this.drawControllerMap(this.controllerInfoStorage[0]);
@@ -531,6 +535,7 @@ export default {
                         if (this.controllerInfoStorage.length === 0) {
                             this.indicatorSearchLastEntry = true; // найти последнюю запись
                             this.thereIsData = true; // показать блок «Нет данных за этот период»
+                            this.receivedData = [];
                         }
 
                         if (this.controllerInfoStorage.length !== 0) {
@@ -675,6 +680,14 @@ export default {
                     if (this.controllerInfo.coordinates_manually) {
                         this.manCoordsInput = this.coordinates.latitude + ',N,' + this.coordinates.longitude + ',E';
                     }
+                }
+            }
+
+            let element = document.getElementById('map-dashboard');
+
+            if (element !== null) {
+                if (element.firstChild !== null) {
+                    element.removeChild(element.firstChild);
                 }
             }
 
@@ -838,6 +851,8 @@ export default {
                 }).then((response) => {
                     if (response.status === 200) {
                         this.lastResult = response.data;
+                        this.lastResult.shift();
+                        // this.lastResult = response.data.shift();
 
                         let date = this.lastResult[0].created_at;
                         let formatDate = date.split(',');
@@ -1063,14 +1078,12 @@ export default {
             });
 
         // Параметры устройства (таблица с номерами регистра)
-        console.log(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/flexdata/`)
         axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/flexdata/`,
             {
                 headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
             }).then((response) => {
                 if (response.status === 200) {
                     let arr = response.data;
-                    console.log(arr);
 
                     for (let key in arr) {
                         if (arr[key] !== null) {
@@ -1673,7 +1686,7 @@ export default {
     font-weight: 500;
     font-size: 14px;
     text-transform: uppercase;
-    border-radius: 16px;
+    border-radius: 4px;
 }
 
 .dashboard-table {
