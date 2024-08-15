@@ -37,6 +37,10 @@
             </div>
             <div class="data-filter__container">
                 <div className="datetext">{{ dateText }}</div>
+                <button v-if="btns.dataActive" @click="saveXMLData()" class="account__add-users save-xml__data">Скачать
+                    XML</button>
+                <button v-if="btns.eventsActive" @click="saveXMLEvents()"
+                    class="account__add-users save-xml__data">Скачать XML</button>
                 <div class="controller-nav__data-filter">
                     <button class="dropdown__button dropdown__button-data-filter" @click="chooseAccessLevel()"
                         v-bind:class="{ opened_button: selectortimeVisible }">{{ selectortimeContent }}<i
@@ -322,6 +326,8 @@
 </template>
 <script>
 import axios from 'axios';
+import * as XLSX from 'xlsx'; // Импортируем библиотеку xlsx
+
 import TheBarChart from './charts/TheBarChart.vue';
 import TheVoltageChart from './charts/TheVoltageChart.vue';
 import ThePieChart from './charts/ThePieChart.vue';
@@ -1037,6 +1043,67 @@ export default {
                     console.log(error);
                 });
             }
+        },
+        saveXMLData() {
+            // Заголовки
+            const headers = [
+                'дата/время',
+                'Напряжение PV(В)',
+                'Напряжение АКБ(В)',
+                'Напряжение нагрузки(В)',
+                'Ток PV(А)',
+                'Ток АКБ(А)',
+                'Ток нагрузки(А)'
+            ];
+
+            // Формируем данные для таблицы
+            const rows = this.receivedData.map(info => [
+                info.created_at,
+                info.pv_v,
+                info.bat_v,
+                info.load_v,
+                info.pv_i,
+                info.bat_i,
+                info.load_i,
+            ]);
+
+            // Объединяем заголовки и строки данных
+            const data = [headers, ...rows];
+
+            // Создаем книгу Excel и добавляем туда лист с данными
+            const worksheet = XLSX.utils.aoa_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Данные');
+
+            // Генерируем файл Excel
+            XLSX.writeFile(workbook, `Данные / ${this.controllerInfo.name} / ${this.controllerInfo.sn} / ${this.dateText}.xlsx`);
+        },
+        saveXMLEvents() {
+            // Заголовки
+            const headers = [
+                'дата/время',
+                'Код',
+                'Описание',
+                'Тип'
+            ];
+            // Формируем данные для таблицы
+            const rows = this.lastEvents.map(info => [
+                info.measured_at,
+                info.code,
+                info.name,
+                info.type
+            ]);
+
+            // Объединяем заголовки и строки данных
+            const data = [headers, ...rows];
+
+            // Создаем книгу Excel и добавляем туда лист с данными
+            const worksheet = XLSX.utils.aoa_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Данные');
+
+            // Генерируем файл Excel
+            XLSX.writeFile(workbook, `События / ${this.controllerInfo.name} / ${this.controllerInfo.sn} / ${this.dateText}.xlsx`);
         }
     },
     mounted() {
@@ -1349,6 +1416,7 @@ export default {
     align-items: center;
     margin-right: 14px;
     color: #294b8e;
+    height: 40px;
 }
 
 .controller-settings {

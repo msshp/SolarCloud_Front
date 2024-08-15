@@ -59,7 +59,7 @@
                 <div class="controller-nav__data-filter">
                     <button class="dropdown__button dropdown__button-data-filter dropdown__set dropdown__set-date"
                         @click="chooseTime()" v-bind:class="{ opened_button: selectortimeVisible }">{{
-                            selectortimeContent }}<i class="white_delta"
+                            selectortimeContent }}<i class="white_delta white_delta-e"
                             v-bind:class="{ inverted_white_delta: selectortimeVisible }">
                         </i></button>
                     <ul class="dropdown__list dropdown__list-data-filter dropdown__list-set ul_date"
@@ -82,7 +82,7 @@
                 </div>
             </div>
             <div class="info-line info-line__title">
-                <div class="measured_at">Контроллер</div>
+                <div class="c_name">Контроллер</div>
                 <div class="measured_at">дата/время</div>
                 <div>Код</div>
                 <div class="eventstable-desc">Описание</div>
@@ -91,7 +91,7 @@
             <div class="controller-data controller-data__events">
                 <div className="info-line" v-for="event in events" :key="event"
                     :style="{ backgroundColor: event.color }">
-                    <div class="measured_at">{{ event.device }}</div>
+                    <div class="c_name">{{ event.device }}</div>
                     <div class="measured_at">{{ event.measured_at }}</div>
                     <div>{{ event.code }}</div>
                     <div class="eventstable-desc">{{ event.name }}</div>
@@ -669,6 +669,15 @@ export default {
 
 .events-filter__delta ul {
     width: 220px;
+}
+
+.white_delta-e {
+    height: 32px !important;
+}
+
+.c_name {
+    width: 248px !important;
+    font-weight: 500 !important;
 }
 
 @media (min-width: 1500px) {

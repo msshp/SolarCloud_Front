@@ -465,6 +465,12 @@ tbody tr:hover {
     padding-bottom: 8px;
 }
 
+.save-xml__data {
+    width: 148px;
+    height: 40px;
+    margin: 0 8px 0 0 !important;
+}
+
 @media (max-width: 1840px) {
     .sidenav {
         width: 17%;
