@@ -30,8 +30,8 @@
                         </div>
                         <div class="accordeon-item__content-info">
                             <div>{{ controllerMapInfo.sn }}</div>
-                            <div>{{ controllerMapInfo.device_type.device_type }}</div>
-                            <div>{{ controllerMapInfo.device_type.description }}</div>
+                            <div>{{ controllerMapInfo.device_type_name.device_type_name }}</div>
+                            <div>{{ controllerMapInfo.device_type_name.description }}</div>
                             <div>{{ lastDataForWidget.dbi }}</div>
                             <div>{{ lastDataForWidget.load_mode }}</div>
                         </div>
@@ -91,7 +91,8 @@ import axios from 'axios';
 
 export default {
     props: {
-        saveUserData: Object
+        saveUserData: Object,
+        controllerList: Array
     },
     data() {
         return {
@@ -105,7 +106,7 @@ export default {
                 account: null,
                 created_at: "",
                 description: "",
-                device_type: { id: null, device_type: '' },
+                device_type_name: { id: null, device_type_name: '' },
                 gps: "",
                 id: null,
                 installer: null,
@@ -139,49 +140,9 @@ export default {
         }
     },
     mounted() {
-        axios.get(`http://cloud.io-tech.ru/api/users/${this.saveUserData.id}/devices/?limit=100000`, // запросить координаты
-            {
-                headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
-            }).then((response) => {
-                // обработка успешного запроса
-                this.allDevicesStorage = response.data.results;
-                this.getInfoForPlaceMark();
-            }).catch((error) => {
-                // обработка ошибки
-                console.log(error);
-            });
+        this.drawMap();
     },
     methods: {
-        getInfoForPlaceMark() {
-            axios.get('http://cloud.io-tech.ru/api/devices/limited/?limit=10000', // запросить статусы
-                {
-                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
-                }).then((response) => {
-                    // обработка успешного запроса
-                    this.allDevicesInfoPlacemark = response.data.results;
-                    this.mergePropertiesForPlaceMark(); // объединить координаты и статусы в один объект
-                }).catch((error) => {
-                    // обработка ошибки
-                    console.log(error);
-                });
-        },
-        mergePropertiesForPlaceMark() {
-            const mergeArraysById = () => {
-                const mergedArray = [];
-                this.allDevicesStorage.forEach((deviceStorage) => {
-                    const matchingDevice = this.allDevicesInfoPlacemark.find((deviceInfo) => deviceInfo.id === deviceStorage.id);
-
-                    if (matchingDevice) {
-                        const mergedDevice = { ...deviceStorage, ...matchingDevice };
-                        mergedArray.push(mergedDevice);
-                    }
-                });
-                return mergedArray;
-            }
-
-            this.newArrayWithMergedObjects = mergeArraysById();
-            this.drawMap(); // нарисовать карту
-        },
         drawMap() {
             // карта
             this.map.loading = false;
@@ -201,7 +162,7 @@ export default {
                     });
                 });
 
-                this.newArrayWithMergedObjects.forEach((el) => {
+                this.controllerList.forEach((el) => {
 
                     if (el.gps !== null) {
                         let result = this.convertCoordinates(el.gps);
@@ -213,18 +174,27 @@ export default {
                         // Зеленый – все ок
 
                         let icon = 'greencircle.svg';
-                        let thisdate = this.formatDate(el.status.last_session);
-                        let targetDate = new Date(thisdate); // Целевая дата
-                        let currentDate = new Date(); // Текущее время
+                        if (el.status !== null) {
 
-                        let diffInHours = Math.abs(targetDate - currentDate) / (1000 * 60 * 60); // Вычисляем разницу в часах между целевой датой и текущим временем
+                            if (el.status.created_at === '-') {
+                                icon = 'redcircle.svg';
+                            } else {
+                                let thisdate = this.formatDate(el.status.created_at);
+                                let targetDate = new Date(thisdate); // Целевая дата
+                                let currentDate = new Date(); // Текущее время
 
-                        if (diffInHours >= 3) { // Проверяем, больше ли разница 3 часов
-                            icon = 'redcircle.svg';
-                        } else {
-                            if (el.status.bat_v !== null && el.status.bat_v < 11.5) {
-                                icon = 'yellowcircle.svg';
+                                let diffInHours = Math.abs(targetDate - currentDate) / (1000 * 60 * 60); // Вычисляем разницу в часах между целевой датой и текущим временем
+
+                                if (diffInHours >= 3) { // Проверяем, больше ли разница 3 часов
+                                    icon = 'redcircle.svg';
+                                } else {
+                                    if (el.status.bat_v !== null && el.status.bat_v < 11.5) {
+                                        icon = 'yellowcircle.svg';
+                                    }
+                                }
                             }
+                        } else {
+                            icon = 'redcircle.svg';
                         }
 
                         let myPlacemark = new ymaps.Placemark([result.latitude, result.longitude], {
@@ -273,8 +243,8 @@ export default {
                 }).then((response) => {
                     if (response.status === 200) {
                         this.controllerMapInfo = response.data;
-                        if (this.controllerMapInfo.device_type.description === undefined) {
-                            this.controllerMapInfo.device_type.description = '–';
+                        if (this.controllerMapInfo.device_type_name.description === undefined) {
+                            this.controllerMapInfo.device_type_name.description = '–';
                         }
                     }
                 }).catch((error) => {
@@ -302,7 +272,7 @@ export default {
                         let diffInHours = Math.abs(targetDate - currentDate) / (1000 * 60 * 60); // Вычисляем разницу в часах между целевой датой и текущим временем
 
                         if (diffInHours >= 3) { // Проверяем, больше ли разница 3 часов
-                            this.lastTimeColor = false;
+                            this.lastTimeColor = false; // красный
                         }
                         /////////////
 
@@ -385,12 +355,20 @@ export default {
         },
         formatDate(date) {
             let dateString = date;
-            let [datePart, timePart] = dateString.split(',');
+            let formattedDate;
+            if (date.split(':').length == 2) {
+                let [datePart, timePart] = dateString.split(' ');
+                let [day, month, year] = datePart.split('.');
+                let [hours, minutes] = timePart.split(':');
 
-            let [day, month, year] = datePart.split('.');
-            let [hours, minutes, seconds] = timePart.split(':');
+                formattedDate = new Date(year, month - 1, day, hours, minutes);
+            } else {
+                let [datePart, timePart] = dateString.split(',');
+                let [day, month, year] = datePart.split('.');
+                let [hours, minutes, seconds] = timePart.split(':');
 
-            let formattedDate = new Date(year, month - 1, day, hours, minutes, seconds);
+                formattedDate = new Date(year, month - 1, day, hours, minutes, seconds);
+            }
 
             return formattedDate.toString();
         }

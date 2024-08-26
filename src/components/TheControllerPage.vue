@@ -373,7 +373,7 @@ export default {
                 account: '',
                 created_at: "",
                 description: "Описание",
-                device_type: { id: '', device_type: '' },
+                device_type_name: { id: '', device_type_name: '' },
                 id: '',
                 installer: null,
                 name: "Устройство",
@@ -697,10 +697,14 @@ export default {
                 }
             }
 
+            let zoom = 15;
+            if (this.coordinates.latitude === 55.76 && this.coordinates.longitude === 37.64) { // если нет координат от устройства, то масштаб оставить 10
+                zoom = 10;
+            }
             ymaps.ready(() => {
                 const dashMap = new ymaps.Map('map-dashboard', {
                     center: [this.coordinates.latitude, this.coordinates.longitude],
-                    zoom: 15
+                    zoom: zoom
                 });
                 if (this.coord !== null && this.coord !== undefined) {
                     // установить цвет метки
@@ -860,10 +864,16 @@ export default {
                         this.lastResult.shift();
                         // this.lastResult = response.data.shift();
 
-                        let date = this.lastResult[0].created_at;
-                        let formatDate = date.split(',');
-                        this.lastResult[0].created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
-                        this.lastReleaseDate = this.lastResult[0].created_at;
+                        if (this.lastResult[0] !== undefined) {
+                            let date = this.lastResult[0].created_at;
+                            let formatDate = date.split(',');
+                            this.lastResult[0].created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+                            this.lastReleaseDate = this.lastResult[0].created_at;
+                        } else {
+                            this.lastResult[0] = {
+                                created_at: '-'
+                            }
+                        }
 
                         this.batCChart = true;
                         this.lastReleaseSignal = '-';

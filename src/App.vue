@@ -134,10 +134,10 @@
                 <TheControlPage v-if="pages.controlPageVisibility" />
                 <TheProjectPage v-if="pages.projectPageVisibility" />
                 <TheUserListPage v-if="pages.listUsersPageVisibility" :saveUserData="saveUserData" :access="access" />
-                <TheMapPage v-if="pages.mapPageVisibility" :saveUserData="saveUserData"
+                <TheMapPage v-if="pages.mapPageVisibility" :saveUserData="saveUserData" :controllerList="controllerList"
                     @openMainControllerPage="openMainControllerPage" />
                 <TheListPage v-if="pages.listPageVisibility" @openMainControllerPage="openMainControllerPage"
-                    :access="access" :saveUserData="saveUserData" />
+                    :access="access" :saveUserData="saveUserData" :controllerList="controllerList" />
                 <ThePersonalArea v-if="pages.personalAreaPageVisibility" :saveUserData="saveUserData"
                     @editAuthorizedUser="editAuthorizedUser" />
                 <TheSubscriptionPage v-if="pages.subscriptionPageVisibility" />
@@ -241,7 +241,10 @@ export default {
                 }
             },
             access: true,
-            controllerId: null
+            controllerId: null,
+
+            controllerList: [],
+            logInIndication: false // индикатор для включения карты
         };
     },
     methods: {
@@ -408,8 +411,12 @@ export default {
         },
         logOut() {
             // удалить токен текущего пользователя
-
             sessionStorage.removeItem('token');
+
+            this.controllerList = [];
+
+            this.logInIndication = false;
+            clearTimeout(this.getMainData); // остановить запрос по всем устройствам
 
             this.userEmail = '';
             this.userPass = '';
@@ -434,7 +441,8 @@ export default {
                 }).then((response) => {
                     // обработка успешного запроса
                     this.saveUserData = response.data;
-                    this.pages.mapPageVisibility = true;
+
+                    this.getMainData(); // запустить функцию, запрос на все устройства
 
                     if (this.saveUserData.profile.role === 'User') {
                         this.access = false;
@@ -458,6 +466,56 @@ export default {
                     // обработка ошибки
                     console.log(error);
                 })
+        },
+        getMainData() {
+            axios.get('http://cloud.io-tech.ru/api/devices/limited/?limit=10000',
+                {
+                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+                }).then((response) => {
+                    // обработка успешного запроса
+                    this.controllerList = response.data.results;
+
+                    this.controllerList.forEach(el => {
+                        if (el.status === null) {
+                            el.status = {
+                                created_at: '-',
+                                bat_v: '-',
+                                dbi: '-',
+                                event: '-'
+                            }
+                        } else {
+                            let date = el.status.measured_at;
+                            if (date !== null) {
+                                let formatDate = date.split(',');
+                                el.status.created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+                            }
+                        }
+                    })
+
+                    this.controllerList.sort(function (a, b) { // сортировка controllerList по id
+                        if (a.id > b.id) {
+                            return 1;
+                        }
+                        if (a.id < b.id) {
+                            return -1;
+                        }
+                        return 0;
+                    });
+
+                    if (!this.logInIndication) {
+                        this.pages.mapPageVisibility = true; // показать карту (только первый раз);
+                        this.logInIndication = true;
+                    }
+
+                    if (this.mainPageVisibility) { // запустить таймаут пока пользователь авторизован, каждые 5 минут запрос на устройства
+                        setTimeout(this.getMainData, 300000);
+                        // setTimeout(this.getMainData, 3000);
+                    }
+
+                }).catch((error) => {
+                    // обработка ошибки
+                    console.log(error);
+                });
         },
         dateFormatting() {
             // удаление запятой в датах

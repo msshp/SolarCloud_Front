@@ -39,7 +39,8 @@
                 </div>
             </div>
             <tbody class="list-tbody" v-if="list.listTable">
-                <TheControllerLine :controllerList="controllerList" @openMainControllerPage="openMainControllerPage"
+                <TheControllerLine :controllerList="controllerTableList"
+                    @openMainControllerPage="openMainControllerPage"
                     @deleteControllerFromList="deleteControllerFromList" :access="access" />
             </tbody>
         </table>
@@ -61,7 +62,8 @@ export default {
     },
     props: {
         access: Boolean,
-        saveUserData: Object
+        saveUserData: Object,
+        controllerList: Array
     },
     data() {
         return {
@@ -70,7 +72,7 @@ export default {
             searchIdControllerById: '',
             searchValControllerByControllerName: '',
             searchValControllerBySn: '',
-            controllerList: [],
+            controllerTableList: [],
 
             list: {
                 loading: true,
@@ -150,10 +152,10 @@ export default {
                 const cellA = a.querySelector(`td:nth-child(${cellIndex})`).textContent;
                 const cellB = b.querySelector(`td:nth-child(${cellIndex})`).textContent;
 
-                if (cellA === '' || cellB === '') {
-                    if (cellA === '') {
+                if (cellA === '-' || cellB === '-') {
+                    if (cellA === '-') {
                         return 1;
-                    } else if (cellB === '') {
+                    } else if (cellB === '-') {
                         return -1;
                     }
                 }
@@ -179,10 +181,10 @@ export default {
                 const cellA = a.querySelector(`td:nth-child(${cellIndex})`).textContent;
                 const cellB = b.querySelector(`td:nth-child(${cellIndex})`).textContent;
 
-                if (cellA === '' || cellB === '') {
-                    if (cellA === '') {
+                if (cellA === '-' || cellB === '-') {
+                    if (cellA === '-') {
                         return 1;
-                    } else if (cellB === '') {
+                    } else if (cellB === '-') {
                         return -1;
                     }
                 }
@@ -213,42 +215,24 @@ export default {
             this.getControllerList();
         },
         getControllerList() {
-            axios.get('http://cloud.io-tech.ru/api/devices/limited/?limit=10000',
-                {
-                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
-                }).then((response) => {
-                    // обработка успешного запроса
-                    this.controllerList = response.data.results;
+            this.controllerTableList = this.controllerList;
+            this.controllerTableList.sort(function (a, b) { // сортировка controllerList по id
+                if (a.id > b.id) {
+                    return 1;
+                }
+                if (a.id < b.id) {
+                    return -1;
+                }
+                return 0;
+            });
 
-                    this.controllerList.forEach(el => {
-                        let date = el.status.last_session;
-
-                        if (date !== null) {
-                            let formatDate = date.split(',');
-                            el.status.created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
-                        }
-                    })
-
-                    this.controllerList.sort(function (a, b) { // сортировка controllerList по id
-                        if (a.id > b.id) {
-                            return 1;
-                        }
-                        if (a.id < b.id) {
-                            return -1;
-                        }
-                        return 0;
-                    });
-
-                    this.list.loading = false;
-                    this.list.listTable = true;
-                }).catch((error) => {
-                    // обработка ошибки
-                    console.log(error);
-                });
+            this.list.loading = false;
+            this.list.listTable = true;
         },
-        deleteControllerFromList(id) {
-            this.controllerList = this.controllerList.filter((controller) => controller.id !== id);
-        }
+        // deleteControllerFromList(id) {
+        //     // controllerTableList
+        //     this.controllerList = this.controllerList.filter((controller) => controller.id !== id);
+        // }
     },
     mounted() {
         this.getControllerList(); // вывести список контроллеров

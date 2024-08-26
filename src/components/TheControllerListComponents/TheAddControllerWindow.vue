@@ -9,7 +9,7 @@
                 <ul class="dropdown__list" v-bind:class="{ dropdown__list_visible: selectorVisible }">
                     <div></div>
                     <li class="dropdown__list-item" v-for="item in deviceTypesStorage" :key="item"
-                        @click="chooseThisType(item)">{{ item.device_type }}</li>
+                        @click="chooseThisType(item)">{{ item.device_type_name }}</li>
                 </ul>
                 <input type="text" v-model.trim="newContrName" placeholder="Название">
                 <input type="text" v-model.trim="newContrDesc" placeholder="Описание">
@@ -71,7 +71,7 @@ export default {
             this.selectorVisible = !this.selectorVisible;
         },
         chooseThisType(item) {
-            this.selectorContent = item.device_type;
+            this.selectorContent = item.device_type_name;
             this.numbSelectorContent = item.id; // выбор из списка
             this.selectorVisible = false;
         },
@@ -82,7 +82,7 @@ export default {
                     "description": this.newContrDesc,
                     "sn": this.newContrSn,
                     "pin": this.newContrPin,
-                    "device_type": this.numbSelectorContent,
+                    "device_type_name": this.numbSelectorContent,
                     "account": this.saveUserData.profile.account,
                     "installer": this.serviseComp
                 }, {
@@ -144,7 +144,7 @@ export default {
         }
     },
     mounted() {
-        axios.get('http://cloud.io-tech.ru/api/device_types/', // Список типов устройств
+        axios.get('http://cloud.io-tech.ru/api/device_type_names/', // Список типов устройств
             {
                 headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
             }).then((response) => {
