@@ -53,7 +53,6 @@
 
 import TheControllerLine from './TheControllerLine.vue'
 import TheAddControllerWindow from './TheControllerListComponents/TheAddControllerWindow.vue'
-import axios from 'axios';
 
 export default {
     components: {
