@@ -9,7 +9,7 @@
                 <ul class="dropdown__list" v-bind:class="{ dropdown__list_visible: selectorVisible }">
                     <div></div>
                     <li class="dropdown__list-item" v-for="item in deviceTypesStorage" :key="item"
-                        @click="chooseThisType(item)">{{ item.device_type_name }}</li>
+                        @click="chooseThisType(item)">{{ item.device_type }}</li>
                 </ul>
                 <input type="text" v-model.trim="newContrName" placeholder="Название">
                 <input type="text" v-model.trim="newContrDesc" placeholder="Описание">
@@ -71,21 +71,28 @@ export default {
             this.selectorVisible = !this.selectorVisible;
         },
         chooseThisType(item) {
-            this.selectorContent = item.device_type_name;
+            this.selectorContent = item.device_type;
             this.numbSelectorContent = item.id; // выбор из списка
             this.selectorVisible = false;
         },
         sendNewController() {
+            let newController = {
+                "name": this.newContrName,
+                "description": this.newContrDesc,
+                "sn": this.newContrSn,
+                "pin": this.newContrPin,
+                "device_type": this.numbSelectorContent,
+                "account": this.saveUserData.profile.account,
+                "installer": this.serviseComp,
+                status: {
+                    created_at: '-',
+                    bat_v: '-',
+                    dbi: '-',
+                    event: '-'
+                }
+            }
             axios.post('http://cloud.io-tech.ru/api/devices/',
-                {
-                    "name": this.newContrName,
-                    "description": this.newContrDesc,
-                    "sn": this.newContrSn,
-                    "pin": this.newContrPin,
-                    "device_type_name": this.numbSelectorContent,
-                    "account": this.saveUserData.profile.account,
-                    "installer": this.serviseComp
-                }, {
+                newController, {
                 headers: {
                     'Authorization': `Token ${sessionStorage.getItem('token')}`,
                     'Content-Type': 'application/json; charset=utf-8'
@@ -93,7 +100,7 @@ export default {
             }).then((response) => { // обработка ошибок
                 if (response.status === 201) { // контроллер успешно добавлен
 
-                    this.$emit('newControllerLine');
+                    this.$emit('newControllerLine', newController);
 
                     this.newContrSn = '';
                     this.newContrPin = '';
@@ -114,6 +121,7 @@ export default {
                     this.errorWindow();
                 }
             }).catch((error) => {
+                console.log(error)
                 this.addErrorText = error.request.responseText;
                 this.errorWindow();
             });
@@ -144,7 +152,7 @@ export default {
         }
     },
     mounted() {
-        axios.get('http://cloud.io-tech.ru/api/device_type_names/', // Список типов устройств
+        axios.get('http://cloud.io-tech.ru/api/device_types/', // Список типов устройств
             {
                 headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
             }).then((response) => {

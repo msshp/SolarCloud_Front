@@ -211,8 +211,9 @@ export default {
         closeAddWindow() {
             this.addControllerWindowVis = false; // закрытие окна «Добавление пользователя»
         },
-        addNewControllerToList() {
-            this.getControllerList();
+        addNewControllerToList(newobj) {
+            this.$emit('addControllerToMainList');
+            this.controllerTableList.push(newobj);
         },
         getControllerList() {
             this.controllerTableList = this.controllerList;
@@ -229,10 +230,9 @@ export default {
             this.list.loading = false;
             this.list.listTable = true;
         },
-        // deleteControllerFromList(id) {
-        //     // controllerTableList
-        //     this.controllerList = this.controllerList.filter((controller) => controller.id !== id);
-        // }
+        deleteControllerFromList(id) {
+            this.controllerTableList = this.controllerList.filter((controller) => controller.id !== id);
+        }
     },
     mounted() {
         this.getControllerList(); // вывести список контроллеров

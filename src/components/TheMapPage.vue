@@ -30,8 +30,8 @@
                         </div>
                         <div class="accordeon-item__content-info">
                             <div>{{ controllerMapInfo.sn }}</div>
-                            <div>{{ controllerMapInfo.device_type_name.device_type_name }}</div>
-                            <div>{{ controllerMapInfo.device_type_name.description }}</div>
+                            <div>{{ controllerMapInfo.device_type.device_type }}</div>
+                            <div>{{ controllerMapInfo.device_type.description }}</div>
                             <div>{{ lastDataForWidget.dbi }}</div>
                             <div>{{ lastDataForWidget.load_mode }}</div>
                         </div>
@@ -106,7 +106,7 @@ export default {
                 account: null,
                 created_at: "",
                 description: "",
-                device_type_name: { id: null, device_type_name: '' },
+                device_type: { id: null, device_type: '' },
                 gps: "",
                 id: null,
                 installer: null,
@@ -243,8 +243,9 @@ export default {
                 }).then((response) => {
                     if (response.status === 200) {
                         this.controllerMapInfo = response.data;
-                        if (this.controllerMapInfo.device_type_name.description === undefined) {
-                            this.controllerMapInfo.device_type_name.description = '–';
+                        console.log(this.controllerMapInfo)
+                        if (this.controllerMapInfo.device_type.description === undefined) {
+                            this.controllerMapInfo.device_type.description = '–';
                         }
                     }
                 }).catch((error) => {

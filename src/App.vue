@@ -137,7 +137,9 @@
                 <TheMapPage v-if="pages.mapPageVisibility" :saveUserData="saveUserData" :controllerList="controllerList"
                     @openMainControllerPage="openMainControllerPage" />
                 <TheListPage v-if="pages.listPageVisibility" @openMainControllerPage="openMainControllerPage"
-                    :access="access" :saveUserData="saveUserData" :controllerList="controllerList" />
+                    :access="access" :saveUserData="saveUserData" :controllerList="controllerList"
+                    @deleteControllerFromMainList="deleteControllerFromMainList"
+                    @addControllerToMainList="addControllerToMainList" />
                 <ThePersonalArea v-if="pages.personalAreaPageVisibility" :saveUserData="saveUserData"
                     @editAuthorizedUser="editAuthorizedUser" />
                 <TheSubscriptionPage v-if="pages.subscriptionPageVisibility" />
@@ -145,7 +147,7 @@
                 <TheCommandsPage v-if="pages.commandsPageVisibility" />
                 <TheReportsPage v-if="pages.reportsPageVisibility" />
                 <TheControllerPage v-if="pages.controllerPageVisibility" :controllerId="controllerId" :access="access"
-                    @deleteControllerFromList="openList" />
+                    @deleteControllerFromList="deleteControllerFromList" />
             </div>
         </div>
     </div>
@@ -509,7 +511,6 @@ export default {
 
                     if (this.mainPageVisibility) { // запустить таймаут пока пользователь авторизован, каждые 5 минут запрос на устройства
                         setTimeout(this.getMainData, 300000);
-                        // setTimeout(this.getMainData, 3000);
                     }
 
                 }).catch((error) => {
@@ -619,6 +620,17 @@ export default {
             }
 
             this.dateFormatting();
+        },
+        deleteControllerFromMainList(id) {
+            this.controllerList = this.controllerList.filter((controller) => controller.id !== id);
+        },
+        addControllerToMainList() {
+            clearTimeout(this.getMainData); // остановить запрос по всем устройствам
+            this.getMainData();
+        },
+        deleteControllerFromList(id) { // удаление контроллера (после нажатия на кнопку «Удалить контроллер» из страницы конкретного контроллера)
+            this.controllerList = this.controllerList.filter((controller) => controller.id !== id);
+            this.openList();
         }
     }
 }

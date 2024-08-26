@@ -373,7 +373,7 @@ export default {
                 account: '',
                 created_at: "",
                 description: "Описание",
-                device_type_name: { id: '', device_type_name: '' },
+                device_type: { id: '', device_type: '' },
                 id: '',
                 installer: null,
                 name: "Устройство",
@@ -768,10 +768,15 @@ export default {
 
             let self = this; // Сохраняем ссылку на this
 
+            let zoom = 15;
+            if (this.coordinates.latitude === 55.76 && this.coordinates.longitude === 37.64) { // если нет координат от устройства, то масштаб оставить 10
+                zoom = 10;
+            }
+
             ymaps.ready(() => {
                 const settingsMap = new ymaps.Map('map-settings', {
                     center: [this.coordinates.latitude, this.coordinates.longitude],
-                    zoom: 17
+                    zoom: zoom
                 }, {
                     cursor: 'pointer'
                 });
@@ -1117,6 +1122,8 @@ export default {
         }
     },
     mounted() {
+
+        this.controllerIdDel = this.controllerId;
         // Информация об устройстве
         axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/`,
             {
