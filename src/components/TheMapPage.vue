@@ -148,9 +148,41 @@ export default {
             this.map.loading = false;
             this.map.map = true;
 
+            let mapLatitude = 0;
+            let mapLongitude = 0;
+
+            let count = 0;
+
+            this.controllerList.forEach((el) => {
+
+                if (el.gps !== null) {
+                    let result = this.convertCoordinates(el.gps);
+
+                    if ((Number(result.latitude) >= -90 && Number(result.latitude) <= 90) &&
+                        (Number(result.longitude) >= -180 && Number(result.longitude) <= 180)) {
+                        // Код для случая, когда координаты валидны
+
+                        mapLatitude = mapLatitude + Number(result.latitude);
+                        mapLongitude = mapLongitude + Number(result.longitude);
+
+                        count++;
+                    }
+
+                    // if ((-90 <= Number(result.latitude) <= 90) && (-180 <= Number(result.longitude) <= 180)) {
+                    //     mapLatitude = mapLatitude + Number(result.latitude);
+                    //     mapLongitude = mapLongitude + Number(result.longitude);
+
+                    //     count++;
+                    // }
+                }
+            })
+
+            mapLatitude = mapLatitude / count;
+            mapLongitude = mapLongitude / count;
+
             ymaps.ready(() => {
                 const myMap = new ymaps.Map('map', {
-                    center: [55.76, 37.64],
+                    center: [mapLatitude, mapLongitude],
                     zoom: 10
                 });
 
@@ -243,7 +275,6 @@ export default {
                 }).then((response) => {
                     if (response.status === 200) {
                         this.controllerMapInfo = response.data;
-                        console.log(this.controllerMapInfo)
                         if (this.controllerMapInfo.device_type.description === undefined) {
                             this.controllerMapInfo.device_type.description = '–';
                         }

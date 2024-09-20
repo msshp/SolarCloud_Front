@@ -133,7 +133,7 @@ export default {
                 this.controlList = response.data.results;
                 // ок
                 // разряд аккум
-                // нет связи
+                // нет связи 
 
                 let okStorage = [];
                 // let dischargedStorage = []; // на связь выходил менее 3 часов назад и батарея разряжена
@@ -141,13 +141,17 @@ export default {
                 this.currentDate = new Date(); // Текущее время
 
                 this.controlList.forEach(element => {
-                    let connection = this.checkConnection(element.status.last_session);
-                    // let battery = this.checkBattery(element.status.bat_v)
-
-                    if (connection) { // на связь выходил менее 3 часов назад и батарея в норме
-                        okStorage.push(element);
-                    } else { // на связь выходил больше 3 часов назад
+                    if (element.status === null) {
                         noСonnectionStorage.push(element);
+                    } else {
+                        let connection = this.checkConnection(element.status.created_at);
+                        // let battery = this.checkBattery(element.status.bat_v)
+
+                        if (connection) { // на связь выходил менее 3 часов назад и батарея в норме
+                            okStorage.push(element);
+                        } else { // на связь выходил больше 3 часов назад
+                            noСonnectionStorage.push(element);
+                        }
                     }
                 });
 

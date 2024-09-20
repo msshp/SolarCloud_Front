@@ -1,7 +1,7 @@
 <template>
     <div class="pie-container">
         <canvas id="p_genChart"></canvas>
-        <div class="pie-value pie-energy">{{ value }}<p>вт⋅ч</p>
+        <div class="pie-value pie-energy">{{ value }}<p>{{ unitsOfMeasurement }}</p>
         </div>
     </div>
 </template>
@@ -16,21 +16,26 @@ export default {
     },
     data() {
         return {
-            value: null
+            value: null,
+            unitsOfMeasurement: 'Вт⋅ч'
+        }
+    },
+    methods: {
+        convertWattsToKWh(watts) {
+            if (typeof watts === 'number' && watts >= 1000) {
+                const kilowatts = watts / 1000;
+                this.unitsOfMeasurement = 'кВт⋅ч';
+                return kilowatts.toFixed(1);
+            } else {
+                this.unitsOfMeasurement = 'Вт⋅ч';
+                return watts;
+            }
         }
     },
     mounted() {
         let ctx = document.getElementById('p_genChart');
+        this.value = this.convertWattsToKWh(this.energyStorage.total_p_gen);
 
-        // if (this.controllerInfoStorage.length === 0) {
-        //     this.value = 0;
-        // } else {
-        //     this.controllerInfoStorage.forEach(el => {
-        //         this.value = this.value + el.p_gen;
-        //     })
-        // }
-
-        this.value = this.energyStorage.total_p_gen;
         const chartdata = {
             datasets: [{
                 data: [this.value],

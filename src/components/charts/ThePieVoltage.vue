@@ -2,14 +2,9 @@
     <div class="pie-container">
         <p class="pie-last-time">{{ lastvalueTime }}</p>
         <canvas id="pieVoltage"></canvas>
-        <div class="pie-value pie-voltage">{{ value }}<p>вольт</p>
+        <div class="pie-value pie-voltage">{{ value }}<p>Вольт</p>
         </div>
     </div>
-    <!-- <div class="pie-container">
-        <canvas id="p_genChart"></canvas>
-        <div class="pie-value pie-energy">{{ value }}<p>вт⋅ч</p>
-        </div>
-    </div> -->
 </template>
 
 <script>

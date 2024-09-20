@@ -34,6 +34,8 @@
                 <button @click="dataOn()" v-bind:class="{ controller_btn_active: btns.dataActive }">Детальные
                     данные</button>
                 <button @click="eventsOn()" v-bind:class="{ controller_btn_active: btns.eventsActive }">События</button>
+                <button @click="commandsOn()"
+                    v-bind:class="{ controller_btn_active: btns.commandsActive }">Команды</button>
             </div>
             <div class="data-filter__container">
                 <div className="datetext">{{ dateText }}</div>
@@ -320,6 +322,59 @@
                 </div>
             </div>
         </div>
+        <div v-if="btns.commandsActive" class="dashboard-table">
+            <div class="controller-info controller-info__param-commands">
+                <div class="controller-info__param-commands-div">
+                    <p class="controller-info__block-title controller-info__block-title_par">Добавить команду в очередь
+                    </p>
+                    <div className="info-line info-line__title info-line__par">
+                        <div class="num-reg">№ регистра Название параметра</div>
+                        <div class="val-par">Текущее значение</div>
+                        <div class="val-par">Новое значение</div>
+                    </div>
+                    <div class="value-string"><button class="dropdown__button dropdown__button-command"
+                            @click="chooseContrType()" v-bind:class="{ opened_button: selectorVisible }">{{
+                                selectorContent }}<i class="white_delta white_delta-commands"
+                                v-bind:class="{ inverted_white_delta: selectorVisible }"></i></button>
+                        <ul class="dropdown__list dropdown__list-command"
+                            v-bind:class="{ dropdown__list_visible: selectorVisible }">
+                            <div class="div-command"></div>
+                            <li class="dropdown__list-item dropdown__list-item-command"
+                                v-for="parameter in parametersStorage" :key="parameter"
+                                @click="chooseThisType(parameter)">
+                                <div>{{
+                                    parameter.num }}</div> <span>{{ parameter.namepar }}</span>
+                            </li>
+                        </ul>
+                        <div class="current-val">{{ currentValueCommand }}</div>
+                        <div class="val-par"><input id="new-val-c" type="text"></div>
+                        <div><button class="save-btn save-btn-command" @click="saveNewFlex()">Сохранить</button></div>
+                    </div>
+                </div>
+            </div>
+            <div class="controller-info__param-commands-div command-queue">
+                <p class="controller-info__block-title controller-info__block-title_par">Очередь команд</p>
+                <div className="info-line info-line__title info-line__par info-line-queue">
+                    <div class="num-reg-queue">№ регистра</div>
+                    <div class="name-par-queue">Название параметра</div>
+                    <div class="val-par-queue">Отправлено значение</div>
+                    <div class="val-par-queue">Дата отправки</div>
+                    <div class="response-queue">Ответ</div>
+                    <div class="val-par-queue">Дата регистрации ответа</div>
+                </div>
+                <div>
+                    <div className="info-line info-line__par_line info-line-queue" v-for="parameter in commandQueue"
+                        :key="parameter">
+                        <div class="num-reg-queue">{{ parameter.num }}</div>
+                        <div class="name-par-queue">{{ parameter.namepar }}</div>
+                        <div class="val-par-queue">{{ parameter.val }}</div>
+                        <div class="val-par-queue">{{ parameter.timeSent }}</div>
+                        <div class="response-queue">{{ parameter.response }}</div>
+                        <div class="val-par-queue">{{ parameter.timeReg }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <TheDeleteController v-if="deleteControllerVis" @closeDeleteWindow="closeDeleteWindow"
         :controllerIdDel="controllerIdDel" @deleteControllerFromList="deleteControllerFromList"></TheDeleteController>
@@ -335,6 +390,7 @@ import ThePieChartTwo from './charts/ThePieChartTwo.vue';
 import ThePieChartThree from './charts/ThePieChartThree.vue';
 import ThePieVoltage from './charts/ThePieVoltage.vue';
 import TheDeleteController from './TheControllerListComponents/TheDeleteController.vue';
+// import { getElementsAtEvent } from 'vue-chartjs';
 
 export default {
     components: {
@@ -357,6 +413,7 @@ export default {
                 settingsActive: false,
                 dataActive: false,
                 eventsActive: false,
+                commandsActive: false,
                 loading: true,
                 loadingDashboard: true
             },
@@ -433,10 +490,26 @@ export default {
                 typeconnect: ''
             },
 
-            energyStorage: null // хранилище энергии (сгенерированно)
+            energyStorage: null, // хранилище энергии (сгенерированно)
+
+            commandQueue: [],
+
+            selectorVisible: false,
+            selectorContent: 'Выбрать',
+            currentValueCommand: '',
+            newParameterData: null
         }
     },
     methods: {
+        chooseContrType() {
+            this.selectorVisible = !this.selectorVisible;
+        },
+        chooseThisType(parameter) {
+            this.selectorContent = parameter.num + ' ' + parameter.namepar;
+            this.currentValueCommand = parameter.val; // выбор из списка
+            this.newParameterData = parameter; // выбор из списка
+            this.selectorVisible = false;
+        },
         dashBoardOn() {
             if (!this.btns.dashBoardActive) {
                 for (let btn in this.btns) { // выключение всех кнопок
@@ -466,6 +539,12 @@ export default {
                 this.btns[btn] = false;
             }
             this.btns.eventsActive = true;
+        },
+        commandsOn() {
+            for (let btn in this.btns) { // выключение всех кнопок
+                this.btns[btn] = false;
+            }
+            this.btns.commandsActive = true;
         },
         chooseAccessLevel() {
             this.selectortimeVisible = !this.selectortimeVisible;
@@ -1119,7 +1198,60 @@ export default {
 
             // Генерируем файл Excel
             XLSX.writeFile(workbook, `События / ${this.controllerInfo.name} / ${this.controllerInfo.sn} / ${this.dateText}.xlsx`);
-        }
+        },
+        saveNewFlex() { // to do
+
+            let newV = document.getElementById('new-val-c').value;
+
+            let command = {
+                "cmd_type": "set",
+                "pdu": this.newParameterData.num,
+                "value": newV
+            };
+
+            let timeSent = this.formatDateCommand(new Date());
+
+            axios.post(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/command/`,
+                command, {
+                headers: {
+                    'Authorization': `Token ${sessionStorage.getItem('token')}`,
+                    'Content-Type': 'application/json; charset=utf-8'
+                }
+            }).then((response) => { // обработка ошибок
+                if (response.status === 201) { // данные обновлены
+
+                    let timeReg = this.formatDateCommand(new Date());
+
+                    this.commandQueue.push({
+                        num: this.newParameterData.num,
+                        namepar: this.newParameterData.namepar,
+                        val: newV,
+                        timeSent: timeSent,
+                        response: response.statusText,
+                        timeReg: timeReg
+                    })
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
+        },
+        formatDateCommand(dateString) {
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+            };
+
+            const date = new Date(dateString);
+            const formattedDate = date.toLocaleString('ru-RU', options)
+                .replace(',', '')
+                .replace(/(\d{2})\.(\d{2})\.(\d{4})/, '$2.$1.$3');
+
+            return formattedDate;
+        },
     },
     mounted() {
 
@@ -1170,19 +1302,27 @@ export default {
                     let arr = response.data;
 
                     for (let key in arr) {
+                        let change = true;
+
+                        if (key === '12' || key === '14' || key === '16') { // неизменяемые поля (тип контроллера и версии)
+                            change = false;
+                        }
+
                         if (arr[key] !== null) {
                             this.parametersStorage.push({
                                 'num': Number(key),
                                 'namepar': arr[key].name,
                                 'val': arr[key].value,
-                                'history': ''
+                                'history': '',
+                                'change': change
                             })
                         } else {
                             this.parametersStorage.push({
                                 'num': Number(key),
                                 'namepar': '',
                                 'val': arr[key],
-                                'history': ''
+                                'history': '',
+                                'change': change
                             });
                         }
 
@@ -1312,6 +1452,7 @@ export default {
     display: flex;
     width: 100%;
     justify-content: space-between;
+    align-items: center;
     font-size: 14px;
     background-color: #F8F6F4;
 }
@@ -1373,6 +1514,7 @@ export default {
     margin: 0;
     height: 40px;
     color: #F8F6F4 !important;
+    padding: 0 10px;
 }
 
 .dropdown__set {
@@ -1448,7 +1590,7 @@ export default {
 .controller-info input {
     background-color: transparent;
     color: #0E1626;
-    border: 1px solid rgba(14, 22, 38, 0.5);
+    border: 1px solid rgb(41 75 142);
     padding: 6px 8px;
     border-radius: 8px;
     font-size: 13px;
@@ -2000,6 +2142,11 @@ export default {
     font-family: 'Inter', sans-serif;
 }
 
+.save-btn-command {
+    margin: 0 0 0 24px !important;
+    width: 110px;
+}
+
 .dropdown__list-set {
     top: 29px;
     padding-top: 0px;
@@ -2029,11 +2176,11 @@ export default {
 .info-line__par {
     padding: 8px 0 0 0;
     font-size: 13px !important;
+    justify-content: flex-start;
 }
 
 .num-reg {
-    width: 120px !important;
-    padding: 0 8px 0 0;
+    width: 550px !important;
 }
 
 .history-par {
@@ -2045,7 +2192,7 @@ export default {
 }
 
 .val-par {
-    width: 210px !important;
+    width: 164px !important;
 }
 
 .info-line__par_line div {
@@ -2062,6 +2209,95 @@ export default {
 
 .settings-btns_container {
     display: flex;
+}
+
+.controller-info__param-commands {
+    width: 100%;
+    padding: 0;
+}
+
+.controller-info__param-commands-div {
+    padding: 24px 20px;
+}
+
+.save-title {
+    width: 203px;
+}
+
+.dropdown__list-command {
+    height: 300px;
+    overflow-y: scroll;
+    margin: 70px 24px 0px 24px;
+    width: 520px;
+}
+
+.dropdown__button-command {
+    margin: 0 !important;
+    width: 520px;
+}
+
+.div-command {
+    margin: 4px 0;
+}
+
+.dropdown__list-item-command {
+    margin: 0;
+    border-radius: 4px;
+}
+
+.dropdown__list-item-command div {
+    width: 80px;
+    border: none;
+    margin: 0;
+}
+
+.dropdown__list-item-command span {
+    margin-left: 8px;
+}
+
+.value-string {
+    display: flex;
+    align-items: center;
+}
+
+.current-val {
+    margin-left: 32px;
+    width: 164px;
+}
+
+.white_delta-commands {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+.command-queue {
+    margin-top: 24px;
+    background-color: #f8f6f4;
+    border-radius: 8px;
+}
+
+.num-reg-queue {
+    width: 96px !important;
+    padding: 0 0 0 8px !important;
+}
+
+.name-par-queue {
+    width: 380px !important;
+    padding: 0 !important;
+}
+
+.info-line-queue {
+    justify-content: space-between;
+}
+
+.val-par-queue {
+    width: 185px !important;
+    padding: 0 !important;
+}
+
+.response-queue {
+    width: 140px !important;
+    padding: 0px !important;
 }
 
 @media (max-width: 1600px) {
@@ -2169,10 +2405,6 @@ export default {
 
     .dashboard-event-line div {
         height: 39px !important;
-    }
-
-    .val-par {
-        width: 225px !important;
     }
 }
 

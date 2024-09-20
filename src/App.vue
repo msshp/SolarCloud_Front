@@ -429,7 +429,6 @@ export default {
                 this.pages[page] = false;
             }
 
-            this.pages.mapPageVisibility = true;
             document.getElementById('page-content').classList.remove('overflow_hidden');
         },
         drawLogIn() {
