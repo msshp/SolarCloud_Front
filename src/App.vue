@@ -4,9 +4,10 @@
         <div v-if="loginFormVisibility" class="form">
             <div className="logo-container"><img src="../public/img/logo.png" alt="logo"></div>
             <input type="email" v-model.trim="userEmail" v-bind:class="{ empty_input: userEmailIsEmpty }"
-                placeholder="Email">
+                placeholder="Email" autocomplete="current-password" required>
             <input class="last-input" type="password" v-model.trim="userPass"
-                v-bind:class="{ empty_input: userPassIsEmpty }" placeholder="Пароль">
+                v-bind:class="{ empty_input: userPassIsEmpty }" placeholder="Пароль" autocomplete="current-password"
+                required>
             <button className="login-btn" @click="logIn()">Войти</button>
             <button className="reg-btn" @click="logRegToggle()">Создать проект</button>
         </div>
@@ -24,11 +25,12 @@
             <input type="text" v-model.trim="projUserSurname" v-bind:class="{ empty_input: projUserSurnameIsEmpty }"
                 placeholder="Фамилия пользователя">
             <input type="email" v-model.trim="projUserEmail" v-bind:class="{ empty_input: projUserEmailIsEmpty }"
-                placeholder="Email">
+                placeholder="Email" autocomplete="username">
             <input type="text" v-model.trim="projUserLogin" v-bind:class="{ empty_input: projUserLoginIsEmpty }"
-                placeholder="Логин">
+                placeholder="Логин" required>
             <input class="last-input" type="password" v-model.trim="projUserPass"
-                v-bind:class="{ empty_input: projUserPassIsEmpty }" placeholder="Пароль">
+                v-bind:class="{ empty_input: projUserPassIsEmpty }" placeholder="Пароль" autocomplete="new-password"
+                required>
             <button className="login-btn" @click="createProj()">Создать проект</button>
             <button className="reg-btn" @click="logRegToggle()">Назад</button>
         </div>
@@ -197,6 +199,14 @@ export default {
 
             userEmail: '',
             userPass: '',
+
+            projName: '',
+            projDescription: '',
+            projUserName: '',
+            projUserSurname: '',
+            projUserEmail: '',
+            projUserLogin: '',
+            projUserPass: '',
 
             userEmailIsEmpty: false,
             userPassIsEmpty: false,

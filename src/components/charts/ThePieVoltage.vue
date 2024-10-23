@@ -12,7 +12,7 @@ import Chart from 'chart.js/auto';
 
 export default {
     props: {
-        controllerInfoStorage: Array,
+        telemetryData: Object,
         lastResult: Array
     },
     data() {
@@ -30,13 +30,17 @@ export default {
     },
     mounted() {
         let ctx = document.getElementById('pieVoltage');
-        let lastvalue = this.controllerInfoStorage[0];
+        let lastvalue = this.telemetryData;
 
         if (lastvalue === undefined) {
-            this.lastvalueTime = this.lastResult[0].created_at;
+            this.lastvalueTime = this.lastResult[0].created_at; // последнее пришедшее значение (может быть давно)
             this.value = this.lastResult[0].bat_v;
         } else {
-            this.lastvalueTime = lastvalue.created_at;
+            if (lastvalue.created_at.includes(',')) {
+                let formatDate = lastvalue.created_at.split(',');
+                lastvalue.created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+            }
+            this.lastvalueTime = lastvalue.created_at; // последнее пришедшее значение за заданный период
             this.value = lastvalue.bat_v;
         }
 

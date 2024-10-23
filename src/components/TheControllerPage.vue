@@ -71,14 +71,14 @@
                         <div class="info-block__half">
                             <div class="info-block__block">
                                 <h4 class="charge-level">Напряжение АКБ</h4>
-                                <ThePieVoltage v-if="batCChart" :controllerInfoStorage="receivedData"
+                                <ThePieVoltage :key="forceRenderKey" v-if="batCChart" :telemetryData="telemetryData"
                                     :lastResult="lastResult" />
                             </div>
                         </div>
                         <div class="info-block__half">
                             <div class="info-block__block">
                                 <h4 class="charge-level">Уровень заряда АКБ</h4>
-                                <ThePieChart v-if="batCChart" :controllerInfoStorage="receivedData"
+                                <ThePieChart :key="forceRenderKey" v-if="batCChart" :telemetryData="telemetryData"
                                     :lastResult="lastResult" />
                             </div>
                         </div>
@@ -382,6 +382,7 @@
 <script>
 import axios from 'axios';
 import * as XLSX from 'xlsx'; // Импортируем библиотеку xlsx
+import { EventSourcePolyfill } from "event-source-polyfill";
 
 import TheBarChart from './charts/TheBarChart.vue';
 import TheVoltageChart from './charts/TheVoltageChart.vue';
@@ -497,7 +498,18 @@ export default {
             selectorVisible: false,
             selectorContent: 'Выбрать',
             currentValueCommand: '',
-            newParameterData: null
+            newParameterData: null,
+
+
+            // SSE
+
+            telemetryData: "Нет данных", // Данные телеметрии
+            eventSource: null, // Источник событий SSE
+            reconnectAttempts: 0, // Попытки переподключения
+            messageQueue: [], // Очередь для сообщений
+            processing: false, // Флаг обработки
+
+            forceRenderKey: 0 // для перерисовки компонентов с диаграмами напряжение и уровень заряда
         }
     },
     methods: {
@@ -552,7 +564,7 @@ export default {
         twoDigits(num) {
             return ('0' + num).slice(-2);
         },
-        showDay() {
+        showDay() { //  по умолчанию
             let today = new Date(); // сегодня
             this.dateEnd = `${today.getFullYear()}-${this.twoDigits(today.getMonth() + 1)}-${this.twoDigits(today.getDate())}`; // формат 2024-02-01
             let datestart = new Date(today.getTime());
@@ -608,8 +620,8 @@ export default {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     if (response.status === 200) {
-                        // this.controllerInfoStorage = response.data;
                         this.controllerInfoStorage = response.data;
+
                         this.energyStorage = this.controllerInfoStorage[0];
                         this.controllerInfoStorage.shift();
 
@@ -634,6 +646,8 @@ export default {
                                 el.created_at = a[0].slice(0, -5) + ' ' + a[1].slice(0, -3); // дата без вывода секунд
                             })
 
+                            this.telemetryData = this.receivedData[0]; // последние данные (для напряжения и уровня заряда акб)
+
                             this.lastReleaseDate = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
                             this.lastReleaseSignal = this.receivedData[0].dbi;
                         }
@@ -652,8 +666,107 @@ export default {
                 this.searchLastEntry();
             } else {
                 this.batCChart = true;
+                this.connectSSE(); // подключиться к серверу (SSE)
             }
             this.getErrors();
+        },
+        connectSSE() { // to do
+            if (!sessionStorage.getItem('token')) {
+                alert("Ошибка доступа!");
+                return;
+            }
+
+            this.eventSource = new EventSourcePolyfill(`http://cloud.io-tech.ru/iocloud_sse/`, { // на сервере будет другой адрес iocloud
+                // Обязательно передаем токен в заголовке
+                headers: {
+                    'Token': sessionStorage.getItem('token')
+                }
+            });
+
+            this.eventSource.onopen = () => {
+                this.reconnectAttempts = 0;
+                // console.log("Соединение установлено");
+            }
+
+            this.eventSource.onmessage = (event) => {
+                let messageData = JSON.parse(event.data);
+
+                // Добавляем каждое сообщение в очередь
+                this.messageQueue.push(messageData);
+
+                if (!this.processing) {
+                    this.processMessages();
+                }
+            };
+
+            this.eventSource.onerror = () => {
+                console.error("Ошибка соединения");
+                this.reconnectAttempts += 1;
+
+                if (this.reconnectAttempts > 5) {
+                    this.eventSource.close();
+                } else {
+                    this.eventSource.close();
+                    setTimeout(() => this.connectSSE(), 3000); // Пробуем переподключиться через 3 секунды
+                }
+            };
+        },
+
+        async processMessages() {
+            this.processing = true;  // Устанавливаем флаг, что идет обработка
+
+            while (this.messageQueue.length > 0) {
+                const message = this.messageQueue.shift();  // Забираем первое сообщение из очереди
+
+                try {
+                    // Асинхронная обработка сообщения (например, сохранение в локальное хранилище)
+                    await this.handleMessage(message);
+                } catch (error) {
+                    console.error("Ошибка при обработке сообщения:", error);
+                }
+            }
+
+            this.processing = false;  // Завершаем обработку
+        },
+
+        async handleMessage(message) {
+            // Пример асинхронной обработки сообщения
+            return new Promise((resolve) => {
+
+                // if (message.ping) {
+                //     console.log("Пинг:", message);
+                // }
+
+                if (message.status) {
+                    if (this.controllerInfo.sn === message.status.device_sn) {
+                        // console.log(this.controllerInfo.sn)
+                        // console.log(message.status.device_sn)
+
+
+                        this.telemetryData = message.status.data;  // Обновляем последние данные на экране
+
+                        // console.log("Cтатус для устройства (" + message.status.device_sn + ") обновлен!");
+                        // console.log("Данные: ", message.status.data);
+
+                        // console.log(this.telemetryData)
+
+                        let date = this.telemetryData.created_at;
+                        let formatDate = date.split(',');
+
+                        this.lastReleaseDate = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+                        this.reRender(); //  перерисовка компонентов с напряжением и уровнем заряда
+                    }
+                }
+
+                // if (message.command) {
+                //     console.log("Данные команды: ", message.command.data)
+                // }
+
+                resolve();
+            });
+        },
+        reRender() {
+            this.forceRenderKey++;
         },
         getErrors() {
             axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/event/?date_start=${this.dateStart}`, // вкладка «События»
@@ -700,12 +813,6 @@ export default {
         },
         getEventsForDashbard() {
             let currentDate = new Date();
-
-            // gps: {
-            //     auto: 'координаты авто',
-            //     manual: 'координаты ручные',
-            //     use: 'auto'/'manual'
-            // }
 
             // Вычитаем две недели (14 дней)
             currentDate.setDate(currentDate.getDate() - 14);
@@ -1236,6 +1343,7 @@ export default {
             });
         },
         formatDateCommand(dateString) {
+
             const options = {
                 year: 'numeric',
                 month: '2-digit',
@@ -1249,7 +1357,6 @@ export default {
             const formattedDate = date.toLocaleString('ru-RU', options)
                 .replace(',', '')
                 .replace(/(\d{2})\.(\d{2})\.(\d{4})/, '$2.$1.$3');
-
             return formattedDate;
         },
     },
@@ -1341,6 +1448,12 @@ export default {
                 // обработка ошибки
                 console.log(error);
             });
+    },
+    beforeUnmount() {
+        if (this.eventSource) {
+            this.eventSource.close();
+            // console.log('соединение закрыто');
+        }
     }
 }
 </script>
