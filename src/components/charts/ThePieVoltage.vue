@@ -32,6 +32,11 @@ export default {
         let ctx = document.getElementById('pieVoltage');
         let lastvalue = this.telemetryData;
 
+
+        if (lastvalue === 'Нет данных') {
+            lastvalue = undefined;
+        }
+
         if (lastvalue === undefined) {
             this.lastvalueTime = this.lastResult[0].created_at; // последнее пришедшее значение (может быть давно)
             this.value = this.lastResult[0].bat_v;

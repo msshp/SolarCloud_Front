@@ -31,6 +31,10 @@ export default {
         let ctx = document.getElementById('bat_cChart');
         let lastvalue = this.telemetryData;
 
+        if (lastvalue === 'Нет данных') {
+            lastvalue = undefined;
+        }
+
         if (lastvalue === undefined) {
             this.lastvalueTime = this.lastResult[0].created_at;
             this.value = this.lastResult[0].bat_c;

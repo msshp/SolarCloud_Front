@@ -190,7 +190,36 @@
         <div class="controller-settings" v-if="btns.settingsActive">
             <div class="controller-info__containerone">
                 <div class="controller-info">
-                    <p class="controller-info__block-title">Данные</p>
+                    <div class="title_button">
+                        <div class="controller-info__block-title">Данные</div>
+                        <div v-if="access" class="controller-info__delete" @click="deleteControllerFromSettings()">
+                            <button>Удалить контроллер</button>
+                            <div></div>
+                        </div>
+                    </div>
+
+                    <div class="important_registers">
+                        <div>
+                            <p class="controller-info__created"><span>ID</span> {{ controllerInfo.id }}</p>
+                            <p class="controller-info__created"><span>Hardware version контроллера</span> {{
+                                dParameters.hardcontr }}</p>
+                            <p class="controller-info__created"><span>Hardware version модема</span> {{
+                                dParameters.hardmod }}</p>
+                            <p class="controller-info__created"><span>Адрес сервера</span> {{
+                                dParameters.serveraddress }}</p>
+                        </div>
+                        <div>
+                            <p class="controller-info__created"><span>Дата создания</span> {{ controllerInfo.created_at
+                                }}</p>
+                            <p class="controller-info__created"><span>Software version контроллера</span> {{
+                                dParameters.cversion }}</p>
+                            <p class="controller-info__created"><span>Software version модема</span> {{
+                                dParameters.mversion }}</p>
+                            <p class="controller-info__created"><span>Порт сервера</span> {{ dParameters.serverport }}
+                            </p>
+                        </div>
+                    </div>
+
                     <div class="controller-info__name">
                         <p>Название</p>
                         <input type="text" v-model="controllerInfo.name">
@@ -199,18 +228,8 @@
                         <p>Описание</p>
                         <input type="text" v-model="controllerInfo.description">
                     </div>
-                    <p class="controller-info__created"><span>ID</span> {{ controllerInfo.id }}</p>
-                    <p class="controller-info__created"><span>Тип контроллера</span> {{ dParameters.type }}</p>
-                    <p class="controller-info__created"><span>Версия контроллера</span> {{ dParameters.cversion }}</p>
-                    <p class="controller-info__created"><span>Версия модема</span> {{ dParameters.mversion }}</p>
-                    <p class="controller-info__created"><span>Тип связи</span> {{ dParameters.typeconnect }}</p>
-                    <p class="controller-info__created"><span>Дата создания</span> {{ controllerInfo.created_at }}</p>
                     <div class="settings-btns_container">
-                        <div v-if="access" class="controller-info__delete" @click="deleteControllerFromSettings()">
-                            <button>Удалить
-                                контроллер</button>
-                            <div></div>
-                        </div><button @click="updateInfo()">Обновить</button>
+                        <button @click="updateInfo()">Обновить</button>
                         <div class="update" v-bind:class="{ update_visible: updateVisible, update_error: updateError }">
                             {{ updateText
                             }}</div>
@@ -264,8 +283,8 @@
                 <p class="controller-info__block-title controller-info__block-title_par">Параметры</p>
                 <div className="info-line info-line__title info-line__par">
                     <div class="num-reg">№ регистра</div>
-                    <div class="name-par">название параметра</div>
-                    <div class="val-par">значение</div>
+                    <div class="name-par">Параметр</div>
+                    <div class="val-par">Значение</div>
                     <div class="history-par"></div>
                 </div>
                 <div>
@@ -328,7 +347,7 @@
                     <p class="controller-info__block-title controller-info__block-title_par">Добавить команду в очередь
                     </p>
                     <div className="info-line info-line__title info-line__par">
-                        <div class="num-reg">№ регистра Название параметра</div>
+                        <div class="num-reg">№ регистра Параметр</div>
                         <div class="val-par">Текущее значение</div>
                         <div class="val-par">Новое значение</div>
                     </div>
@@ -356,7 +375,7 @@
                 <p class="controller-info__block-title controller-info__block-title_par">Очередь команд</p>
                 <div className="info-line info-line__title info-line__par info-line-queue">
                     <div class="num-reg-queue">№ регистра</div>
-                    <div class="name-par-queue">Название параметра</div>
+                    <div class="name-par-queue">Параметр</div>
                     <div class="val-par-queue">Отправлено значение</div>
                     <div class="val-par-queue">Дата отправки</div>
                     <div class="response-queue">Ответ</div>
@@ -488,7 +507,13 @@ export default {
                 type: '',
                 cversion: '',
                 mversion: '',
-                typeconnect: ''
+                typeconnect: '',
+                hardcontr: '',
+                hardmod: '',
+                serveraddress: '',
+                softcontr: '',
+                softmod: '',
+                serverport: ''
             },
 
             energyStorage: null, // хранилище энергии (сгенерированно)
@@ -1415,22 +1440,26 @@ export default {
                             change = false;
                         }
 
-                        if (arr[key] !== null) {
-                            this.parametersStorage.push({
-                                'num': Number(key),
-                                'namepar': arr[key].name,
-                                'val': arr[key].value,
-                                'history': '',
-                                'change': change
-                            })
-                        } else {
-                            this.parametersStorage.push({
-                                'num': Number(key),
-                                'namepar': '',
-                                'val': arr[key],
-                                'history': '',
-                                'change': change
-                            });
+                        const keysToExclude = ['14', '16', '40999', '41027', '41028', '41042', '41043', '41044'];
+
+                        if (!keysToExclude.includes(key)) {  // код для выполнения, если key не содержится в массиве keysToExclude
+                            if (arr[key] !== null) {
+                                this.parametersStorage.push({
+                                    'num': Number(key),
+                                    'namepar': arr[key].name,
+                                    'val': arr[key].value,
+                                    'history': '',
+                                    'change': change
+                                })
+                            } else {
+                                this.parametersStorage.push({
+                                    'num': Number(key),
+                                    'namepar': '',
+                                    'val': arr[key],
+                                    'history': '',
+                                    'change': change
+                                });
+                            }
                         }
 
                         if (Number(key) === 12 && arr[key] !== null) {
@@ -1441,6 +1470,14 @@ export default {
                             this.dParameters.mversion = arr[key].value;
                         } else if (Number(key) === 41042 && arr[key] !== null) {
                             this.dParameters.typeconnect = arr[key].value;
+                        } else if (Number(key) === 16 && arr[key] !== null) {
+                            this.dParameters.hardcontr = arr[key].value;
+                        } else if (Number(key) === 41044 && arr[key] !== null) {
+                            this.dParameters.hardmod = arr[key].value;
+                        } else if (Number(key) === 41027 && arr[key] !== null) { // Адрес сервера
+                            this.dParameters.serveraddress = arr[key].value;
+                        } else if (Number(key) === 41028 && arr[key] !== null) { // Адрес сервера
+                            this.dParameters.serverport = arr[key].value;
                         }
                     }
                 }
@@ -1514,6 +1551,18 @@ export default {
             3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em,
             -2em 2em 0 0, -3em 0em 0 0, -2em -2em 0 0.2em;
     }
+}
+
+.important_registers {
+    display: flex;
+}
+
+.important_registers div p:first-child {
+    margin: 0;
+}
+
+.important_registers div:last-child {
+    margin-left: 24px;
 }
 
 .loading {
@@ -1669,10 +1718,10 @@ export default {
 .dropdown__set i {
     width: 14px;
     height: 14px;
-    width: 14px;
+    width: 28px;
     height: 100%;
     position: absolute;
-    right: -78px;
+    right: -108px;
     border-radius: 8px;
     background-color: #294b8e;
     padding: 0 7px;
@@ -1696,10 +1745,6 @@ export default {
     justify-content: space-between;
 }
 
-.controller-info p:last-child {
-    margin-top: 20px;
-}
-
 .controller-info input {
     background-color: transparent;
     color: #0E1626;
@@ -1715,15 +1760,15 @@ export default {
 .controller-info button {
     border-radius: 8px;
     padding: 7px 10px;
-    margin-left: 8px;
     height: 100%;
-    background: #294b8e;
+    background: linear-gradient(90deg, #294b8e 27%, #2384c5 100%);
+    width: 120px;
     color: #f8f6f4;
     margin-right: 8px;
 }
 
 .controller-info__containerone {
-    width: 47%;
+    width: 57%;
 }
 
 .controller-info,
@@ -2187,23 +2232,31 @@ export default {
     cursor: pointer !important;
 }
 
+.title_button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
 .controller-info__delete {
     display: flex;
     align-items: center;
-    background: linear-gradient(90deg, #294b8e 27%, #2384c5 100%);
+    background: #294b8e;
     border-radius: 8px;
     padding: 5px 10px 5px 16px;
     width: 173px;
-    bottom: 24px;
+    height: 24px;
     font-size: 13px;
 }
 
 .controller-info__delete button {
     color: #F8F6F4;
-    background-color: transparent;
+    background: #294b8e !important;
     font-size: 14px;
     padding: 0;
     margin: 0;
+    width: 168px !important;
     font-family: 'Inter', sans-serif;
 }
 
@@ -2251,7 +2304,7 @@ export default {
 .save-set {
     border-radius: 8px;
     padding: 7px 14px;
-    margin-left: 8px;
+    margin-left: 8px !important;
     font-family: 'Inter', sans-serif;
 }
 
@@ -2264,16 +2317,15 @@ export default {
     top: 29px;
     padding-top: 0px;
     padding-bottom: 2px;
-    width: 286px;
+    width: 316px;
 }
 
 .controller-info__block-title {
-    margin-bottom: 16px;
     text-align: left;
 }
 
 .controller-info__param {
-    width: 50%;
+    width: 40%;
     margin: 0;
     padding: 24px 16px;
 }
@@ -2283,7 +2335,8 @@ export default {
 }
 
 .dropdown__set-coord {
-    width: 286px;
+    width: 316px !important;
+    background: #294b8e !important;
 }
 
 .info-line__par {
@@ -2293,7 +2346,7 @@ export default {
 }
 
 .num-reg {
-    width: 550px !important;
+    width: 36% !important;
 }
 
 .history-par {
@@ -2301,11 +2354,12 @@ export default {
 }
 
 .name-par {
-    width: 446px !important;
+    width: 96% !important;
 }
 
 .val-par {
-    width: 164px !important;
+    width: 29% !important;
+    margin-left: 8px;
 }
 
 .info-line__par_line div {
@@ -2322,6 +2376,7 @@ export default {
 
 .settings-btns_container {
     display: flex;
+    margin-top: 16px;
 }
 
 .controller-info__param-commands {
@@ -2430,6 +2485,10 @@ export default {
     .info-line__par_line div {
         font-size: 14px;
     }
+
+    .important_registers div:last-child {
+        margin-left: 48px;
+    }
 }
 
 @media (min-width: 1600px) {
@@ -2485,6 +2544,10 @@ export default {
     .options-block__input-manual {
         width: 187px !important;
     }
+
+    .important_registers div:last-child {
+        margin-left: 56px;
+    }
 }
 
 @media (min-width: 1700px) {
@@ -2519,6 +2582,10 @@ export default {
     .dashboard-event-line div {
         height: 39px !important;
     }
+
+    .important_registers div:last-child {
+        margin-left: 64px;
+    }
 }
 
 @media (min-width: 1800px) {
@@ -2548,6 +2615,10 @@ export default {
 
     .measured-at__dashboard-name {
         width: 250px !important;
+    }
+
+    .important_registers div:last-child {
+        margin-left: 88px;
     }
 }
 
@@ -2595,6 +2666,10 @@ export default {
 
     .dashboard-event-line div {
         height: 35px !important;
+    }
+
+    .important_registers div:last-child {
+        margin-left: 108px;
     }
 }
 
