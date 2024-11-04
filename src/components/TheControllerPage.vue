@@ -283,7 +283,7 @@
                 <p class="controller-info__block-title controller-info__block-title_par">Параметры</p>
                 <div className="info-line info-line__title info-line__par">
                     <div class="num-reg">№ регистра</div>
-                    <div class="name-par">Параметр</div>
+                    <div class="name-par name-par__title">Параметр</div>
                     <div class="val-par">Значение</div>
                     <div class="history-par"></div>
                 </div>
@@ -347,9 +347,9 @@
                     <p class="controller-info__block-title controller-info__block-title_par">Добавить команду в очередь
                     </p>
                     <div className="info-line info-line__title info-line__par">
-                        <div class="num-reg">№ регистра Параметр</div>
-                        <div class="val-par">Текущее значение</div>
-                        <div class="val-par">Новое значение</div>
+                        <div class="num-reg title-selector__commands">№ регистра &emsp; &nbsp;Параметр</div>
+                        <div class="current-val">Текущее значение</div>
+                        <div class="new-value__commands">Новое значение</div>
                     </div>
                     <div class="value-string"><button class="dropdown__button dropdown__button-command"
                             @click="chooseContrType()" v-bind:class="{ opened_button: selectorVisible }">{{
@@ -359,15 +359,22 @@
                             v-bind:class="{ dropdown__list_visible: selectorVisible }">
                             <div class="div-command"></div>
                             <li class="dropdown__list-item dropdown__list-item-command"
-                                v-for="parameter in parametersStorage" :key="parameter"
+                                v-for="parameter in parametersCommandStorage" :key="parameter"
                                 @click="chooseThisType(parameter)">
-                                <div>{{
-                                    parameter.num }}</div> <span>{{ parameter.namepar }}</span>
+                                <div>{{ parameter.num }}</div><span>{{ parameter.namepar }}</span>
+                            </li>
+                            <li class="dropdown__list-item dropdown__list-item-command"
+                                v-for="parameter in additionalParameters" :key="parameter"
+                                @click="chooseThisType(parameter)">
+                                <div>{{ parameter }}</div>
                             </li>
                         </ul>
                         <div class="current-val">{{ currentValueCommand }}</div>
-                        <div class="val-par"><input id="new-val-c" type="text"></div>
-                        <div><button class="save-btn save-btn-command" @click="saveNewFlex()">Сохранить</button></div>
+                        <div class="inp-btn__commands">
+                            <div><input id="new-val-c" type="text"></div>
+                            <div><button class="save-btn save-btn-command" @click="saveNewFlex()">Сохранить</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -477,6 +484,9 @@ export default {
             dashboardLastEvents: [],
 
             parametersStorage: [],
+            parametersCommandStorage: [],
+
+            additionalParameters: ['get gps', 'get status', 'get all_flex', 'get fix', 'get timezone'],
 
             coord: null, // координаты для дашборда
             coordinates: { latitude: 55.76, longitude: 37.64 },
@@ -534,6 +544,8 @@ export default {
             messageQueue: [], // Очередь для сообщений
             processing: false, // Флаг обработки
 
+            ssecommand: null,
+
             forceRenderKey: 0 // для перерисовки компонентов с диаграмами напряжение и уровень заряда
         }
     },
@@ -542,10 +554,21 @@ export default {
             this.selectorVisible = !this.selectorVisible;
         },
         chooseThisType(parameter) {
-            this.selectorContent = parameter.num + ' ' + parameter.namepar;
-            this.currentValueCommand = parameter.val; // выбор из списка
-            this.newParameterData = parameter; // выбор из списка
-            this.selectorVisible = false;
+            console.log(parameter)
+            if (typeof parameter !== 'object' || parameter === null) {
+                if (parameter.includes('get')) {
+                    this.selectorContent = parameter;
+                    this.currentValueCommand = ''; // выбор из списка
+                    this.newParameterData = null; // выбор из списка
+                    this.selectorVisible = false; // закрыть селектор 
+                }
+            } else {
+                this.selectorContent = parameter.num + '\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0' + parameter.namepar;
+                this.currentValueCommand = parameter.val; // выбор из списка
+                this.newParameterData = parameter; // выбор из списка
+                this.selectorVisible = false;
+            }
+
         },
         dashBoardOn() {
             if (!this.btns.dashBoardActive) {
@@ -710,7 +733,7 @@ export default {
 
             this.eventSource.onopen = () => {
                 this.reconnectAttempts = 0;
-                // console.log("Соединение установлено");
+                console.log("Соединение установлено");
             }
 
             this.eventSource.onmessage = (event) => {
@@ -758,22 +781,14 @@ export default {
             // Пример асинхронной обработки сообщения
             return new Promise((resolve) => {
 
-                // if (message.ping) {
-                //     console.log("Пинг:", message);
-                // }
+                if (message.ping) {
+                    console.log("Пинг:", message);
+                }
 
                 if (message.status) {
                     if (this.controllerInfo.sn === message.status.device_sn) {
-                        // console.log(this.controllerInfo.sn)
-                        // console.log(message.status.device_sn)
-
 
                         this.telemetryData = message.status.data;  // Обновляем последние данные на экране
-
-                        // console.log("Cтатус для устройства (" + message.status.device_sn + ") обновлен!");
-                        // console.log("Данные: ", message.status.data);
-
-                        // console.log(this.telemetryData)
 
                         let date = this.telemetryData.created_at;
                         let formatDate = date.split(',');
@@ -783,9 +798,21 @@ export default {
                     }
                 }
 
-                // if (message.command) {
-                //     console.log("Данные команды: ", message.command.data)
-                // }
+                console.log('команда?')
+                if (message.command) {
+                    console.log("Данные команды: ", message.command.data);
+                    this.ssecommand = message.command.data;
+                    this.commandQueue.push(this.ssecommand);
+
+                    // this.commandQueue.push({
+                    //     num: this.newParameterData.num,
+                    //     namepar: this.newParameterData.namepar,
+                    //     val: newV,
+                    //     timeSent: timeSent,
+                    //     response: response.statusText,
+                    //     timeReg: timeReg
+                    // }) 
+                }
 
                 resolve();
             });
@@ -1331,18 +1358,28 @@ export default {
             // Генерируем файл Excel
             XLSX.writeFile(workbook, `События / ${this.controllerInfo.name} / ${this.controllerInfo.sn} / ${this.dateText}.xlsx`);
         },
-        saveNewFlex() { // to do
-
+        saveNewFlex() {
+            let command;
             let newV = document.getElementById('new-val-c').value;
 
-            let command = {
-                "cmd_type": "set",
-                "pdu": this.newParameterData.num,
-                "value": newV
-            };
+            if (this.selectorContent.includes('get')) {
+
+                let cmdInput = this.selectorContent.replace(/get\s*/, '');
+                command = {
+                    "cmd_type": "get",
+                    "cmd_input": cmdInput,
+                    "value": null
+                }
+                console.log(command);
+            } else {
+                command = {
+                    "cmd_type": "set",
+                    "cmd_input": this.newParameterData.num,
+                    "value": newV
+                };
+            }
 
             let timeSent = this.formatDateCommand(new Date());
-
             axios.post(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/command/`,
                 command, {
                 headers: {
@@ -1354,21 +1391,31 @@ export default {
 
                     let timeReg = this.formatDateCommand(new Date());
 
-                    this.commandQueue.push({
-                        num: this.newParameterData.num,
-                        namepar: this.newParameterData.namepar,
-                        val: newV,
-                        timeSent: timeSent,
-                        response: response.statusText,
-                        timeReg: timeReg
-                    })
+                    if (this.selectorContent.includes('get')) {
+                        this.commandQueue.unshift({
+                            num: null,
+                            namepar: this.selectorContent,
+                            val: null,
+                            timeSent: timeSent,
+                            response: response.statusText,
+                            timeReg: timeReg
+                        })
+                    } else {
+                        this.commandQueue.unshift({
+                            num: this.newParameterData.num,
+                            namepar: this.newParameterData.namepar,
+                            val: newV,
+                            timeSent: timeSent,
+                            response: response.statusText,
+                            timeReg: timeReg
+                        })
+                    }
                 }
             }).catch((error) => {
                 console.log(error);
             });
         },
         formatDateCommand(dateString) {
-
             const options = {
                 year: 'numeric',
                 month: '2-digit',
@@ -1386,7 +1433,6 @@ export default {
         },
     },
     mounted() {
-
         this.controllerIdDel = this.controllerId;
         // Информация об устройстве
         axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/`,
@@ -1432,6 +1478,7 @@ export default {
             }).then((response) => {
                 if (response.status === 200) {
                     let arr = response.data;
+                    console.log(arr)
 
                     for (let key in arr) {
                         let change = true;
@@ -1461,6 +1508,10 @@ export default {
                                 });
                             }
                         }
+
+                        this.parametersCommandStorage = this.parametersStorage.filter(item => {
+                            return !(item.num === 12 || item.num === 41035);
+                        });
 
                         if (Number(key) === 12 && arr[key] !== null) {
                             this.dParameters.type = arr[key].value;
@@ -1711,8 +1762,8 @@ export default {
 }
 
 .dropdown__button-data-filter i {
-    width: 16px;
-    height: 16px;
+    width: 16px !important;
+    height: 16px !important;
 }
 
 .dropdown__set i {
@@ -2309,8 +2360,12 @@ export default {
 }
 
 .save-btn-command {
-    margin: 0 0 0 24px !important;
+    margin: 0 0 0 8px !important;
     width: 110px;
+}
+
+#new-val-c {
+    width: 224px;
 }
 
 .dropdown__list-set {
@@ -2342,11 +2397,15 @@ export default {
 .info-line__par {
     padding: 8px 0 0 0;
     font-size: 13px !important;
-    justify-content: flex-start;
+    justify-content: space-between;
 }
 
 .num-reg {
     width: 36% !important;
+}
+
+.title-selector__commands {
+    width: 548px !important;
 }
 
 .history-par {
@@ -2354,12 +2413,15 @@ export default {
 }
 
 .name-par {
-    width: 96% !important;
+    width: 109% !important;
 }
 
 .val-par {
     width: 29% !important;
-    margin-left: 8px;
+}
+
+.inp-btn__commands {
+    display: flex;
 }
 
 .info-line__par_line div {
@@ -2395,13 +2457,14 @@ export default {
 .dropdown__list-command {
     height: 300px;
     overflow-y: scroll;
-    margin: 70px 24px 0px 24px;
-    width: 520px;
+    margin: 70px 24px 0px 20px;
+    width: 548px;
 }
 
 .dropdown__button-command {
     margin: 0 !important;
-    width: 520px;
+    width: 548px !important;
+    background: #294b8e !important;
 }
 
 .div-command {
@@ -2413,8 +2476,12 @@ export default {
     border-radius: 4px;
 }
 
+.new-value__commands {
+    width: 370px !important;
+}
+
 .dropdown__list-item-command div {
-    width: 80px;
+    width: 95px;
     border: none;
     margin: 0;
 }
@@ -2426,11 +2493,11 @@ export default {
 .value-string {
     display: flex;
     align-items: center;
+    justify-content: space-between;
 }
 
 .current-val {
-    margin-left: 32px;
-    width: 164px;
+    min-width: 124px;
 }
 
 .white_delta-commands {
@@ -2466,6 +2533,11 @@ export default {
 .response-queue {
     width: 140px !important;
     padding: 0px !important;
+}
+
+.name-par__title {
+    margin-left: -19px;
+    width: 80% !important;
 }
 
 @media (max-width: 1600px) {
@@ -2619,6 +2691,18 @@ export default {
 
     .important_registers div:last-child {
         margin-left: 88px;
+    }
+
+    #new-val-c {
+        width: 306px;
+    }
+
+    .new-value__commands {
+        width: 452px !important;
+    }
+
+    .current-val {
+        min-width: 262px;
     }
 }
 
