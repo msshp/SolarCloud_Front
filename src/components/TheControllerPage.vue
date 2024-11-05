@@ -544,8 +544,6 @@ export default {
             messageQueue: [], // Очередь для сообщений
             processing: false, // Флаг обработки
 
-            ssecommand: null,
-
             forceRenderKey: 0 // для перерисовки компонентов с диаграмами напряжение и уровень заряда
         }
     },
@@ -554,7 +552,7 @@ export default {
             this.selectorVisible = !this.selectorVisible;
         },
         chooseThisType(parameter) {
-            console.log(parameter)
+            document.getElementById('new-val-c').value = '';
             if (typeof parameter !== 'object' || parameter === null) {
                 if (parameter.includes('get')) {
                     this.selectorContent = parameter;
@@ -568,7 +566,6 @@ export default {
                 this.newParameterData = parameter; // выбор из списка
                 this.selectorVisible = false;
             }
-
         },
         dashBoardOn() {
             if (!this.btns.dashBoardActive) {
@@ -781,9 +778,9 @@ export default {
             // Пример асинхронной обработки сообщения
             return new Promise((resolve) => {
 
-                if (message.ping) {
-                    console.log("Пинг:", message);
-                }
+                // if (message.ping) {
+                //     console.log("Пинг:", message);
+                // }
 
                 if (message.status) {
                     if (this.controllerInfo.sn === message.status.device_sn) {
@@ -798,20 +795,19 @@ export default {
                     }
                 }
 
-                console.log('команда?')
                 if (message.command) {
-                    console.log("Данные команды: ", message.command.data);
-                    this.ssecommand = message.command.data;
-                    this.commandQueue.push(this.ssecommand);
+                    let ssecommand = message.command.data;
 
-                    // this.commandQueue.push({
-                    //     num: this.newParameterData.num,
-                    //     namepar: this.newParameterData.namepar,
-                    //     val: newV,
-                    //     timeSent: timeSent,
-                    //     response: response.statusText,
-                    //     timeReg: timeReg
-                    // }) 
+                    let timeReg = this.formatDateCommand(new Date());
+
+                    this.commandQueue.unshift({
+                        num: this.newParameterData.num,
+                        namepar: this.newParameterData.namepar,
+                        val: '',
+                        timeSent: '',
+                        response: ssecommand,
+                        timeReg: timeReg
+                    })
                 }
 
                 resolve();
@@ -1370,7 +1366,6 @@ export default {
                     "cmd_input": cmdInput,
                     "value": null
                 }
-                console.log(command);
             } else {
                 command = {
                     "cmd_type": "set",
