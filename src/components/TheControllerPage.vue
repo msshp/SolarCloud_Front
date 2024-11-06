@@ -371,8 +371,11 @@
                         </ul>
                         <div class="current-val">{{ currentValueCommand }}</div>
                         <div class="inp-btn__commands">
-                            <div><input id="new-val-c" type="text"></div>
-                            <div><button class="save-btn save-btn-command" @click="saveNewFlex()">Сохранить</button>
+                            <div class="input_clue"><input id="new-val-c" type="text" @focus="onFocus" @blur="onBlur"
+                                    :class="{ active: isInputActive }">
+                                <div v-if="isInputActive" class="clue" v-html="clueText"></div>
+                            </div>
+                            <div><button class="save-btn save-btn-command" @click="saveNewFlex()">Отправить</button>
                             </div>
                         </div>
                     </div>
@@ -544,7 +547,10 @@ export default {
             messageQueue: [], // Очередь для сообщений
             processing: false, // Флаг обработки
 
-            forceRenderKey: 0 // для перерисовки компонентов с диаграмами напряжение и уровень заряда
+            forceRenderKey: 0, // для перерисовки компонентов с диаграмами напряжение и уровень заряда
+
+            isInputActive: false, // Статус активности инпута
+            clueText: ''
         }
     },
     methods: {
@@ -552,6 +558,9 @@ export default {
             this.selectorVisible = !this.selectorVisible;
         },
         chooseThisType(parameter) {
+            this.isInputActive = false; // Установить в true при фокусе
+            document.getElementById('new-val-c').disabled = false;
+
             document.getElementById('new-val-c').value = '';
             if (typeof parameter !== 'object' || parameter === null) {
                 if (parameter.includes('get')) {
@@ -730,7 +739,7 @@ export default {
 
             this.eventSource.onopen = () => {
                 this.reconnectAttempts = 0;
-                console.log("Соединение установлено");
+                // console.log("Соединение установлено");
             }
 
             this.eventSource.onmessage = (event) => {
@@ -745,7 +754,7 @@ export default {
             };
 
             this.eventSource.onerror = () => {
-                console.error("Ошибка соединения");
+                // console.error("Ошибка соединения");
                 this.reconnectAttempts += 1;
 
                 if (this.reconnectAttempts > 5) {
@@ -767,7 +776,7 @@ export default {
                     // Асинхронная обработка сообщения (например, сохранение в локальное хранилище)
                     await this.handleMessage(message);
                 } catch (error) {
-                    console.error("Ошибка при обработке сообщения:", error);
+                    // console.error("Ошибка при обработке сообщения:", error);
                 }
             }
 
@@ -1426,6 +1435,47 @@ export default {
                 .replace(/(\d{2})\.(\d{2})\.(\d{4})/, '$2.$1.$3');
             return formattedDate;
         },
+        onFocus() {
+            this.isInputActive = true; // Установить в true при фокусе
+            document.getElementById('new-val-c').disabled = false;
+            let text = '';
+            const messages = {
+                '41032': 'Период отправки пакета data_status. Считаем с 00:00. Измерение в мс. Число передается без кавычек. Пример: 300;',
+                '41005': 'Включен или выключен датчик двери. 0 – выключен. 1 – включен.',
+                '41006': 'Включен или выключен отчет по СМС. 0 – выключен. 1 – включен.',
+                '41025': 'Часовой пояс (-12…+12). Пример: +3;',
+                '41033': 'Период отправки пакета data_fix. Считаем с 00:00. Измерение в мс. Число передается без кавычек. Пример: 3600;',
+                '57345': 'От 2 до 40',
+                '57348': 'тип АКБ. 0 – настроено пользователем. 1 – обслуживаемые свинцовые. 2 – не обслуживаемые. 3 – гелевые. 4 – литиевые',
+                '57349': 'Порог перенапряжения. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+                '57350': 'Предел напряжения зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+                '57351': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+                '57352': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+                '57353': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+                '57354': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+                '57355': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+                '57356': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+                '57357': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+                '57358': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА'
+            };
+
+            if (this.selectorContent === 'Выбрать' || this.selectorContent.includes('get')) {
+                this.isInputActive = false;
+                document.getElementById('new-val-c').disabled = true;
+            } else {
+                for (const key in messages) {
+                    if (this.selectorContent.includes(key)) {
+                        text = messages[key];
+                        break;
+                    }
+                }
+            }
+
+            this.clueText = text.split('. ').join('.<br>');
+        },
+        onBlur() {
+            this.isInputActive = false; // Установить в false при потере фокуса
+        }
     },
     mounted() {
         this.controllerIdDel = this.controllerId;
@@ -1473,7 +1523,6 @@ export default {
             }).then((response) => {
                 if (response.status === 200) {
                     let arr = response.data;
-                    console.log(arr)
 
                     for (let key in arr) {
                         let change = true;
@@ -1808,7 +1857,7 @@ export default {
     padding: 7px 10px;
     height: 100%;
     background: linear-gradient(90deg, #294b8e 27%, #2384c5 100%);
-    width: 120px;
+    width: 108px;
     color: #f8f6f4;
     margin-right: 8px;
 }
@@ -2360,7 +2409,7 @@ export default {
 }
 
 #new-val-c {
-    width: 224px;
+    width: 236px;
 }
 
 .dropdown__list-set {
@@ -2535,6 +2584,30 @@ export default {
     width: 80% !important;
 }
 
+/* всплывающая подсказка  */
+
+.active {
+    border: 2px solid blue;
+    /* Пример стиля для активного инпута */
+}
+
+.clue {
+    display: flex;
+    top: 45px;
+    right: -45%;
+    position: absolute;
+    width: 334px;
+    background: #f8f6f4;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #2384c5;
+}
+
+.input_clue {
+    position: relative;
+}
+
+
 @media (max-width: 1600px) {
 
     .options-block__coords-btn button,
@@ -2689,7 +2762,7 @@ export default {
     }
 
     #new-val-c {
-        width: 306px;
+        width: 318px;
     }
 
     .new-value__commands {
@@ -2698,6 +2771,11 @@ export default {
 
     .current-val {
         min-width: 262px;
+    }
+
+    .clue {
+        right: -34%;
+        width: 415px;
     }
 }
 
