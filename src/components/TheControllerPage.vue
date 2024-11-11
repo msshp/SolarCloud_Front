@@ -382,14 +382,14 @@
                 </div>
             </div>
             <div class="controller-info__param-commands-div command-queue">
-                <p class="controller-info__block-title controller-info__block-title_par">Очередь команд</p>
+                <p class="controller-info__block-title controller-info__block-title_par">История команд</p>
                 <div className="info-line info-line__title info-line__par info-line-queue">
                     <div class="num-reg-queue">№ регистра</div>
                     <div class="name-par-queue">Параметр</div>
                     <div class="val-par-queue">Отправлено значение</div>
                     <div class="val-par-queue">Дата отправки</div>
                     <div class="response-queue">Ответ</div>
-                    <div class="val-par-queue">Дата регистрации ответа</div>
+                    <div class="val-par-queue date-of-reg">Дата регистрации ответа</div>
                 </div>
                 <div>
                     <div className="info-line info-line__par_line info-line-queue" v-for="parameter in commandQueue"
@@ -399,7 +399,7 @@
                         <div class="val-par-queue">{{ parameter.val }}</div>
                         <div class="val-par-queue">{{ parameter.timeSent }}</div>
                         <div class="response-queue">{{ parameter.response }}</div>
-                        <div class="val-par-queue">{{ parameter.timeReg }}</div>
+                        <div class="val-par-queue date-of-reg">{{ parameter.timeReg }}</div>
                     </div>
                 </div>
             </div>
@@ -550,7 +550,8 @@ export default {
             forceRenderKey: 0, // для перерисовки компонентов с диаграмами напряжение и уровень заряда
 
             isInputActive: false, // Статус активности инпута
-            clueText: ''
+            clueText: '',
+            commandStory: []
         }
     },
     methods: {
@@ -805,6 +806,7 @@ export default {
                 }
 
                 if (message.command) {
+                    // console.log(message.command)
                     let ssecommand = message.command.data;
 
                     let timeReg = this.formatDateCommand(new Date());
@@ -1575,6 +1577,32 @@ export default {
                             this.dParameters.serverport = arr[key].value;
                         }
                     }
+                }
+            }).catch((error) => {
+                // обработка ошибки
+                console.log(error);
+            });
+
+        // история команд
+        axios.get(`http://cloud.io-tech.ru/api/devices/${this.controllerId}/command/`,
+            {
+                headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+            }).then((response) => {
+                if (response.status === 200) {
+                    this.commandStory = response.data;
+                    // console.log(this.commandStory);
+
+                    this.commandStory.forEach(el => {
+                        let obj = {
+                            num: '',
+                            namepar: el.command,
+                            val: '',
+                            timeSent: el.sended_at,
+                            response: el.response,
+                            timeReg: el.responsed_at
+                        }
+                        this.commandQueue.push(obj);
+                    })
                 }
             }).catch((error) => {
                 // обработка ошибки
@@ -2556,12 +2584,12 @@ export default {
 }
 
 .num-reg-queue {
-    width: 96px !important;
+    width: 77px !important;
     padding: 0 0 0 8px !important;
 }
 
 .name-par-queue {
-    width: 380px !important;
+    width: 240px !important;
     padding: 0 !important;
 }
 
@@ -2575,7 +2603,7 @@ export default {
 }
 
 .response-queue {
-    width: 140px !important;
+    width: 196px !important;
     padding: 0px !important;
 }
 
@@ -2607,6 +2635,9 @@ export default {
     position: relative;
 }
 
+.date-of-reg {
+    width: 164px !important;
+}
 
 @media (max-width: 1600px) {
 
