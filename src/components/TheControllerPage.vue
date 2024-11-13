@@ -310,6 +310,11 @@
                 <div>Ток PV(А)</div>
                 <div>Ток АКБ(А)</div>
                 <div>Ток нагрузки(А)</div>
+                <div>Уровень заряда АКБ(%)</div>
+                <div>Температура радиатор/внешний(градусы)</div>
+                <div>Сгенерировано за час(Вт)</div>
+                <div>Потрачено за час, (Вт)</div>
+                <div>Статус заряда</div>
             </div>
             <div class="controller-data">
                 <div className="info-line" v-for="info in receivedData" :key="info">
@@ -320,6 +325,11 @@
                     <div>{{ info.pv_i }}</div>
                     <div>{{ info.bat_i }}</div>
                     <div>{{ info.load_i }}</div>
+                    <div>{{ info.bat_c }}</div>
+                    <div>{{ info.temp }}</div>
+                    <div>{{ info.p_gen }}</div>
+                    <div>{{ info.p_con }}</div>
+                    <div>{{ info.crg_mode }}</div>
                 </div>
             </div>
         </div>
@@ -699,6 +709,8 @@ export default {
                             this.receivedData.forEach((el) => {
                                 let a = el.created_at.split(',')
                                 el.created_at = a[0].slice(0, -5) + ' ' + a[1].slice(0, -3); // дата без вывода секунд
+
+                                el.crg_mode = this.decryptionBattStatus(el.crg_mode);
                             })
 
                             this.telemetryData = this.receivedData[0]; // последние данные (для напряжения и уровня заряда акб)
@@ -706,12 +718,39 @@ export default {
                             this.lastReleaseDate = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
                             this.lastReleaseSignal = this.receivedData[0].dbi;
                         }
+
                         this.correctControllerData();
                     }
                 }).catch((error) => {
                     // обработка ошибки
                     console.log(error);
                 });
+        },
+        decryptionBattStatus(val) { // расшифровка статуса заряда (для Детально)
+
+            let newVal;
+
+            if (val === '0') {
+                newVal = 'charge off';
+            } else if (val === '1') {
+                newVal = 'charge on';
+            } else if (val === '2') {
+                newVal = 'mppt';
+            } else if (val === '3') {
+                newVal = 'equalizing';
+            } else if (val === '4') {
+                newVal = 'boost';
+            } else if (val === '5') {
+                newVal = 'floating';
+            } else if (val === '6') {
+                newVal = 'current limiting';
+            } else if (val === '98') {
+                newVal = 'power limit';
+            } else if (val === '99') {
+                newVal = 'current limit (program)';
+            }
+
+            return newVal;
         },
         correctControllerData() {
             this.batCChart = false;
@@ -1112,8 +1151,6 @@ export default {
                     if (response.status === 200) {
                         this.lastResult = response.data;
                         this.lastResult.shift();
-                        // this.lastResult = response.data.shift();
-
                         if (this.lastResult[0] !== undefined) {
                             let date = this.lastResult[0].created_at;
                             let formatDate = date.split(',');
@@ -1325,6 +1362,11 @@ export default {
                 info.pv_i,
                 info.bat_i,
                 info.load_i,
+                info.bat_c,
+                info.temp,
+                info.p_gen,
+                info.p_con,
+                info.crg_mode,
             ]);
 
             // Объединяем заголовки и строки данных
@@ -1477,6 +1519,10 @@ export default {
         },
         onBlur() {
             this.isInputActive = false; // Установить в false при потере фокуса
+        },
+        formatTime(date) {
+            let formatDate = date.split(',');
+            return formatDate[0] + ' ' + formatDate[1].slice(0, -3);
         }
     },
     mounted() {
@@ -1590,16 +1636,15 @@ export default {
             }).then((response) => {
                 if (response.status === 200) {
                     this.commandStory = response.data;
-                    // console.log(this.commandStory);
 
                     this.commandStory.forEach(el => {
                         let obj = {
-                            num: '',
-                            namepar: el.command,
-                            val: '',
-                            timeSent: el.sended_at,
+                            num: el.pdu,
+                            namepar: el.cmd_type,
+                            val: el.value,
+                            timeSent: this.formatTime(el.sended_at),
                             response: el.response,
-                            timeReg: el.responsed_at
+                            timeReg: this.formatTime(el.responsed_at)
                         }
                         this.commandQueue.push(obj);
                     })
@@ -1749,6 +1794,8 @@ export default {
 .info-line__title {
     margin-bottom: 4px;
     background-color: transparent;
+    font-size: 13px;
+    height: 54px;
 }
 
 .info-line__title:hover {
@@ -2885,7 +2932,7 @@ export default {
 
     .measured-at__widget-errors,
     .measured-at__dashboard-code {
-        font-size: 11px !important;
+        font-size: 10px !important;
     }
 }
 
@@ -2920,6 +2967,22 @@ export default {
 @media (min-width: 2500px) {
     .dashboard-event-line div {
         height: 32px !important;
+    }
+}
+
+@media (max-width: 1900px) {
+    .info-line__title {
+        font-size: 12px;
+    }
+
+    .info-line {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 1600px) {
+    .info-line__title {
+        font-size: 11px;
     }
 }
 </style>

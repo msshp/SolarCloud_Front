@@ -154,9 +154,12 @@ export default {
             let count = 0;
 
             this.controllerList.forEach((el) => {
-
                 if (el.gps !== null) {
                     let result = this.convertCoordinates(el.gps);
+
+                    if (result.latitude.startsWith('0') || result.longitude.startsWith('0')) { // валидация (если координаты пришли побитые)
+                        return;
+                    }
 
                     if ((Number(result.latitude) >= -90 && Number(result.latitude) <= 90) &&
                         (Number(result.longitude) >= -180 && Number(result.longitude) <= 180)) {
