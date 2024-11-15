@@ -51,7 +51,8 @@
                     <ul class="dropdown__list dropdown__list-data-filter"
                         v-bind:class="{ dropdown__list_visible: selectortimeVisible }">
                         <div class=" .datafilter-separator datafilter-separator_set"></div>
-                        <li class="dropdown__list-item" @click="showDay()">Последний день</li>
+                        <li class="dropdown__list-item" @click="showDay()">Сегодня</li>
+                        <li class="dropdown__list-item" @click="showYesterday()">Последние 2 дня</li>
                         <li class="dropdown__list-item" @click="showWeek()">Последние 7 дней</li>
                         <li class="dropdown__list-item" @click="showMonth()">Последние 30 дней</li>
                         <li class="dropdown__list-item" @click="showAllTime()">Всё время</li>
@@ -313,7 +314,7 @@
                 <div>Уровень заряда АКБ(%)</div>
                 <div>Температура радиатор/внешний(градусы)</div>
                 <div>Сгенерировано за час(Вт)</div>
-                <div>Потрачено за час, (Вт)</div>
+                <div>Потрачено за час(Вт)</div>
                 <div>Статус заряда</div>
             </div>
             <div class="controller-data">
@@ -636,7 +637,17 @@ export default {
             // let datestart = new Date(today.getTime() - (24 * 60 * 60 * 1000));
             this.dateStart = `${datestart.getFullYear()}-${this.twoDigits(datestart.getMonth() + 1)}-${this.twoDigits(datestart.getDate())}`;
 
-            this.selectortimeContent = 'Последний день';
+            this.selectortimeContent = 'Сегодня';
+            this.getControllerData();
+        },
+        showYesterday() {
+            let today = new Date(); // сегодня
+            this.dateEnd = `${today.getFullYear()}-${this.twoDigits(today.getMonth() + 1)}-${this.twoDigits(today.getDate())}`; // формат 2024-02-01
+            let datestart = new Date(today.getTime());
+            // let datestart = new Date(today.getTime() - (24 * 60 * 60 * 1000));
+            this.dateStart = `${datestart.getFullYear()}-${this.twoDigits(datestart.getMonth() + 1)}-${this.twoDigits(datestart.getDate() - 1)}`;
+
+            this.selectortimeContent = 'Последние 2 дня';
             this.getControllerData();
         },
         showWeek() {
@@ -1354,7 +1365,7 @@ export default {
                 'Уровень заряда АКБ(%)',
                 'Температура радиатор/внешний(градусы)',
                 'Сгенерировано за час(Вт)',
-                'Потрачено за час, (Вт)',
+                'Потрачено за час(Вт)',
                 'Статус заряда',
             ];
 
@@ -1526,8 +1537,13 @@ export default {
             this.isInputActive = false; // Установить в false при потере фокуса
         },
         formatTime(date) {
-            let formatDate = date.split(',');
-            return formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+            if (date !== null) {
+                let formatDate = date.split(',');
+                return formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+            } else {
+                return '';
+            }
+
         }
     },
     mounted() {
