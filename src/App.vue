@@ -492,7 +492,7 @@ export default {
                                 created_at: '-',
                                 bat_v: '-',
                                 dbi: '-',
-                                event: '-'
+                                event_code: '-'
                             }
                         } else {
                             let date = el.status.measured_at;

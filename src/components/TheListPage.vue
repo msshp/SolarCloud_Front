@@ -30,7 +30,7 @@
                                 v-bind:class="{ sortlistbyvoltage_active: sortlistByLastTimeActive }"></div>
                         </div>
                     </th>
-                    <th class="sort-by-date">Ошибки</th>
+                    <th class="sort-by-date">Состояние</th>
                 </tr>
             </thead>
             <div v-if="list.loading" class="loading">

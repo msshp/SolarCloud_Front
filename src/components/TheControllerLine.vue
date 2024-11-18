@@ -6,7 +6,7 @@
         <td @click="openControllerPage(controller.id)">{{ controller.status.bat_v }}</td>
         <td @click="openControllerPage(controller.id)">{{ controller.status.dbi }}</td>
         <td @click="openControllerPage(controller.id)">{{ controller.status.created_at }}</td>
-        <td @click="openControllerPage(controller.id)">{{ controller.status.event }}</td>
+        <td @click="openControllerPage(controller.id)">{{ controller.status.event_code }}</td>
         <td v-if="access" class="controller-delete__container" @click="deleteController(controller.id)">
             <div class="controller-delete"></div>
         </td>
