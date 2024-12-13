@@ -65,7 +65,8 @@
                     <ul class="dropdown__list dropdown__list-data-filter dropdown__list-set ul_date"
                         v-bind:class="{ dropdown__list_visible: selectortimeVisible }">
                         <div class="datafilter-separator datafilter-separator_set"></div>
-                        <li class="dropdown__list-item" @click="showDay()">Последний день</li>
+                        <li class="dropdown__list-item" @click="showDay()">Сегодня</li>
+                        <li class="dropdown__list-item" @click="showYesterday()">Последние 2 дня</li>
                         <li class="dropdown__list-item" @click="showWeek()">Последние 7 дней</li>
                         <li class="dropdown__list-item" @click="showMonth()">Последние 30 дней</li>
                         <li class="dropdown__list-item" @click="showAllTime()">Всё время</li>
@@ -196,7 +197,21 @@ export default {
             this.dateEnd = `${today.getFullYear()}-${this.twoDigits(today.getMonth() + 1)}-${this.twoDigits(today.getDate())}`; // формат 2024-02-01
             let datestart = new Date(today.getTime());
             this.dateStart = `${datestart.getFullYear()}-${this.twoDigits(datestart.getMonth() + 1)}-${this.twoDigits(datestart.getDate())}`;
-            this.selectortimeContent = 'Последний день';
+            this.selectortimeContent = 'Сегодня';
+
+            this.pagesCount = 0;
+            this.pagesCountArr = [];
+            this.page = 1;
+
+            this.getEvents();
+        },
+        showYesterday() {
+            let today = new Date(); // сегодня
+            this.dateEnd = `${today.getFullYear()}-${this.twoDigits(today.getMonth() + 1)}-${this.twoDigits(today.getDate())}`; // формат 2024-02-01
+            let datestart = new Date(today.getTime());
+            this.dateStart = `${datestart.getFullYear()}-${this.twoDigits(datestart.getMonth() + 1)}-${this.twoDigits(datestart.getDate() - 1)}`;
+
+            this.selectortimeContent = 'Последние 2 дня';
 
             this.pagesCount = 0;
             this.pagesCountArr = [];
@@ -664,11 +679,11 @@ export default {
 }
 
 .events-filter__delta i {
-    right: -10px !important;
+    right: -20px !important;
 }
 
 .events-filter__delta ul {
-    width: 220px;
+    width: 230px;
 }
 
 .white_delta-e {

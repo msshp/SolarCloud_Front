@@ -1505,7 +1505,7 @@ export default {
                 '41006': 'Включен или выключен отчет по СМС. 0 – выключен. 1 – включен.',
                 '41025': 'Часовой пояс (-12…+12). Пример: +3;',
                 '41033': 'Период отправки пакета data_fix. Считаем с 00:00. Измерение в мс. Число передается без кавычек. Пример: 3600;',
-                '57345': 'От 2 до 40',
+                '57346': 'От 2 до 40',
                 '57348': 'тип АКБ. 0 – настроено пользователем. 1 – обслуживаемые свинцовые. 2 – не обслуживаемые. 3 – гелевые. 4 – литиевые',
                 '57349': 'Порог перенапряжения. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
                 '57350': 'Предел напряжения зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
@@ -1873,7 +1873,7 @@ export default {
 .dropdown__set {
     height: 30px;
     font-size: 13px;
-    width: 220px;
+    width: 230px;
     padding: 6px 20px 6px 8px !important;
     font-family: 'Inter', sans-serif;
     margin-left: 0px !important;
@@ -2167,6 +2167,9 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin: 0 auto;
+    width: 236px;
+    height: 236px;
 }
 
 .pie-value {
@@ -2174,7 +2177,7 @@ export default {
     padding: 0 !important;
     font-size: 40px;
     width: 100%;
-    top: 44%;
+    top: 47%;
     text-align: center;
 }
 
@@ -2599,6 +2602,7 @@ export default {
     overflow-y: scroll;
     margin: 70px 24px 0px 20px;
     width: 548px;
+    top: 70px;
 }
 
 .dropdown__button-command {
@@ -2624,10 +2628,6 @@ export default {
     width: 95px;
     border: none;
     margin: 0;
-}
-
-.dropdown__list-item-command span {
-    margin-left: 8px;
 }
 
 .value-string {
@@ -2825,6 +2825,15 @@ export default {
     .important_registers div:last-child {
         margin-left: 64px;
     }
+
+    .pie-container {
+        width: 280px;
+        height: 280px;
+    }
+
+    .pie-voltage {
+        top: 43%;
+    }
 }
 
 @media (min-width: 1800px) {
@@ -2845,7 +2854,7 @@ export default {
     }
 
     .pie-value {
-        top: 45%;
+        top: 48%;
     }
 
     .pie-energy {
@@ -2903,11 +2912,6 @@ export default {
         width: 29%;
     }
 
-    .pie-container canvas {
-        width: 75% !important;
-        height: 75% !important;
-    }
-
     .measured-at__dashboard-name {
         width: 370px !important;
     }
@@ -2932,20 +2936,6 @@ export default {
 @media (min-width: 2000px) {
     .controller-data {
         height: 70vh;
-    }
-}
-
-@media (min-width: 2200px) {
-    .pie-container canvas {
-        width: 60% !important;
-        height: 60% !important;
-    }
-}
-
-@media (min-width: 2500px) {
-    .pie-container canvas {
-        width: 50% !important;
-        height: 50% !important;
     }
 }
 
