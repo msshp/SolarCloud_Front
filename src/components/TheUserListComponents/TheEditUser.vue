@@ -23,7 +23,7 @@
                 <input type="text" v-model.trim="newUserLogin" placeholder="Логин">
                 <!-- <input type="password" v-model.trim="newUserPass" placeholder="Пароль"> -->
                 <div class="btn-container">
-                    <button className="save-btn edit-save-btn" @click="sendNewUser()">Сохранить изменения</button>
+                    <button className="save-btn edit-save-btn" @click="sendNewUser()">Сохранить</button>
                     <button className="cancel-btn" @click="closeEditWindow">Отменить</button>
                 </div>
             </div>

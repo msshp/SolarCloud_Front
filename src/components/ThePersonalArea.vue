@@ -4,13 +4,13 @@
             <p>Личный кабинет</p>
             <div></div>
         </div>
-        <table>
+        <table class="pa_page-table">
             <thead>
                 <tr class="pa__titles">
                     <th class="tr-id">ID</th>
                     <th class="tr-pa">Имя</th>
                     <th class="tr-pa">email</th>
-                    <th class="tr-role">роль</th>
+                    <th>роль</th>
                     <th class="tr-pa">дата создания</th>
                     <th class="tr-pa">дата обновления</th>
                     <th></th>

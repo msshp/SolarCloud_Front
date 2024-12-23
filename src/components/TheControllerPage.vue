@@ -143,7 +143,7 @@
                         <TheBarChart v-if="visibleChart" :controllerInfoStorage="receivedData" />
                     </div>
                 </div>
-                <div class="info-block__half">
+                <div class="info-block__half block_cp">
                     <div class="info-block__block">
                         <h4>Напряжение</h4>
                         <TheVoltageChart v-if="visibleChart" :controllerInfoStorage="receivedData" />
@@ -156,7 +156,7 @@
                         <div id="map-dashboard" style="width: 100%; height: 100%;"></div>
                     </div>
                 </div>
-                <div class="info-block__half dashboard-table">
+                <div class="info-block__half dashboard-table block_cp">
                     <div v-if="thereIsData" class="there-is-data">Нет данных за период</div>
                     <div class="info-block__block dashboard-spectable">
                         <div class="info-block__half-title">
@@ -352,12 +352,12 @@
                 </div>
             </div>
         </div>
-        <div v-if="btns.commandsActive" class="dashboard-table">
+        <div v-if="btns.commandsActive" class="dashboard-table dashboard-table__commands-on-page">
             <div class="controller-info controller-info__param-commands">
                 <div class="controller-info__param-commands-div">
                     <p class="controller-info__block-title controller-info__block-title_par">Добавить команду в очередь
                     </p>
-                    <div className="info-line info-line__title info-line__par">
+                    <div className="info-line info-line__title info-line__par commands-on-page">
                         <div class="num-reg title-selector__commands">№ регистра &emsp; &nbsp;Параметр</div>
                         <div class="current-val">Текущее значение</div>
                         <div class="new-value__commands">Новое значение</div>
@@ -1816,7 +1816,7 @@ export default {
     margin-bottom: 4px;
     background-color: transparent;
     font-size: 13px;
-    height: 54px;
+    height: 38px;
 }
 
 .info-line__title:hover {
@@ -1824,7 +1824,7 @@ export default {
 }
 
 .info-line div {
-    text-align: center;
+    text-align: left;
     width: 115px;
     height: 32px;
     display: flex;
@@ -2094,7 +2094,7 @@ export default {
 }
 
 .controller-data__dashboard {
-    overflow: hidden;
+    overflow: scroll;
     height: 230px;
 }
 
@@ -2200,6 +2200,10 @@ export default {
     color: #293b5f;
 }
 
+.info-line__title-dashboard div {
+    text-align: center;
+}
+
 .controller-page__info-block {
     border-radius: 8px;
     width: 30%;
@@ -2291,7 +2295,7 @@ export default {
     align-items: center;
 }
 
-.ymaps-2-1-79-map,
+#map-dashboard .ymaps-2-1-79-map,
 .ymaps-2-1-79-inner-panes {
     border-radius: 8px;
 }
@@ -2638,6 +2642,7 @@ export default {
 
 .current-val {
     min-width: 124px;
+    text-align: center;
 }
 
 .white_delta-commands {

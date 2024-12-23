@@ -459,11 +459,11 @@ export default {
     display: flex;
     align-items: center;
     font-weight: 600;
-    font-size: 16px;
+    font-size: 14px;
     line-height: 107%;
     text-transform: uppercase;
     color: #293b5f;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
     cursor: pointer;
 }
 
@@ -472,6 +472,8 @@ export default {
     width: 28px;
     height: 28px;
     margin-right: 8px;
+    background-repeat: no-repeat;
+    padding-right: 12px;
 }
 
 .map-widget h3 {

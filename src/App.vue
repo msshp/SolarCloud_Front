@@ -55,6 +55,11 @@
                     <img src="../public/img/logo-color.svg" alt="logo">
                 </div>
                 <nav className="sidenav__block">
+                    <button id="sidenav__lk" @click="openPersonalArea()"
+                        v-bind:class="{ sidebtn_active: pages.personalAreaPageVisibility }">
+                        <div class="icon-lk" v-bind:class="{ iconlk_active: pages.personalAreaPageVisibility }">
+                        </div>
+                    </button>
                     <button id="sidenav__control" @click="openControl()"
                         v-bind:class="{ sidebtn_active: pages.controlPageVisibility }">
                         <div class="icon-control" v-bind:class="{ iconcontrol_active: pages.controlPageVisibility }">
@@ -93,6 +98,10 @@
                         v-bind:class="{ sidebtn_active: pages.eventsPageVisibility }">
                         <div class="icon-events" v-bind:class="{ iconevents_active: pages.eventsPageVisibility }"></div>
                         События
+                    </button>
+                    <button id="sidenav__events" @click="logOut()">
+                        <div class="icon-logout"></div>
+                        Выходы
                     </button>
                     <!-- <button id="sidenav__commands" @click="openCommands()"
                         v-bind:class="{ sidebtn_active: pages.commandsPageVisibility }">
@@ -234,7 +243,7 @@ export default {
                 commandsPageVisibility: false,
                 reportsPageVisibility: false,
                 listUsersPageVisibility: false,
-                controllerPageVisibility: false
+                controllerPageVisibility: false,
             },
 
             saveUserData: {

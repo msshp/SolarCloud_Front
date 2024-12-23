@@ -3,7 +3,7 @@
         <td class="tr-id">{{ user.id }}</td>
         <td class="tr-name"> {{ user.first_name + ' ' + user.last_name }}</td>
         <td>{{ user.email }}</td>
-        <td>{{ user.profile.role }}</td>
+        <td class="tr-role">{{ user.profile.role }}</td>
         <td>{{ user.profile.created }}</td>
         <td>{{ user.profile.updated }}</td>
         <td class="tr-btns">

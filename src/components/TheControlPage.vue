@@ -108,10 +108,10 @@ export default {
                             legend: {
                                 labels: {
                                     font: {
-                                        size: 16
+                                        size: 12
                                     },
                                     color: '#293B5F',
-                                    padding: 24
+                                    padding: 16
                                 },
                                 position: 'right'
                             }
@@ -184,10 +184,10 @@ export default {
                             legend: {
                                 labels: {
                                     font: {
-                                        size: 16
+                                        size: 12
                                     },
                                     color: '#293B5F',
-                                    padding: 24
+                                    padding: 16
                                 },
                                 position: 'right'
                             }
@@ -300,7 +300,7 @@ export default {
 }
 
 .control-diagram canvas {
-    width: 85% !important;
-    height: 85% !important;
+    width: 100% !important;
+    height: 100% !important;
 }
 </style>

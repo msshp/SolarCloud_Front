@@ -36,7 +36,7 @@
                     <th class="tr-id"><input v-model.trim="searchUserID" type="number" placeholder="ID"
                             v-on:input="searchUser">
                     </th>
-                    <th><input v-model.trim="searchUserName" type="text" placeholder="Имя"
+                    <th class="tr-name"><input v-model.trim="searchUserName" type="text" placeholder="Имя"
                             v-on:input="searchUserByName"></th>
                     <th><input v-model.trim="searchUserEmail" type="text" placeholder="email"
                             v-on:input="searchUserByEmail"></th>
@@ -63,7 +63,7 @@
                     <td class="tr-id">{{ saveUserData.id }}</td>
                     <td class="tr-name"> {{ saveUserData.first_name + ' ' + saveUserData.last_name }}</td>
                     <td>{{ saveUserData.email }}</td>
-                    <td>{{ saveUserData.profile.role }}</td>
+                    <td class="tr-role">{{ saveUserData.profile.role }}</td>
                     <td>{{ saveUserData.profile.created }}</td>
                     <td>{{ saveUserData.profile.updated }}</td>
                     <td class="tr-btns"></td>
@@ -444,7 +444,7 @@ td p {
     display: none;
     position: absolute;
     left: 8px;
-    top: 32px;
+    top: 27px;
     list-style-type: none;
     background: #294b8e;
     border-radius: 2px 2px 8px 8px;

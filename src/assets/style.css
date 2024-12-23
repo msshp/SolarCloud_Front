@@ -53,6 +53,7 @@ button {
     position: relative;
     overflow-x: hidden;
     height: 100vh;
+    background-color: #eeeeee;
 }
 
 .sidenav {
@@ -206,7 +207,6 @@ button {
 
 .top-menu__item i {
     padding-right: 16px;
-    width: 20px;
     width: 20px;
     height: 20px;
     background-repeat: no-repeat;
@@ -471,6 +471,537 @@ tbody tr:hover {
     margin: 0 8px 0 0 !important;
 }
 
+.dropdown__list-command {
+    margin-top: 54px;
+}
+
+#sidenav__lk {
+    display: none;
+}
+
+.data-filter__container {
+    align-items: center;
+}
+
+@media (max-width: 1024px) {
+    .sidenav__block button {
+        font-size: 12px;
+        height: 32px;
+        padding: 0 8px;
+    }
+
+    .sidenav__top-block img {
+        width: 100px;
+    }
+
+    .sidenav__block div {
+        display: none;
+    }
+
+    .sidenav__block {
+        padding: 10px !important;
+    }
+
+    .page-content__container {
+        padding: 72px 16px 24px 16px;
+    }
+
+    .page-content__title p,
+    .controller-page__title {
+        margin: 0 0 10px 0;
+    }
+
+    .page-content__title div,
+    .account-separator {
+        margin-bottom: 16px;
+    }
+
+    .menu__user-name {
+        font-size: 14px;
+    }
+
+    .top-menu__item-options {
+        height: 80px;
+    }
+
+    .top-menu__item-options button {
+        padding: 0 0 0 16px;
+    }
+
+    .top-menu__item i {
+        width: 6px;
+        background-size: contain;
+        margin-right: 16px;
+    }
+
+    .top-menu__item-options button {
+        font-size: 13px;
+    }
+
+    tbody td {
+        font-size: 10px;
+    }
+
+    thead th:last-child {
+        width: 48px !important;
+    }
+
+    table input,
+    .select__button,
+    .sort-by-creation {
+        padding: 4px 6px 4px 6px;
+    }
+
+    .page-content__container th {
+        font-size: 9px;
+    }
+
+    .dropdown__list-item_table {
+        font-size: 10px;
+        padding: 0px 6px;
+        height: 26px;
+    }
+
+    .tr-id {
+        width: 24px;
+    }
+
+    .page-content__title p,
+    .controller-page__title {
+        font-size: 14px;
+        margin: 0 0 8px 0 !important;
+    }
+
+    .top-menu__item {
+        padding-left: 0;
+    }
+
+    .tr-btns button {
+        width: 20px !important;
+        height: 20px !important;
+    }
+
+    .dropdown__list_table {
+        top: 23px;
+    }
+
+    .content img {
+        margin-bottom: 24px;
+        width: 70%;
+    }
+
+    .form input {
+        padding: 10px;
+    }
+
+    .form button {
+        font-size: 14px;
+        padding: 10px 0;
+    }
+
+    .last-input {
+        margin-bottom: 8px !important;
+    }
+
+    .window {
+        padding: 15px !important;
+    }
+
+    h3 {
+        font-size: 12px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .accordeon-item__content-info {
+        font-size: 10px !important;
+    }
+
+    .accordeon-item__content-info div {
+        height: 26px !important;
+        display: flex;
+        align-items: center;
+    }
+
+    .lastdate_widget {
+        width: 70%;
+    }
+
+    .slider-title {
+        font-size: 10px !important;
+        margin: 0 0 2px 2px !important;
+    }
+
+    .slider-container {
+        margin-bottom: 4px;
+    }
+
+    .map-widget {
+        width: 36%;
+    }
+
+    .dropdown p {
+        margin: 0 0 4px 0 !important;
+        font-size: 12px;
+    }
+
+    .dropdown input {
+        padding: 6px !important;
+        font-size: 12px !important;
+    }
+
+    .btn-container button {
+        height: 27px !important;
+        font-size: 12px !important;
+    }
+
+    .btn-container {
+        margin-top: 4px;
+    }
+
+    .result_window p {
+        font-size: 12px !important;
+    }
+
+    .result_window {
+        margin-bottom: 10px !important;
+    }
+
+    .slider-container div {
+        width: auto;
+    }
+
+    .page-content__container th {
+        font-size: 10px !important;
+    }
+
+    table input,
+    .select__button,
+    .sort-by-creation {
+        font-size: 10px;
+    }
+
+    .page-content__title_list {
+        margin-bottom: 10px;
+    }
+
+    .info-line__title {
+        font-size: 10px;
+    }
+
+    .dashboard-table__commands-on-page {
+        width: 800px;
+        overflow: scroll;
+    }
+
+    .dashboard-table__commands-on-page {
+        width: 800px !important;
+        overflow-y: hidden;
+    }
+}
+
+@media (max-width: 1400px) {
+    .control-page__container {
+        flex-direction: column;
+        overflow: scroll;
+    }
+
+    .control-diagram div {
+        width: 476px;
+        margin: 0 auto;
+    }
+
+    .info-block__block {
+        width: 94%;
+        margin-bottom: 16px;
+        padding: 10px 10px 0 10px !important;
+    }
+
+    .proj-info {
+        flex-direction: column;
+    }
+
+    .proj-info section:first-child {
+        margin-right: 0;
+        margin-bottom: 16px;
+    }
+
+    .proj-info section {
+        width: auto;
+        height: auto;
+    }
+
+    .page-content__title p,
+    .controller-page__title {
+        margin: 0 0 16px 0;
+    }
+
+    .page-content__title div,
+    .account-separator {
+        margin-bottom: 16px;
+    }
+
+    .role-block {
+        margin-right: 16px;
+        margin-bottom: 16px;
+    }
+
+    .account__add-users {
+        width: 268px;
+        height: 40px;
+        margin-bottom: 16px;
+    }
+
+    .account__add-users span {
+        font-size: 24px;
+    }
+
+    tbody td {
+        padding: 0 0 0 8px;
+        font-size: 12px;
+    }
+
+    tr th input {
+        margin-left: 0px;
+    }
+
+    .tr-id input {
+        width: 49%;
+    }
+
+    .select_role {
+        padding-left: 0px !important;
+    }
+
+    table input,
+    .select__button,
+    .sort-by-creation {
+        width: 80%;
+    }
+
+    .dropdown__list_table {
+        left: 0;
+        width: 80%;
+    }
+
+    .dropdown__list-item_table {
+        font-size: 12px;
+    }
+
+    .select__button i {
+        width: 12px;
+    }
+
+    .sort-by-date {
+        padding-left: 8px !important;
+        font-size: 13px;
+    }
+
+    .tr-btns button {
+        width: 27px;
+        height: 27px;
+    }
+
+    .role-name {
+        font-size: 13px;
+    }
+
+    thead th:last-child {
+        width: 68px;
+    }
+
+    .window {
+        padding: 16px;
+        width: 50%;
+    }
+
+    .dropdown__list {
+        top: 39px;
+    }
+
+    h3 {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .dropdown p {
+        margin: 8px 0px;
+    }
+
+    .dropdown input {
+        padding: 8px;
+        font-size: 14px;
+        width: 97%;
+    }
+
+    .btn-container button {
+        height: 38px;
+        font-size: 14px;
+    }
+
+    .save-btn {
+        margin-right: 4px;
+    }
+
+    .dropdown__button {
+        height: 32px;
+        padding: 4px 8px 4px 8px;
+        font-size: 14px;
+    }
+
+    .dropdown__button i {
+        width: 14px;
+        height: 14px;
+    }
+
+    ul div {
+        margin-bottom: 4px;
+        margin: 4px 0px 0;
+    }
+
+    .dropdown__list-item {
+        height: 32px;
+        font-size: 14px;
+        margin: 0 0px 0px;
+    }
+
+    .result_window p {
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .result_window {
+        width: 100%;
+        margin-bottom: 16px;
+    }
+
+    .btn-container {
+        justify-content: space-between;
+    }
+
+    .btn-container button {
+        width: 50% !important;
+    }
+
+    .window-delete h3 {
+        margin-bottom: 5% !important;
+    }
+
+    .there-is-data {
+        width: 98%;
+        height: 96%;
+    }
+
+    .info-block__half {
+        width: 48% !important;
+    }
+
+    .pie-container canvas {
+        padding: 16px;
+    }
+
+    .info-block__block {
+        padding: 10px 10px 12px 10px !important;
+    }
+
+    .pie-container canvas {
+        padding: 8px 16px 16px;
+    }
+
+    .pies-block:first-child {
+        margin-bottom: 0px;
+    }
+
+    .account-separator {
+        margin-bottom: 10px !important;
+    }
+
+    .controller-nav {
+        margin-bottom: 10px;
+    }
+
+    .info-block__first {
+        margin-bottom: 4px;
+    }
+
+    .info-block__block-current {
+        width: 97% !important;
+    }
+
+    .dashboard-map {
+        width: 49.5% !important;
+    }
+
+    .block_cp {
+        width: 50% !important;
+    }
+
+    .block_cp div {
+        width: 96%;
+    }
+
+    .info-block__block-current {
+        height: 87% !important;
+    }
+
+    .dashboard-spectable {
+        height: 91%;
+    }
+
+    .pie-container {
+        width: 214px;
+        height: 214px;
+    }
+
+    .dropdown__list-data-filter {
+        top: 31px;
+    }
+
+    .dropdown__list-command {
+        top: 67px;
+    }
+
+    .commands-on-page {
+        flex-direction: column;
+        align-items: self-start;
+        width: 180px;
+        float: left;
+    }
+
+    .value-string {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dropdown__button-command {
+        margin-bottom: 16px !important;
+    }
+
+    .current-val {
+        margin-bottom: 16px;
+    }
+
+    .title-selector__commands {
+        margin-bottom: 16px;
+    }
+
+    .controller-info__block-title_par {
+        margin-bottom: 10px !important;
+    }
+
+    .dropdown__list-command {
+        top: 27px;
+        left: 180px;
+    }
+
+    .events-filter__contrllers {
+        font-size: 12px;
+    }
+
+    .events-page {
+        overflow-x: scroll;
+    }
+}
+
 @media (max-width: 1840px) {
     .sidenav {
         width: 17%;
@@ -506,5 +1037,1117 @@ tbody tr:hover {
 
     .sidenav__block div {
         margin: 0 16px 0 16px;
+    }
+}
+
+@media (max-width: 1235px) {
+    .map-widget__padding {
+        padding: 70px 10px;
+    }
+
+    .map-widget__title {
+        margin-bottom: 14px;
+    }
+
+    .map-widget h3 {
+        margin-bottom: 10px;
+    }
+
+    .accordeon-item__content {
+        padding: 10px;
+    }
+
+    .accordeon-item__content-info {
+        margin-right: 4px !important;
+    }
+
+    .accordeon-item__content-info div {
+        height: 32px;
+    }
+
+    .accordeon-item__content {
+        margin-bottom: 10px;
+    }
+
+    .map-widget h3 {
+        font-size: 12px;
+    }
+
+    .slider-title {
+        font-size: 12px;
+        margin: 0 0 4px 2px;
+    }
+
+    .lastdate_widget {
+        padding: 4px 8px;
+    }
+
+    .map-widget h3 {
+        margin-left: 10px;
+    }
+
+    .tr-id {
+        width: 24px;
+    }
+
+    .controller-btn td {
+        padding: 0 0 0 12px;
+    }
+
+    .controller-page__info-container {
+        flex-direction: column;
+    }
+
+    .controller-nav {
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .controller-nav__btns {
+        margin-bottom: 8px;
+    }
+
+    .data-filter__container {
+        align-items: center;
+    }
+
+    .pie-voltage {
+        top: 37%;
+    }
+
+    .pie-value {
+        font-size: 34px;
+    }
+
+    .page-content__container {
+        padding: 80px 16px 16px 16px;
+    }
+
+    .info-block__first {
+        flex-direction: column;
+    }
+
+    .info-block__half {
+        width: 100% !important;
+    }
+
+    .info-block__block {
+        width: 91%;
+    }
+
+    .info-block__errors {
+        width: 95% !important;
+        height: 275px;
+    }
+
+    .block_cp div {
+        width: 97%;
+    }
+
+    .dashboard-map div {
+        width: 97%;
+    }
+
+    .controller-page__info-block {
+        width: 97%;
+    }
+
+    .controller-settings {
+        flex-direction: column;
+    }
+
+    .controller-info__containerone {
+        width: 100%;
+    }
+
+    .controller-map {
+        height: 400px;
+    }
+
+    #map-settings {
+        height: 320px;
+    }
+
+    .controller-map__set-coords {
+        padding: 0px 12px 20px;
+        background-color: #f8f6f4;
+        margin-top: 10px;
+        border-radius: 8px;
+    }
+
+    .controller-info {
+        margin-right: 0;
+    }
+
+    .controller-info__param {
+        margin-top: 40px;
+        width: 96%;
+    }
+
+    .controller-data__dashboard-errors {
+        overflow-y: scroll;
+        height: 168px;
+    }
+
+    .controller-data__events {
+        width: 970px;
+    }
+
+    .events-filters {
+        width: 970px;
+    }
+
+    .events-filters {
+        justify-content: flex-start;
+    }
+
+    .datetext {
+        width: 100px;
+    }
+
+    .dashboard-table__events .info-line__title {
+        width: 970px !important;
+    }
+
+    .dashboard-table__events {
+        width: 970px !important;
+    }
+}
+
+@media (max-width: 1086px) {
+    .role-block div:last-child {
+        margin-right: 0px;
+    }
+
+    .account__add-users {
+        width: 184px;
+        height: 32px;
+        margin-bottom: 16px;
+        font-size: 12px;
+    }
+
+    .account__add-users span {
+        display: none;
+    }
+
+    .tr-btns button {
+        width: 24px;
+        height: 24px;
+    }
+
+    thead th:last-child {
+        width: 62px;
+    }
+
+    tbody td {
+        padding: 0 0 0 4px;
+        font-size: 11px;
+    }
+
+    .sidenav__block button {
+        font-size: 11px;
+    }
+
+    .sidenav__block div {
+        margin: 0 10px 0 10px;
+    }
+
+    .sidenav__block {
+        padding: 12px;
+    }
+
+    .sidenav__block button {
+        height: 40px;
+    }
+
+    .role-block div:first-child {
+        display: none;
+    }
+
+    .role-block {
+        justify-content: center;
+    }
+
+    .sort-by-date {
+        padding-left: 8px !important;
+        font-size: 10px;
+    }
+
+    .basket {
+        margin-right: 4px;
+    }
+
+    .tr-name {
+        width: 20%;
+    }
+
+    .select_role {
+        width: 124%;
+    }
+
+    .tr-role {
+        font-size: 9px;
+    }
+
+    .role-block {
+        width: 150px;
+        height: 90px;
+    }
+
+    .form {
+        width: 38%;
+    }
+
+    .page-content__container th {
+        font-size: 11px;
+        padding-bottom: 0px;
+    }
+
+    .role-count {
+        text-align: center;
+    }
+
+    .events-filter__contrllers {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .form {
+        width: 78%;
+    }
+
+    .sidenav__block div {
+        display: block;
+        margin: 0;
+    }
+
+    .sidenav__block button {
+        text-indent: -9999px;
+        /* Сдвигаем текст за пределы видимости */
+        overflow: hidden;
+        /* Скрываем переполнение, если такое имеется */
+        width: 36px;
+        height: 36px;
+        padding: 4px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .sidenav__block {
+        padding: 0px !important;
+        align-items: center;
+        margin-top: 0px;
+    }
+
+    .sidenav__top-block img {
+        width: 100px;
+        display: none;
+    }
+
+    .sidenav {
+        width: 15%;
+    }
+
+    .page-content {
+        width: 85%;
+    }
+
+    .separator {
+        display: none !important;
+    }
+
+    .top-menu {
+        display: none;
+    }
+
+    #sidenav__lk {
+        display: flex;
+    }
+
+    .icon-lk {
+        background-image: url(../../public/img/sidenav/personala.svg);
+    }
+
+    #sidenav__lk:hover .icon-lk,
+    .iconlk_active {
+        background-image: url(../../public/img/sidenav/personala_hover.svg) !important;
+    }
+
+    .icon-burger {
+        background-color: #f8f6f4;
+        border-radius: 8px;
+        padding: 15px 4px;
+    }
+
+    .side-menu__btn {
+        top: 4px;
+        right: -42px;
+    }
+
+    .sidenav__top-block {
+        margin-top: 4px;
+    }
+
+    .page-content__container {
+        padding: 12px 8px 12px 8px;
+    }
+
+    .page-content__title p,
+    .controller-page__title {
+        margin: 0px 0 8px 42px !important;
+        text-transform: uppercase;
+        color: #293b5f;
+    }
+
+    .control-diagram div {
+        width: 320px;
+    }
+
+    .info-block__block {
+        width: 310px;
+        margin-bottom: 8px;
+    }
+
+    .control-diagram h4 {
+        font-size: 12px;
+    }
+
+    .pa_page-table {
+        display: flex;
+        margin-right: 10px;
+    }
+
+    .pa_page-table tr {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .pa_page-table td {
+        font-size: 12px;
+        padding-bottom: 12px;
+    }
+
+    .page-content__container th {
+        padding-bottom: 12px;
+    }
+
+    .pa__settings::after {
+        content: "Настройки";
+    }
+
+    .pa_page-table .tr-btns button {
+        width: 118px !important;
+        border-radius: 8px;
+        font-size: 12px;
+        height: 26px !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #293b5f;
+        background-size: contain;
+        background-image: none;
+        color: #f8f6f4;
+    }
+
+    .pa__titles {
+        margin-right: 10px;
+    }
+
+    .proj-info section:first-child {
+        margin-bottom: 8px;
+    }
+
+    .page-content__title div,
+    .account-separator {
+        margin-bottom: 8px;
+    }
+
+    .proj-info section {
+        padding: 16px;
+    }
+
+    .proj-info input {
+        height: 32px;
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+
+    .save-proj-btn {
+        width: 110px;
+        height: 32px;
+    }
+
+    .proj-info__img {
+        display: none;
+    }
+
+    .proj-info__block-num {
+        padding-bottom: 16px;
+    }
+
+    .proj-info__block {
+        font-size: 14px;
+    }
+
+    .proj-info__block-num {
+        font-size: 32px;
+    }
+
+    .map-widget__padding {
+        padding: 8px;
+    }
+
+    .map-widget__title {
+        margin-bottom: 8px;
+    }
+
+    .map-widget__title {
+        font-size: 12px;
+    }
+
+    .map-widget__icon {
+        width: 24px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        height: 24px;
+    }
+
+    .map-widget h3 {
+        margin-left: 0px;
+    }
+
+    .map-widget {
+        width: 48%;
+    }
+
+    .ymaps-2-1-79-balloon__content {
+        font: 12px / 20px Arial, sans-serif;
+    }
+
+    .ymaps-2-1-79-balloon__close+.ymaps-2-1-79-balloon__content {
+        width: 140px;
+    }
+
+    .ymaps-2-1-79-balloon__content {
+        padding: 8px;
+    }
+
+    .controller-delete {
+        padding: 0 16px 0 0 !important;
+    }
+
+    .side-menu__btn-back {
+        background-color: #f8f6f4;
+        border-radius: 20px;
+        top: 4px;
+        right: -89px;
+        padding: 15px 6px;
+    }
+
+    .pies-block {
+        flex-direction: column;
+    }
+
+    .pies-block div {
+        width: 95%;
+    }
+
+    .pie-container canvas {
+        width: 218px !important;
+    }
+
+    .controller-page__info-container {
+        margin-top: 40px;
+    }
+
+    .controller-page__info-block {
+        width: 87%;
+    }
+
+    .controller-page__info-block {
+        padding: 12px;
+    }
+
+    .controller-page__info-block span {
+        font-size: 14px;
+    }
+
+    .controller-nav button {
+        font-size: 14px;
+        text-transform: uppercase;
+        line-height: 197%;
+        padding: 0 8px;
+        border-radius: 8px;
+        margin-right: 4px !important;
+        background: #fcfcfc;
+        font-weight: 400 !important;
+        margin-bottom: 8px;
+    }
+
+    .dropdown__list-data-filter {
+        top: 29px !important;
+    }
+
+    .dropdown__list-item {
+        font-size: 14px !important;
+        height: 32px !important;
+    }
+
+    .dropdown__list-data-filter li {
+        margin: 0;
+    }
+
+    .info-line__title {
+        font-size: 9px;
+    }
+
+    .controller-info__param {
+        width: 95%;
+    }
+
+    .dropdown__button {
+        height: 26px;
+        background: #294b8e !important;
+    }
+
+    .save-xml__data {
+        background: #f4ca8d !important;
+        height: 27px !important;
+    }
+
+    .dropdown__list-data-filter {
+        top: 25px !important;
+    }
+
+    .controller-nav__btns {
+        margin-bottom: 0px;
+    }
+
+    .controller-info__delete {
+        width: 163px;
+        height: 20px;
+        font-size: 12px;
+    }
+
+    .controller-info__delete div {
+        display: none;
+    }
+
+    .controller-info {
+        padding: 16px;
+    }
+
+    .controller-map__set-coords {
+        border-radius: 10px;
+        padding: 0;
+    }
+
+    .controller_btn_active {
+        background-color: #275fa1 !important;
+        color: white !important;
+    }
+
+    .controller-nav {
+        margin-bottom: 0px;
+    }
+
+    .dashboard-table {
+        width: 700px;
+        overflow: scroll;
+    }
+
+    .dropdown__button-data-filter {
+        margin-bottom: 0 !important;
+    }
+
+    .controller-data {
+        overflow: scroll;
+    }
+
+    .there-is-data {
+        width: 99%;
+    }
+
+    .map-widget__icon {
+        padding-right: 0;
+    }
+
+    .proj-info__block {
+        margin-left: 0;
+    }
+
+    .data-filter__container {
+        margin-bottom: 8px;
+    }
+
+    .dropdown__list-command {
+        top: 42px;
+        left: 196px;
+    }
+}
+
+
+@media (min-width: 425px) and (max-width: 768px) {
+    .form {
+        width: 50%;
+    }
+
+    .sidenav {
+        width: 7%;
+    }
+
+    .page-content {
+        width: 93%;
+    }
+}
+
+@media (max-width: 632px) {
+    table {
+        width: 570px;
+    }
+}
+
+
+@media (max-width: 620px) {
+    .page-content__container {
+        overflow: scroll;
+    }
+
+    .window-container {
+        width: 104%;
+    }
+
+    .window-delete {
+        background-color: transparent !important;
+    }
+
+    .page-content__container th {
+        font-size: 10px;
+    }
+
+    .dropdown__list-item_table {
+        padding: 0px 4px;
+        height: 30px;
+    }
+
+    .dropdown__list-item_table {
+        font-size: 11px;
+    }
+
+    .dropdown input {
+        width: 95%;
+    }
+
+    .dropdown__button {
+        height: 30px;
+        padding: 4px 6px;
+        font-size: 12px;
+    }
+
+    .dropdown__list {
+        top: 32px;
+    }
+
+    .dropdown__list-item {
+        height: 28px;
+        font-size: 12px;
+    }
+
+    .map-widget {
+        width: 65%;
+    }
+
+    .page-content__title_list {
+        align-items: flex-start;
+        margin-bottom: 10px;
+        flex-direction: column;
+    }
+
+    .account__add-users {
+        width: 220px;
+        height: 24px;
+        margin-top: 4px;
+        font-size: 10px;
+    }
+
+    .controller-info__delete {
+        width: 136px;
+        height: 25px;
+        font-size: 10px;
+        padding-top: 0;
+    }
+
+    .dashboard-container h4,
+    .controller-info__block-title {
+        font-size: 12px;
+    }
+
+    .controller-info__delete button {
+        font-size: 12px;
+        margin-top: 5px !important;
+    }
+
+    .important_registers {
+        font-size: 12px;
+        flex-direction: column;
+    }
+
+    .important_registers div:last-child {
+        margin-left: 0;
+    }
+
+    .controller-info__name p {
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .controller-info input {
+        font-size: 12px;
+    }
+
+    .controller-info p {
+        margin-bottom: 4px;
+        margin-top: 4px;
+    }
+
+    .title_button {
+        margin-bottom: 6px;
+    }
+
+    .settings-btns_container {
+        margin-top: 10px;
+    }
+
+    .info-line__par {
+        padding: 0px 0 0 0;
+        font-size: 12px !important;
+    }
+
+    .info-line__title {
+        height: 32px;
+    }
+
+    .info-line__par_line div {
+        font-size: 12px;
+    }
+
+    .controller-data__dashboard-errors {
+        height: 213px;
+    }
+
+    .info-line__table {
+        height: 32px;
+    }
+
+    .controller-data__dashboard-errors div {
+        padding: 0;
+    }
+
+    .num-reg {
+        width: 26% !important;
+    }
+
+    .controller-map {
+        padding-bottom: 54px !important;
+    }
+
+    .options-block__coords-inp {
+        flex-wrap: wrap;
+    }
+
+    .controller-nav__data-filter {
+        width: 100%;
+    }
+
+    .dropdown__set-coord {
+        width: 100% !important;
+        margin-top: 4px;
+    }
+
+    .dropdown__set i {
+        right: 0;
+    }
+
+    .controller-info button {
+        width: 100%;
+        margin-right: 0;
+        border-radius: 4px;
+        margin-top: 4px;
+        height: 30px !important;
+        margin-left: 0 !important;
+    }
+
+    .controller-info input {
+        border-radius: 4px;
+        width: 94% !important;
+        margin-top: 4px;
+    }
+
+    .info-block__errors-container {
+        padding: 0px;
+    }
+
+    .info-line__title {
+        padding: 0;
+    }
+
+    .controller-data__dashboard-errors {
+        padding: 0;
+    }
+
+    .dropdown__list {
+        top: 40px;
+    }
+
+    .title-selector__commands {
+        width: 100% !important;
+    }
+
+    .controller-info__param-commands {
+        padding: 0;
+    }
+
+    .inp-btn__commands {
+        align-items: center;
+    }
+
+    #new-val-c {
+        width: 236px !important;
+        margin-top: 0;
+        margin-right: 8px;
+    }
+
+    .dropdown__list-command {
+        margin: 40px 24px 0px 4px;
+    }
+
+    .events-filter__delta i {
+        right: 8px !important;
+    }
+
+    .events-filter__delta i {
+        right: 28px !important;
+    }
+
+    .events-filters .dropdown__set-date i {
+        right: 29px !important;
+    }
+
+    .dropdown__list-data-filter {
+        top: 30px !important;
+    }
+
+    .events-filters .dropdown__list-data-filter {
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 425px) and (max-width: 620px) {
+    .sidenav {
+        width: 11%;
+    }
+
+    .page-content {
+        width: 89%;
+    }
+}
+
+@media (max-width: 425px) {
+    .window {
+        width: 75%;
+    }
+
+    .window h3 {
+        font-size: 12px !important;
+    }
+
+    h3 {
+        font-size: 10px !important;
+    }
+
+    .dropdown p {
+        font-size: 11px;
+    }
+
+    .btn-container button {
+        height: 30px !important;
+    }
+
+    .role-name {
+        font-size: 10px;
+        margin: 0;
+    }
+
+    .role-count {
+        font-size: 20px;
+        margin: 16px 0 0;
+    }
+
+    .role-block {
+        height: 60px;
+        margin-right: 0;
+    }
+
+    .account__add-users {
+        width: 100%;
+    }
+
+    .account__number-users {
+        justify-content: space-between;
+    }
+
+    .page-content__container-map {
+        width: 380px;
+        overflow-x: scroll;
+    }
+
+    .map-widget {
+        width: 78%;
+    }
+
+    .map-loader {
+        width: 56px !important;
+    }
+
+    .accordeon-item__content {
+        margin-bottom: 6px;
+        width: 96%;
+        padding: 4px;
+    }
+
+    .page-content__container-map {
+        width: 100%;
+    }
+
+    .slider-container {
+        font-size: 10px;
+    }
+
+    .block_cp {
+        display: none;
+    }
+
+    .datetext {
+        font-size: 12px;
+    }
+
+    .dropdown__set-coord {
+        font-size: 10px;
+        height: 24px !important;
+        padding: 0px 4px !important;
+    }
+
+    .controller-info {
+        padding: 8px;
+    }
+
+    .options-block__coords-inptitle {
+        font-size: 12px;
+        padding: 4px;
+    }
+
+    .icon-checkbox-blank {
+        background-size: contain;
+        padding-bottom: 8px;
+        background-position: center;
+        margin-right: 4px !important;
+    }
+
+    .controller-page__info-block {
+        padding: 8px;
+    }
+
+    .controller-page__info-block p {
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .controller-page__info-block span {
+        font-size: 12px;
+    }
+
+    .controller-info button {
+        border-radius: 4px;
+        margin-top: 4px;
+        height: 29px !important;
+        margin-left: 0 !important;
+    }
+
+    .controller-info input {
+        border-radius: 4px;
+        width: 94% !important;
+        margin-top: 4px;
+    }
+
+    #map-settings {
+        height: 256px !important;
+    }
+
+    .controller-info__delete {
+        height: 24px;
+    }
+
+    .controller-info button {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    .controller-info__param {
+        margin-top: 10px;
+    }
+
+    .name-par__title {
+        width: 14% !important;
+    }
+
+    .info-line__par {
+        font-size: 10px !important;
+    }
+
+    .info-line div {
+        height: 28px;
+        line-height: 102%;
+        font-size: 10px;
+    }
+
+    .controller-info p {
+        margin-bottom: 0px;
+        margin-top: 4px;
+        font-size: 12px;
+    }
+
+    .controller-nav button {
+        font-size: 11px;
+    }
+
+    .dropdown__list-item {
+        font-size: 10px !important;
+        height: 26px !important;
+    }
+
+    .info-block__errors {
+        display: none;
+    }
+
+    .important_registers div p:first-child {
+        margin-top: 4px;
+    }
+
+    .dropdown__list {
+        top: 34px;
+        margin-left: 12px;
+    }
+
+    .events-filter__delta ul {
+        margin-left: 0;
+        top: 29px !important;
+    }
+}
+
+@media (max-width: 375px) {
+    .dropdown input {
+        width: 94%;
     }
 }

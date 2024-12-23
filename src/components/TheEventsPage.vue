@@ -1,5 +1,5 @@
 <template>
-    <div class="page-content__container">
+    <div class="page-content__container events-page">
         <div class="page-content__title">
             <p>События</p>
             <div></div>
@@ -592,6 +592,7 @@ export default {
 
 .dashboard-table__events {
     margin-top: 12px;
+    overflow-x: hidden !important;
 }
 
 .ul-controller {
