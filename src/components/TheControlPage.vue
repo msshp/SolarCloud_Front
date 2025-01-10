@@ -288,6 +288,8 @@ export default {
 .control-diagram div {
     display: flex;
     justify-content: center;
+    width: 508px;
+    height: 508px;
 }
 
 .control-diagram h4 {

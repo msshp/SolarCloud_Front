@@ -475,7 +475,8 @@ tbody tr:hover {
     margin-top: 54px;
 }
 
-#sidenav__lk {
+#sidenav__lk,
+#sidenav__sidelogout {
     display: none;
 }
 
@@ -487,15 +488,10 @@ tbody tr:hover {
     .sidenav__block button {
         font-size: 12px;
         height: 32px;
-        padding: 0 8px;
     }
 
     .sidenav__top-block img {
         width: 100px;
-    }
-
-    .sidenav__block div {
-        display: none;
     }
 
     .sidenav__block {
@@ -702,11 +698,12 @@ tbody tr:hover {
 @media (max-width: 1400px) {
     .control-page__container {
         flex-direction: column;
-        overflow: scroll;
+        align-items: center;
     }
 
     .control-diagram div {
         width: 476px;
+        height: 476px;
         margin: 0 auto;
     }
 
@@ -1254,7 +1251,7 @@ tbody tr:hover {
     }
 
     .sidenav__block {
-        padding: 12px;
+        padding: 6px;
     }
 
     .sidenav__block button {
@@ -1362,7 +1359,8 @@ tbody tr:hover {
         display: none;
     }
 
-    #sidenav__lk {
+    #sidenav__lk,
+    #sidenav__sidelogout {
         display: flex;
     }
 
@@ -1403,6 +1401,7 @@ tbody tr:hover {
 
     .control-diagram div {
         width: 320px;
+        height: 320px;
     }
 
     .info-block__block {
@@ -1685,6 +1684,10 @@ tbody tr:hover {
     .dropdown__list-command {
         top: 42px;
         left: 196px;
+    }
+
+    .control-diagram {
+        width: 90% !important;
     }
 }
 
@@ -2023,10 +2026,6 @@ tbody tr:hover {
 
     .slider-container {
         font-size: 10px;
-    }
-
-    .block_cp {
-        display: none;
     }
 
     .datetext {

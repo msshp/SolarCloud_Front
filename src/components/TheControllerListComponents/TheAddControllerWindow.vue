@@ -14,7 +14,7 @@
                 <input type="text" v-model.trim="newContrName" placeholder="Название">
                 <input type="text" v-model.trim="newContrDesc" placeholder="Описание">
                 <input type="text" v-model.trim="newContrSn" placeholder="Серийный номер">
-                <input type="number" v-model.trim="newContrPin" placeholder="Пин-код">
+                <!-- <input type="number" v-model.trim="newContrPin" placeholder="Пин-код"> -->
                 <div class="btn-container">
                     <button className="save-btn" @click="sendNewController()">Сохранить</button>
                     <button className="cancel-btn" @click="closeAddWindow">Отменить</button>
@@ -80,7 +80,7 @@ export default {
                 "name": this.newContrName,
                 "description": this.newContrDesc,
                 "sn": this.newContrSn,
-                "pin": this.newContrPin,
+                // "pin": this.newContrPin,
                 "device_type": this.numbSelectorContent,
                 "account": this.saveUserData.profile.account,
                 "installer": this.serviseComp,

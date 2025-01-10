@@ -99,9 +99,9 @@
                         <div class="icon-events" v-bind:class="{ iconevents_active: pages.eventsPageVisibility }"></div>
                         События
                     </button>
-                    <button id="sidenav__events" @click="logOut()">
+                    <button id="sidenav__sidelogout" @click="logOut()">
                         <div class="icon-logout"></div>
-                        Выходы
+                        Выход
                     </button>
                     <!-- <button id="sidenav__commands" @click="openCommands()"
                         v-bind:class="{ sidebtn_active: pages.commandsPageVisibility }">
@@ -505,9 +505,11 @@ export default {
                             }
                         } else {
                             let date = el.status.measured_at;
-                            if (date !== null) {
-                                let formatDate = date.split(',');
-                                el.status.created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+                            if (date !== undefined) {
+                                if (date !== null) {
+                                    let formatDate = date.split(',');
+                                    el.status.created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+                                }
                             }
                         }
                     })

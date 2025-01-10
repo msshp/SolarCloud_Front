@@ -2607,6 +2607,7 @@ export default {
     margin: 70px 24px 0px 20px;
     width: 548px;
     top: 70px;
+    z-index: 67;
 }
 
 .dropdown__button-command {
