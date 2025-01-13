@@ -63,56 +63,55 @@
                     <button id="sidenav__control" @click="openControl()"
                         v-bind:class="{ sidebtn_active: pages.controlPageVisibility }">
                         <div class="icon-control" v-bind:class="{ iconcontrol_active: pages.controlPageVisibility }">
-                        </div>Контрольная панель
+                        </div><span>Контрольная панель</span>
                     </button>
                     <div v-if="projBtnVisibility" class="separator"></div>
                     <button v-if="projBtnVisibility" id="sidenav__project" @click="openProject()"
                         v-bind:class="{ sidebtn_active: pages.projectPageVisibility }">
                         <div class="icon-project" v-bind:class="{ iconproj_active: pages.projectPageVisibility }"></div>
-                        Проект
+                        <span>Проект</span>
                     </button>
                     <button v-if="listUsersBtnVisibility" id="sidenav__userlist" @click="openUserListPage()"
                         v-bind:class="{ sidebtn_active: pages.listUsersPageVisibility }">
                         <div class="icon-personal-area"
                             v-bind:class="{ icon_personal_area_active: pages.listUsersPageVisibility }">
-                        </div>
-                        Список пользователей
+                        </div><span>Список пользователей</span>
                     </button>
                     <div class="separator"></div>
                     <button id="sidenav__map" @click="openMap()"
                         v-bind:class="{ sidebtn_active: pages.mapPageVisibility }">
-                        <div class="icon-map" v-bind:class="{ iconmap_active: pages.mapPageVisibility }"></div>Карта
+                        <div class="icon-map" v-bind:class="{ iconmap_active: pages.mapPageVisibility }"></div>
+                        <span>Карта</span>
                     </button>
                     <button id="sidenav__list" @click="openList()"
                         v-bind:class="{ sidebtn_active: pages.listPageVisibility }">
-                        <div class="icon-list" v-bind:class="{ iconlist_active: pages.listPageVisibility }"></div>Список
-                        контроллеров
+                        <div class="icon-list" v-bind:class="{ iconlist_active: pages.listPageVisibility }"></div>
+                        <span>Список
+                            контроллеров</span>
                     </button>
                     <!-- <button id="sidenav__subscription" @click="openSubscription()"
                         v-bind:class="{ sidebtn_active: pages.subscriptionPageVisibility }">
                         <div class="icon-subscription"
-                            v-bind:class="{ iconsub_active: pages.subscriptionPageVisibility }"></div>Подписка
+                            v-bind:class="{ iconsub_active: pages.subscriptionPageVisibility }"></div><span>Подписка</span>
                     </button> -->
                     <div class="separator"></div>
                     <button id="sidenav__events" @click="openEvents()"
                         v-bind:class="{ sidebtn_active: pages.eventsPageVisibility }">
                         <div class="icon-events" v-bind:class="{ iconevents_active: pages.eventsPageVisibility }"></div>
-                        События
+                        <span>События</span>
                     </button>
                     <button id="sidenav__sidelogout" @click="logOut()">
-                        <div class="icon-logout"></div>
-                        Выход
+                        <div class="icon-logout"></div><span>Выход</span>
                     </button>
                     <!-- <button id="sidenav__commands" @click="openCommands()"
                         v-bind:class="{ sidebtn_active: pages.commandsPageVisibility }">
                         <div class="icon-commands" v-bind:class="{ iconcom_active: pages.commandsPageVisibility }">
-                        </div>
-                        Команды
+                        </div><span>Команды</span>
                     </button> -->
                     <!-- <button id="sidenav__reports" @click="openReports()"
                         v-bind:class="{ sidebtn_active: pages.reportsPageVisibility }">
                         <div class="icon-reports" v-bind:class="{ iconreports_active: pages.reportsPageVisibility }">
-                        </div>Отчёты
+                        </div><span>Отчёты</span>
                     </button> -->
                 </nav>
             </div>

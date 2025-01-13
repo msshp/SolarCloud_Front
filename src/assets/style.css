@@ -1689,6 +1689,10 @@ tbody tr:hover {
     .control-diagram {
         width: 90% !important;
     }
+
+    .sidenav__block button span {
+        display: none;
+    }
 }
 
 
