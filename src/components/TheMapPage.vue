@@ -294,22 +294,31 @@ export default {
                     if (response.status === 200) {
                         this.lastDataForWidget = response.data[1];
 
-                        let date = this.lastDataForWidget.measured_at;
-                        let formatDate = date.split(',');
-                        this.lastDataForWidget.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+                        if (this.lastDataForWidget !== undefined) {
+                            let date = this.lastDataForWidget.measured_at;
+                            let formatDate = date.split(',');
+                            this.lastDataForWidget.measured_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
 
-                        //////// установить цвет плашки с временем
-                        this.lastTimeColor = true; // зелёный
-                        let thisdate = this.formatDate(date);
-                        let targetDate = new Date(thisdate); // Целевая дата
-                        let currentDate = new Date(); // Текущее время
+                            //////// установить цвет плашки с временем
+                            this.lastTimeColor = true; // зелёный
+                            let thisdate = this.formatDate(date);
+                            let targetDate = new Date(thisdate); // Целевая дата
+                            let currentDate = new Date(); // Текущее время
 
-                        let diffInHours = Math.abs(targetDate - currentDate) / (1000 * 60 * 60); // Вычисляем разницу в часах между целевой датой и текущим временем
+                            let diffInHours = Math.abs(targetDate - currentDate) / (1000 * 60 * 60); // Вычисляем разницу в часах между целевой датой и текущим временем
 
-                        if (diffInHours >= 3) { // Проверяем, больше ли разница 3 часов
-                            this.lastTimeColor = false; // красный
+                            if (diffInHours >= 3) { // Проверяем, больше ли разница 3 часов
+                                this.lastTimeColor = false; // красный
+                            }
+                        } else {
+                            this.lastDataForWidget = {
+                                measured_at: '–',
+                                bat_c: 0,
+                                bat_v: 0
+                            }
+
+                            this.lastTimeColor = false;
                         }
-                        /////////////
 
                         setTimeout(() => { // нарисовать значения
                             this.setLastValues();

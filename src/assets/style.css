@@ -484,6 +484,22 @@ tbody tr:hover {
     align-items: center;
 }
 
+.flex-table {
+    margin-bottom: 16px;
+}
+
+.tooltip_text {
+    width: 60% !important;
+}
+
+.info-line__flex-table {
+    height: 60px;
+}
+
+.name__flex-table {
+    width: 28% !important;
+}
+
 @media (max-width: 1024px) {
     .sidenav__block button {
         font-size: 12px;
@@ -500,6 +516,7 @@ tbody tr:hover {
 
     .page-content__container {
         padding: 72px 16px 24px 16px;
+        overflow-x: scroll;
     }
 
     .page-content__title p,
@@ -1210,6 +1227,10 @@ tbody tr:hover {
     .dashboard-table__events {
         width: 970px !important;
     }
+
+    .tooltip_text {
+        font-size: 10px !important;
+    }
 }
 
 @media (max-width: 1086px) {
@@ -1390,6 +1411,7 @@ tbody tr:hover {
 
     .page-content__container {
         padding: 12px 8px 12px 8px;
+        overflow-x: scroll;
     }
 
     .page-content__title p,
@@ -1654,7 +1676,7 @@ tbody tr:hover {
 
     .dashboard-table {
         width: 700px;
-        overflow: scroll;
+        overflow: hidden;
     }
 
     .dropdown__button-data-filter {

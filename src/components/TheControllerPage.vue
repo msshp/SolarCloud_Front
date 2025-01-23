@@ -223,14 +223,16 @@
 
                     <div class="controller-info__name">
                         <p>Название</p>
-                        <input type="text" v-model="controllerInfo.name">
+                        <input type="text" v-model="controllerInfo.name" :disabled="!access"
+                            :style="{ border: access ? '1px solid black' : 'none', padding: access ? '1px solid black' : '0' }">
                     </div>
                     <div>
                         <p>Описание</p>
-                        <input type="text" v-model="controllerInfo.description">
+                        <input type="text" v-model="controllerInfo.description" :disabled="!access"
+                            :style="{ border: access ? '1px solid black' : 'none', padding: access ? '1px solid black' : '0' }">
                     </div>
                     <div class="settings-btns_container">
-                        <button @click="updateInfo()">Обновить</button>
+                        <button v-if="access" @click="updateInfo()">Обновить</button>
                         <div class="update" v-bind:class="{ update_visible: updateVisible, update_error: updateError }">
                             {{ updateText
                             }}</div>
@@ -242,17 +244,36 @@
                         <div class="options-block__coords-inpcont">
                             <div>
                                 <div class="options-block__coords-inp">
-                                    <div @click="switchCoordinates()" class="icon-checkbox-blank"
+                                    <div v-if="access" @click="switchCoordinates()" class="icon-checkbox-blank"
                                         v-bind:class="{ manual_coords: this.autoSwitchCoords }">
                                     </div>
                                     <div class="options-block__coords-inptitle">Координаты от устройства</div>
                                     <div class="controller-nav__data-filter">
-                                        <button
+                                        <!-- <button
                                             class="dropdown__button dropdown__button-data-filter dropdown__set dropdown__set-coord"
                                             @click="chooseCoords()" v-bind:class="{ opened_button: selectorCoord }">{{
                                                 selectorCoordContent
-                                            }}<i class="white_delta"
-                                                v-bind:class="{ inverted_white_delta: selectorCoord }"></i></button>
+                                            }}<i v-if="access" class="white_delta"
+                                                v-bind:class="{ inverted_white_delta: selectorCoord }"></i></button> -->
+
+                                        <!-- <button
+                                            class="dropdown__button dropdown__button-data-filter dropdown__set dropdown__set-coord"
+                                            @click="access ? chooseCoords() : null"
+                                            v-bind:class="{ opened_button: selectorCoord }">{{
+                                                selectorCoordContent
+                                            }}<i v-if="access" class="white_delta"
+                                                v-bind:class="{ inverted_white_delta: selectorCoord }"></i></button> -->
+
+                                        <button
+                                            class="dropdown__button dropdown__button-data-filter dropdown__set dropdown__set-coord"
+                                            @click="access ? chooseCoords() : null"
+                                            v-bind:class="{ opened_button: selectorCoord }"
+                                            v-bind:style="access ? {} : { background: 'transparent !important', color: '#294b8e !important', cursor: 'default' }">
+                                            {{ selectorCoordContent }}
+                                            <i v-if="access" class="white_delta"
+                                                v-bind:class="{ inverted_white_delta: selectorCoord }"></i>
+                                        </button>
+
                                         <ul class="dropdown__list dropdown__list-data-filter dropdown__list-set"
                                             v-bind:class="{ dropdown__list_visible: selectorCoord }">
                                             <div class="datafilter-separator datafilter-separator_set"></div>
@@ -262,7 +283,7 @@
                                         </ul>
                                     </div>
                                 </div>
-                                <div class="options-block__coords-inp options-block__coords-inp_m">
+                                <div v-if="access" class="options-block__coords-inp options-block__coords-inp_m">
                                     <div @click="switchCoordinates()" class="icon-checkbox-blank"
                                         v-bind:class="{ manual_coords: this.manualCoords }">
                                     </div>
@@ -353,7 +374,31 @@
             </div>
         </div>
         <div v-if="btns.commandsActive" class="dashboard-table dashboard-table__commands-on-page">
-            <div class="controller-info controller-info__param-commands">
+            <div class="controller-info controller-info__param-commands flex-table">
+                <div class="controller-info__param-commands-div">
+                    <p class="controller-info__block-title controller-info__block-title_par">Параметры
+                    </p>
+                    <div className="info-line info-line__title info-line__par">
+                        <div class="">№ регистра</div>
+                        <div class="name__flex-table">Название</div>
+                        <div class="">Текущее значение</div>
+                        <div class="tooltip_text">Описание</div>
+                    </div>
+                    <div>
+                        <div className="info-line info-line__par_line info-line__flex-table"
+                            v-for="parameter in parametersStorage" :key="parameter">
+                            <div class="">{{ parameter.num }}</div>
+                            <div class="name__flex-table">{{ parameter.namepar }}</div>
+                            <div class="">{{ parameter.val }}
+                            </div>
+                            <div class="tooltip_text">{{ parameter.tooltip_text }}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-if="access" class="controller-info controller-info__param-commands">
                 <div class="controller-info__param-commands-div">
                     <p class="controller-info__block-title controller-info__block-title_par">Добавить команду в очередь
                     </p>
@@ -1592,6 +1637,7 @@ export default {
             }).then((response) => {
                 if (response.status === 200) {
                     let arr = response.data;
+                    // console.log(arr)
 
                     for (let key in arr) {
                         let change = true;
@@ -1603,13 +1649,17 @@ export default {
                         const keysToExclude = ['14', '16', '40999', '41027', '41028', '41042', '41043', '41044'];
 
                         if (!keysToExclude.includes(key)) {  // код для выполнения, если key не содержится в массиве keysToExclude
+
+                            arr[key].tooltip_text = arr[key].tooltip_text.replace(/<br>/g, ' ');
+
                             if (arr[key] !== null) {
                                 this.parametersStorage.push({
                                     'num': Number(key),
                                     'namepar': arr[key].name,
                                     'val': arr[key].value,
                                     'history': '',
-                                    'change': change
+                                    'change': change,
+                                    'tooltip_text': arr[key].tooltip_text
                                 })
                             } else {
                                 this.parametersStorage.push({
@@ -1617,7 +1667,8 @@ export default {
                                     'namepar': '',
                                     'val': arr[key],
                                     'history': '',
-                                    'change': change
+                                    'change': change,
+                                    'tooltip_text': arr[key].tooltip_text
                                 });
                             }
                         }
@@ -1638,11 +1689,13 @@ export default {
                             this.dParameters.hardcontr = arr[key].value;
                         } else if (Number(key) === 41044 && arr[key] !== null) {
                             this.dParameters.hardmod = arr[key].value;
-                        } else if (Number(key) === 41027 && arr[key] !== null) { // Адрес сервера
+                        } else if (Number(key) === 41027 && arr[key] !== null) {
                             this.dParameters.serveraddress = arr[key].value;
-                        } else if (Number(key) === 41028 && arr[key] !== null) { // Адрес сервера
+                        } else if (Number(key) === 41028 && arr[key] !== null) {
                             this.dParameters.serverport = arr[key].value;
                         }
+
+                        // console.log(this.parametersCommandStorage);
                     }
                 }
             }).catch((error) => {
@@ -2094,7 +2147,7 @@ export default {
 }
 
 .controller-data__dashboard {
-    overflow: scroll;
+    overflow: hidden;
     height: 230px;
 }
 
@@ -2652,7 +2705,7 @@ export default {
 }
 
 .command-queue {
-    margin-top: 24px;
+    margin-top: 16px;
     background-color: #f8f6f4;
     border-radius: 8px;
 }
