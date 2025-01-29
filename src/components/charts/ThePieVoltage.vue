@@ -13,7 +13,8 @@ import Chart from 'chart.js/auto';
 export default {
     props: {
         telemetryData: Object,
-        lastResult: Array
+        lastResult: Array,
+        voltageValueSetSystem: Number
     },
     data() {
         return {
@@ -32,7 +33,6 @@ export default {
         let ctx = document.getElementById('pieVoltage');
         let lastvalue = this.telemetryData;
 
-
         if (lastvalue === 'Нет данных') {
             lastvalue = undefined;
         }
@@ -49,16 +49,27 @@ export default {
             this.value = lastvalue.bat_v;
         }
 
+        // console.log(this.voltageValueSetSystem);
+
         // из 57347 посмотреть систему
 
-        // 10 (57358) - 14.5 (57352) вольт
+        // 12 - 10 (57358) - 14.5 (57352) вольт
 
         // 24 - 20 - 29
         // 36 - 30 - 43.5
-        // 48 - 40 - 
+        // 48 - 40 - 58
 
-        let a = this.value - 10;
-        let b = (a * 100) / 4.5;
+        let k = 1;
+        if (this.voltageValueSetSystem === 24) {
+            k = 2;
+        } else if (this.voltageValueSetSystem === 36) {
+            k = 3;
+        } else if (this.voltageValueSetSystem === 48) {
+            k = 4;
+        }
+
+        let a = this.value - (10 * k);
+        let b = (a * 100) / (4.5 * k);
         let c = 100 - b;
 
         if (b < 50) {

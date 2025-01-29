@@ -490,14 +490,29 @@ tbody tr:hover {
 
 .tooltip_text {
     width: 60% !important;
+    font-size: 12px !important;
+    line-height: 130%;
 }
 
 .info-line__flex-table {
-    height: 60px;
+    height: 76px;
+    padding: 2px 0;
 }
 
 .name__flex-table {
-    width: 28% !important;
+    width: 450px !important;
+}
+
+.num__flex-table {
+    width: 80px !important;
+}
+
+.value__flex-table {
+    width: 84px !important;
+}
+
+.value__flex-table_mg {
+    margin-left: 16px;
 }
 
 @media (max-width: 1024px) {
@@ -1230,6 +1245,7 @@ tbody tr:hover {
 
     .tooltip_text {
         font-size: 10px !important;
+        line-height: 120%;
     }
 }
 
@@ -2133,7 +2149,7 @@ tbody tr:hover {
 
     .info-line div {
         height: 28px;
-        line-height: 102%;
+        line-height: 110%;
         font-size: 10px;
     }
 

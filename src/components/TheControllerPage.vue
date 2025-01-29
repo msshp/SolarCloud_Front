@@ -73,7 +73,7 @@
                             <div class="info-block__block">
                                 <h4 class="charge-level">Напряжение АКБ</h4>
                                 <ThePieVoltage :key="forceRenderKey" v-if="batCChart" :telemetryData="telemetryData"
-                                    :lastResult="lastResult" />
+                                    :lastResult="lastResult" :voltageValueSetSystem="voltageValueSetSystem" />
                             </div>
                         </div>
                         <div class="info-block__half">
@@ -379,21 +379,18 @@
                     <p class="controller-info__block-title controller-info__block-title_par">Параметры
                     </p>
                     <div className="info-line info-line__title info-line__par">
-                        <div class="">№ регистра</div>
+                        <div class="num__flex-table">№ регистра</div>
                         <div class="name__flex-table">Название</div>
-                        <div class="">Текущее значение</div>
-                        <div class="tooltip_text">Описание</div>
+                        <div class="value__flex-table">Текущее значение</div>
+                        <div class="tooltip_text value__flex-table_mg">Описание</div>
                     </div>
                     <div>
                         <div className="info-line info-line__par_line info-line__flex-table"
                             v-for="parameter in parametersStorage" :key="parameter">
-                            <div class="">{{ parameter.num }}</div>
+                            <div class="num__flex-table">{{ parameter.num }}</div>
                             <div class="name__flex-table">{{ parameter.namepar }}</div>
-                            <div class="">{{ parameter.val }}
-                            </div>
-                            <div class="tooltip_text">{{ parameter.tooltip_text }}
-                            </div>
-
+                            <div class="value__flex-table">{{ parameter.val }}</div>
+                            <div class="tooltip_text">{{ parameter.tooltip_text }}</div>
                         </div>
                     </div>
                 </div>
@@ -607,7 +604,10 @@ export default {
 
             isInputActive: false, // Статус активности инпута
             clueText: '',
-            commandStory: []
+            commandStory: [],
+
+            tooltips: {},  // tooltips в Командах на странице устройства
+            voltageValueSetSystem: 0 // Установленное в системе значение напряжения, В
         }
     },
     methods: {
@@ -1544,33 +1544,35 @@ export default {
             this.isInputActive = true; // Установить в true при фокусе
             document.getElementById('new-val-c').disabled = false;
             let text = '';
-            const messages = {
-                '41032': 'Период отправки пакета data_status. Считаем с 00:00. Измерение в мс. Число передается без кавычек. Пример: 300;',
-                '41005': 'Включен или выключен датчик двери. 0 – выключен. 1 – включен.',
-                '41006': 'Включен или выключен отчет по СМС. 0 – выключен. 1 – включен.',
-                '41025': 'Часовой пояс (-12…+12). Пример: +3;',
-                '41033': 'Период отправки пакета data_fix. Считаем с 00:00. Измерение в мс. Число передается без кавычек. Пример: 3600;',
-                '57346': 'От 2 до 40',
-                '57348': 'тип АКБ. 0 – настроено пользователем. 1 – обслуживаемые свинцовые. 2 – не обслуживаемые. 3 – гелевые. 4 – литиевые',
-                '57349': 'Порог перенапряжения. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-                '57350': 'Предел напряжения зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-                '57351': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-                '57352': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-                '57353': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-                '57354': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-                '57355': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-                '57356': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-                '57357': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-                '57358': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА'
-            };
+
+
+            // const messages = {
+            //     '41032': 'Период отправки пакета data_status. Считаем с 00:00. Измерение в мс. Число передается без кавычек. Пример: 300;',
+            //     '41005': 'Включен или выключен датчик двери. 0 – выключен. 1 – включен.',
+            //     '41006': 'Включен или выключен отчет по СМС. 0 – выключен. 1 – включен.',
+            //     '41025': 'Часовой пояс (-12…+12). Пример: +3;',
+            //     '41033': 'Период отправки пакета data_fix. Считаем с 00:00. Измерение в мс. Число передается без кавычек. Пример: 3600;',
+            //     '57346': 'От 2 до 40',
+            //     '57348': 'тип АКБ. 0 – настроено пользователем. 1 – обслуживаемые свинцовые. 2 – не обслуживаемые. 3 – гелевые. 4 – литиевые',
+            //     '57349': 'Порог перенапряжения. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+            //     '57350': 'Предел напряжения зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+            //     '57351': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+            //     '57352': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+            //     '57353': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+            //     '57354': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+            //     '57355': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+            //     '57356': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+            //     '57357': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
+            //     '57358': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА'
+            // };
 
             if (this.selectorContent === 'Выбрать' || this.selectorContent.includes('get')) {
                 this.isInputActive = false;
                 document.getElementById('new-val-c').disabled = true;
             } else {
-                for (const key in messages) {
+                for (const key in this.tooltips) {
                     if (this.selectorContent.includes(key)) {
-                        text = messages[key];
+                        text = this.tooltips[key];
                         break;
                     }
                 }
@@ -1589,6 +1591,13 @@ export default {
                 return '';
             }
 
+        },
+        transformArrayToObject(arr) { // для формирования объекта с подсказками в командах (описание каждого флекса)
+            const result = {};
+            arr.forEach(item => {
+                result[item.num] = `${item.tooltip_text}`;
+            });
+            return result;
         }
     },
     mounted() {
@@ -1637,7 +1646,6 @@ export default {
             }).then((response) => {
                 if (response.status === 200) {
                     let arr = response.data;
-                    // console.log(arr)
 
                     for (let key in arr) {
                         let change = true;
@@ -1646,7 +1654,7 @@ export default {
                             change = false;
                         }
 
-                        const keysToExclude = ['14', '16', '40999', '41027', '41028', '41042', '41043', '41044'];
+                        const keysToExclude = ['14', '16', '40999', '41027', '41028', '41035', '41042', '41043', '41044'];
 
                         if (!keysToExclude.includes(key)) {  // код для выполнения, если key не содержится в массиве keysToExclude
 
@@ -1693,10 +1701,11 @@ export default {
                             this.dParameters.serveraddress = arr[key].value;
                         } else if (Number(key) === 41028 && arr[key] !== null) {
                             this.dParameters.serverport = arr[key].value;
+                        } else if (Number(key) === 57347 && arr[key] !== null) {
+                            this.voltageValueSetSystem = parseInt(arr[key].value.split(';')[1], 10);
                         }
-
-                        // console.log(this.parametersCommandStorage);
                     }
+                    this.tooltips = this.transformArrayToObject(this.parametersCommandStorage);
                 }
             }).catch((error) => {
                 // обработка ошибки
@@ -2708,6 +2717,7 @@ export default {
     margin-top: 16px;
     background-color: #f8f6f4;
     border-radius: 8px;
+    min-height: 240px;
 }
 
 .num-reg-queue {
