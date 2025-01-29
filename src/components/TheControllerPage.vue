@@ -607,7 +607,13 @@ export default {
             commandStory: [],
 
             tooltips: {},  // tooltips в Командах на странице устройства
-            voltageValueSetSystem: 0 // Установленное в системе значение напряжения, В
+
+            voltageValueSetSystem: { // Установленное в системе значение напряжения, В
+                system: 0,
+                max: 0,
+                min: 0,
+                k: 1
+            }
         }
     },
     methods: {
@@ -1545,27 +1551,6 @@ export default {
             document.getElementById('new-val-c').disabled = false;
             let text = '';
 
-
-            // const messages = {
-            //     '41032': 'Период отправки пакета data_status. Считаем с 00:00. Измерение в мс. Число передается без кавычек. Пример: 300;',
-            //     '41005': 'Включен или выключен датчик двери. 0 – выключен. 1 – включен.',
-            //     '41006': 'Включен или выключен отчет по СМС. 0 – выключен. 1 – включен.',
-            //     '41025': 'Часовой пояс (-12…+12). Пример: +3;',
-            //     '41033': 'Период отправки пакета data_fix. Считаем с 00:00. Измерение в мс. Число передается без кавычек. Пример: 3600;',
-            //     '57346': 'От 2 до 40',
-            //     '57348': 'тип АКБ. 0 – настроено пользователем. 1 – обслуживаемые свинцовые. 2 – не обслуживаемые. 3 – гелевые. 4 – литиевые',
-            //     '57349': 'Порог перенапряжения. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-            //     '57350': 'Предел напряжения зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-            //     '57351': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-            //     '57352': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-            //     '57353': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-            //     '57354': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-            //     '57355': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-            //     '57356': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-            //     '57357': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА',
-            //     '57358': 'Выравнивающее напряжение зарядки. Диапазон 7 – 17В. Напряжение*10, затем переводиться в hex. Пример: 17В*10 = 170; 170 в hex 00АА'
-            // };
-
             if (this.selectorContent === 'Выбрать' || this.selectorContent.includes('get')) {
                 this.isInputActive = false;
                 document.getElementById('new-val-c').disabled = true;
@@ -1654,11 +1639,25 @@ export default {
                             change = false;
                         }
 
+                        if (Number(key) === 57347 && arr[key] !== null) {
+                            this.voltageValueSetSystem.system = Number(parseInt(arr[key].value.split(';')[1], 10)); // система напряжения (12/24/36/48)
+
+                            if (this.voltageValueSetSystem.system === 24) {
+                                this.voltageValueSetSystem.k = 2;
+                            } else if (this.voltageValueSetSystem.system === 36) {
+                                this.voltageValueSetSystem.k = 3;
+                            } else if (this.voltageValueSetSystem.system === 48) {
+                                this.voltageValueSetSystem.k = 4;
+                            }
+                        } else if (Number(key) === 57358 && arr[key] !== null) {
+                            this.voltageValueSetSystem.min = Number(arr[key].value) * this.voltageValueSetSystem.k;; // максимальное значение напряжение
+                        } else if (Number(key) === 57352 && arr[key] !== null) {
+                            this.voltageValueSetSystem.max = Number(arr[key].value) * this.voltageValueSetSystem.k; // максимальное значение напряжение
+                        }
+
                         const keysToExclude = ['14', '16', '40999', '41027', '41028', '41035', '41042', '41043', '41044'];
 
                         if (!keysToExclude.includes(key)) {  // код для выполнения, если key не содержится в массиве keysToExclude
-
-                            arr[key].tooltip_text = arr[key].tooltip_text.replace(/<br>/g, ' ');
 
                             if (arr[key] !== null) {
                                 this.parametersStorage.push({
@@ -1667,16 +1666,16 @@ export default {
                                     'val': arr[key].value,
                                     'history': '',
                                     'change': change,
-                                    'tooltip_text': arr[key].tooltip_text
+                                    'tooltip_text': arr[key].tooltip_text.replace(/<br>/g, ' ')
                                 })
                             } else {
                                 this.parametersStorage.push({
                                     'num': Number(key),
                                     'namepar': '',
-                                    'val': arr[key],
+                                    'val': '',
                                     'history': '',
                                     'change': change,
-                                    'tooltip_text': arr[key].tooltip_text
+                                    'tooltip_text': ''
                                 });
                             }
                         }
@@ -1701,10 +1700,9 @@ export default {
                             this.dParameters.serveraddress = arr[key].value;
                         } else if (Number(key) === 41028 && arr[key] !== null) {
                             this.dParameters.serverport = arr[key].value;
-                        } else if (Number(key) === 57347 && arr[key] !== null) {
-                            this.voltageValueSetSystem = parseInt(arr[key].value.split(';')[1], 10);
                         }
                     }
+
                     this.tooltips = this.transformArrayToObject(this.parametersCommandStorage);
                 }
             }).catch((error) => {

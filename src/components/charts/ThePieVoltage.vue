@@ -14,7 +14,7 @@ export default {
     props: {
         telemetryData: Object,
         lastResult: Array,
-        voltageValueSetSystem: Number
+        voltageValueSetSystem: Object
     },
     data() {
         return {
@@ -49,27 +49,13 @@ export default {
             this.value = lastvalue.bat_v;
         }
 
-        // console.log(this.voltageValueSetSystem);
-
         // из 57347 посмотреть систему
+        // мин 57358 - макс 57352
 
-        // 12 - 10 (57358) - 14.5 (57352) вольт
+        let minVal = this.voltageValueSetSystem.min;
+        let maxVal = this.voltageValueSetSystem.max;
 
-        // 24 - 20 - 29
-        // 36 - 30 - 43.5
-        // 48 - 40 - 58
-
-        let k = 1;
-        if (this.voltageValueSetSystem === 24) {
-            k = 2;
-        } else if (this.voltageValueSetSystem === 36) {
-            k = 3;
-        } else if (this.voltageValueSetSystem === 48) {
-            k = 4;
-        }
-
-        let a = this.value - (10 * k);
-        let b = (a * 100) / (4.5 * k);
+        let b = ((this.value - minVal) / (maxVal - minVal)) * 100; // процентное соотношение третьего значения от разницы между максимальным и минимальным.
         let c = 100 - b;
 
         if (b < 50) {
