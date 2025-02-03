@@ -2,18 +2,23 @@
     <div v-if="loginPageVisibility" class="content"
         style="width: 100%;height: 100%; vertical-align: center; position: fixed;">
         <div v-if="loginFormVisibility" class="form">
-            <div className="logo-container"><img src="../public/img/logo.png" alt="logo"></div>
+            <div className="logo-container"><img src="../public/img/logo/logo_solar_white_rus_crop.svg" alt="logo">
+            </div>
             <input type="email" v-model.trim="userEmail" v-bind:class="{ empty_input: userEmailIsEmpty }"
                 placeholder="Email" autocomplete="current-password" required>
             <input class="last-input" type="password" v-model.trim="userPass"
                 v-bind:class="{ empty_input: userPassIsEmpty }" placeholder="Пароль" autocomplete="current-password"
                 required>
             <button className="login-btn" @click="logIn()">Войти</button>
-            <button className="reg-btn" @click="logRegToggle()">Создать проект</button>
+            <div class="form-btns__container"><button className="recover-password"
+                    @click="RecoverPassword()">Восстановить пароль</button><button className="reg-btn"
+                    @click="logRegToggle()">Создать
+                    проект</button>
+            </div>
         </div>
         <div v-if="errorLoginVisibility" class="form">
             <p class="reg-title">{{ errorLoginMessage }}</p>
-            <button className="login-btn" @click="tryLogIn()">Попробовать снова</button>
+            <button v-if="errorBtnVisibility" className="login-btn" @click="tryLogIn()">Попробовать снова</button>
         </div>
         <div v-if="regFormVisibility" class="form">
             <input type="text" v-model="projName" v-bind:class="{ empty_input: projNameIsEmpty }"
@@ -32,7 +37,14 @@
                 v-bind:class="{ empty_input: projUserPassIsEmpty }" placeholder="Пароль" autocomplete="new-password"
                 required>
             <button className="login-btn" @click="createProj()">Создать проект</button>
-            <button className="reg-btn" @click="logRegToggle()">Назад</button>
+            <button className="reg-btn reg-btn_back" @click="logRegToggle()">Назад</button>
+        </div>
+        <div v-if="resetPasswordVisibility" class="form">
+            <p class="reset-p">Введите электронный адрес</p>
+            <input type="email" v-model.trim="resetUserEmail" v-bind:class="{ empty_input: resetUserEmailIsEmpty }"
+                placeholder="Email">
+            <button className="login-btn" @click="sendEmail()">Отправить</button>
+            <button className="reg-btn reg-btn_back" @click="resetBack()">Назад</button>
         </div>
         <div v-if="regMessageVisibility" class="form">
             <p class="reg-title">Вы зарегистрированы</p>
@@ -41,6 +53,10 @@
         <div v-if="errorMessageVisibility" class="form">
             <p class="reg-title">Ошибка</p>
             <button className="login-btn" @click="tryRegWindow()">Попробовать снова</button>
+        </div>
+        <div v-if="errorResetVisibility" class="form">
+            <p class="reg-title">Ошибка</p>
+            <button className="login-btn" @click="RecoverPassword()">Попробовать снова</button>
         </div>
     </div>
 
@@ -52,7 +68,7 @@
                 </div>
                 <div v-if="pages.controllerPageVisibility" @click="openList()" className="side-menu__btn-back"></div>
                 <div className="sidenav__top-block">
-                    <img src="../public/img/logo-color.svg" alt="logo">
+                    <img src="../public/img/logo/logo_solar_blue_rus_crop.svg" alt="logo">
                 </div>
                 <nav className="sidenav__block">
                     <button id="sidenav__lk" @click="openPersonalArea()"
@@ -197,10 +213,13 @@ export default {
         return {
             loginFormVisibility: true,
             regFormVisibility: false,
+            resetPasswordVisibility: false,
             regMessageVisibility: false,
             errorMessageVisibility: false,
+            errorResetVisibility: false,
             errorLoginVisibility: false,
             errorLoginMessage: 'Ошибка',
+            errorBtnVisibility: true,
 
             mainPageVisibility: false, // доступ после авторизации
             loginPageVisibility: true, // страница авторизации
@@ -215,6 +234,9 @@ export default {
             projUserEmail: '',
             projUserLogin: '',
             projUserPass: '',
+
+            resetUserEmail: '',
+            resetUserEmailIsEmpty: false,
 
             userEmailIsEmpty: false,
             userPassIsEmpty: false,
@@ -268,6 +290,15 @@ export default {
         };
     },
     methods: {
+        RecoverPassword() {
+            this.resetPasswordVisibility = true;
+            this.loginFormVisibility = false;
+            this.errorResetVisibility = false;
+        },
+        resetBack() {
+            this.resetPasswordVisibility = false;
+            this.loginFormVisibility = true;
+        },
         logRegToggle() {
             this.loginFormVisibility = !this.loginFormVisibility;
             this.regFormVisibility = !this.regFormVisibility;
@@ -373,6 +404,39 @@ export default {
                 this.projUserPass = '';
             }
         },
+        sendEmail() {
+            axios.post('http://cloud.io-tech.ru/api/users/reset_password/',
+                {
+                    "email": this.resetUserEmail
+                }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then((response) => { // обработка ошибок
+                if (response.status === 204) {
+                    this.resetPasswordVisibility = false;
+                    this.errorBtnVisibility = false;
+
+                    this.errorLoginMessage = `На ваш электронный адрес пришла ссылка. Перейдите по ней для ввода нового пароля.`;
+                    this.drawErrorLogIn();
+                } else if (response.status === 400) {
+                    console.log(response.status)
+                    this.resetPasswordVisibility = false;
+                    this.resetUserEmail = '';
+                    this.errorResetVisibility = true; // показать окно с ошибкой восстановления
+                } else {
+                    console.log(response.status)
+                    this.resetPasswordVisibility = false;
+                    this.resetUserEmail = '';
+                    this.errorResetVisibility = true; // показать окно с ошибкой восстановления
+                }
+            }).catch((error) => {
+                console.log(error);
+                this.resetPasswordVisibility = false;
+                this.resetUserEmail = '';
+                this.errorResetVisibility = true; // показать окно с ошибкой восстановления
+            });
+        },
         drawErrorLogIn() {
             this.loginFormVisibility = false;
             this.errorLoginVisibility = true;
@@ -423,7 +487,6 @@ export default {
                         this.drawErrorLogIn();
                     }
                 }).catch((error) => {
-                    // this.errorLoginMessage = `${error.response.data.non_field_errors}`;
                     this.errorLoginMessage = `Ошибка ${error.response.status}`;
                     this.drawErrorLogIn();
                 });
@@ -668,11 +731,12 @@ export default {
 }
 
 .form input {
-    padding: 14px 16px;
+    /* padding: 14px 16px; */
+    padding: 10px 12px;
     border-radius: 8px;
     background-color: rgba(248, 246, 244, 0.3);
     color: #ffffff;
-    font-size: 16px;
+    font-size: 14px;
     margin-bottom: 8px;
 }
 
@@ -685,7 +749,7 @@ input::placeholder {
 }
 
 .last-input {
-    margin-bottom: 16px !important;
+    margin-bottom: 10px !important;
 }
 
 .form {
@@ -695,12 +759,19 @@ input::placeholder {
 }
 
 .form button {
-    font-weight: 500;
-    font-size: 16px;
+    font-weight: 400;
+    font-size: 14px;
+}
+
+.form input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px #f8f6f4 inset;
+    /* цвет фона */
+    -webkit-text-fill-color: #0E1626;
+    /* цвет текста */
 }
 
 .login-btn {
-    padding: 14px 0;
+    padding: 10px 0;
     border-radius: 8px;
     color: #0E1626;
     background-color: #F8F6F4;
@@ -711,12 +782,31 @@ input::placeholder {
     box-shadow: 0 0 8px 0 rgba(41, 59, 95, 0.5);
 }
 
+.form-btns__container {
+    display: flex;
+    justify-content: space-between;
+}
+
 .reg-btn {
     background-color: transparent;
     color: #F8F6F4;
-    padding: 13px 0;
+    padding: 4px 2px;
     border-radius: 8px;
-    border: 1px solid #F8F6F4;
+    text-align: right;
+    font-size: 12px !important;
+}
+
+.reg-btn_back {
+    text-align: center;
+}
+
+.recover-password {
+    background-color: transparent;
+    color: #F8F6F4;
+    padding: 4px 0;
+    text-align: left;
+    font-size: 12px !important;
+    border-radius: 8px;
 }
 
 .empty_input {

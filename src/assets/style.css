@@ -1,5 +1,5 @@
 .content {
-    /* background: linear-gradient(-45deg, #224c8e, #3b9fff, #193161); */
+    /* background: linear-gradient(-45deg, #4936c5, #606770, #3478de); */
     background: linear-gradient(-45deg, #293B5F, #294B8E, #0E1626);
     background-size: 400% 400%;
     animation: gradient 10s ease infinite;
@@ -99,6 +99,10 @@ button {
 .sidenav__top-block {
     text-align: center;
     margin-top: 20px;
+}
+
+.sidenav__top-block img {
+    width: 65%;
 }
 
 .sidenav__block {
@@ -221,6 +225,11 @@ button {
     height: 100%;
     margin: 0 0 0 auto;
     padding-left: 32px;
+}
+
+.reset-p {
+    color: #f8f6f4;
+    text-align: center;
 }
 
 .top-menu__item-name {
@@ -614,8 +623,7 @@ tbody tr:hover {
     }
 
     .content img {
-        margin-bottom: 24px;
-        width: 70%;
+        margin-bottom: 40px;
     }
 
     .form input {
@@ -1345,6 +1353,18 @@ tbody tr:hover {
     .events-filter__contrllers {
         font-size: 12px;
     }
+
+    .reg-btn,
+    .recover-password {
+        border: 0.5px solid #F8F6F4;
+        padding: 10px 8px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .recover-password {
+        margin-right: 8px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -1730,6 +1750,11 @@ tbody tr:hover {
 
     .sidenav__block button span {
         display: none;
+    }
+
+    .reg-btn,
+    .recover-password {
+        font-size: 11px !important;
     }
 }
 
@@ -2190,5 +2215,10 @@ tbody tr:hover {
 @media (max-width: 375px) {
     .dropdown input {
         width: 94%;
+    }
+
+    .reg-btn,
+    .recover-password {
+        font-size: 10px !important;
     }
 }
