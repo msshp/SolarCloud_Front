@@ -17,12 +17,6 @@
                     <canvas id="controllersChart"></canvas>
                 </div>
             </div>
-            <!-- <div class="info-block__block control-diagram">
-                <h4>Общая выработка энергии</h4>
-                <div>
-                    <canvas id="pgenChart"></canvas>
-                </div>
-            </div> -->
         </div>
     </div>
 </template>

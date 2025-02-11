@@ -1,25 +1,30 @@
 <template>
+    <!-- Страница авторизации -->
     <div v-if="loginPageVisibility" class="content"
         style="width: 100%;height: 100%; vertical-align: center; position: fixed;">
+        <!-- Вход в учётную запись, если уже есть аккаунт -->
         <div v-if="loginFormVisibility" class="form">
             <div className="logo-container"><img src="../public/img/logo/logo_solar_white_rus_crop.svg" alt="logo">
             </div>
+            <!-- Email -->
             <input type="email" v-model.trim="userEmail" v-bind:class="{ empty_input: userEmailIsEmpty }"
                 placeholder="Email" autocomplete="current-password" required>
+            <!-- Пароль -->
             <input class="last-input" type="password" v-model.trim="userPass"
                 v-bind:class="{ empty_input: userPassIsEmpty }" placeholder="Пароль" autocomplete="current-password"
                 required>
             <button className="login-btn" @click="logIn()">Войти</button>
             <div class="form-btns__container"><button className="recover-password"
                     @click="RecoverPassword()">Восстановить пароль</button><button className="reg-btn"
-                    @click="logRegToggle()">Создать
-                    проект</button>
+                    @click="logRegToggle()">Создать проект</button>
             </div>
         </div>
+        <!-- Окно для вывода ошибок при попытке авторизации -->
         <div v-if="errorLoginVisibility" class="form">
             <p class="reg-title">{{ errorLoginMessage }}</p>
             <button v-if="errorBtnVisibility" className="login-btn" @click="tryLogIn()">Попробовать снова</button>
         </div>
+        <!-- Окно для регистрации проекта -->
         <div v-if="regFormVisibility" class="form">
             <input type="text" v-model="projName" v-bind:class="{ empty_input: projNameIsEmpty }"
                 placeholder="Название проекта">
@@ -39,6 +44,7 @@
             <button className="login-btn" @click="createProj()">Создать проект</button>
             <button className="reg-btn reg-btn_back" @click="logRegToggle()">Назад</button>
         </div>
+        <!-- Окно для восстановления пароля, если аккаунт уже зарегистрирован, ввод электронной почты -->
         <div v-if="resetPasswordVisibility" class="form">
             <p class="reset-p">Введите электронный адрес</p>
             <input type="email" v-model.trim="resetUserEmail" v-bind:class="{ empty_input: resetUserEmailIsEmpty }"
@@ -46,30 +52,37 @@
             <button className="login-btn" @click="sendEmail()">Отправить</button>
             <button className="reg-btn reg-btn_back" @click="resetBack()">Назад</button>
         </div>
+        <!-- Окно для сообщения об успешной регистрации -->
         <div v-if="regMessageVisibility" class="form">
             <p class="reg-title">Вы зарегистрированы</p>
             <button className="login-btn" @click="closeRegMessage()">Войти</button>
         </div>
+        <!-- Окно для вывода ошибок при попытке регистрации проекта -->
         <div v-if="errorMessageVisibility" class="form">
             <p class="reg-title">Ошибка</p>
             <button className="login-btn" @click="tryRegWindow()">Попробовать снова</button>
         </div>
+        <!-- Окно для вывода ошибок при попытке восстановления пароля (вводе электронной почты) -->
         <div v-if="errorResetVisibility" class="form">
             <p class="reg-title">Ошибка</p>
             <button className="login-btn" @click="RecoverPassword()">Попробовать снова</button>
         </div>
     </div>
-
+    <!-- Основная страница приложения (доступна авторизованным пользователям) -->
     <div v-if="mainPageVisibility">
         <div className="wrapper">
+            <!-- Боковое меню -->
             <div class="sidenav" v-bind:class="{ sidenav_hidden: sidenavIsHidden }">
+                <!-- Кнопка для скрытия/раскрытия бокового меню -->
                 <div className="side-menu__btn" @click="sidenavToggle()">
                     <div className="icon-burger"></div>
                 </div>
+                <!-- Стрелка «Назад», доступна на экране только если пользователь находится на странице устройста. Ведёт в список всех устройств. -->
                 <div v-if="pages.controllerPageVisibility" @click="openList()" className="side-menu__btn-back"></div>
                 <div className="sidenav__top-block">
                     <img src="../public/img/logo/logo_solar_blue_rus_crop.svg" alt="logo">
                 </div>
+                <!-- Навигация по страницам приложения -->
                 <nav className="sidenav__block">
                     <button id="sidenav__lk" @click="openPersonalArea()"
                         v-bind:class="{ sidebtn_active: pages.personalAreaPageVisibility }">
@@ -82,11 +95,13 @@
                         </div><span>Контрольная панель</span>
                     </button>
                     <div v-if="projBtnVisibility" class="separator"></div>
+                    <!-- Страница проекта доступна только пользователям в роли администратора/модератора -->
                     <button v-if="projBtnVisibility" id="sidenav__project" @click="openProject()"
                         v-bind:class="{ sidebtn_active: pages.projectPageVisibility }">
                         <div class="icon-project" v-bind:class="{ iconproj_active: pages.projectPageVisibility }"></div>
                         <span>Проект</span>
                     </button>
+                    <!-- Список пользователей доступен только пользователям в роли администратора/модератора -->
                     <button v-if="listUsersBtnVisibility" id="sidenav__userlist" @click="openUserListPage()"
                         v-bind:class="{ sidebtn_active: pages.listUsersPageVisibility }">
                         <div class="icon-personal-area"
@@ -105,34 +120,23 @@
                         <span>Список
                             контроллеров</span>
                     </button>
-                    <!-- <button id="sidenav__subscription" @click="openSubscription()"
-                        v-bind:class="{ sidebtn_active: pages.subscriptionPageVisibility }">
-                        <div class="icon-subscription"
-                            v-bind:class="{ iconsub_active: pages.subscriptionPageVisibility }"></div><span>Подписка</span>
-                    </button> -->
                     <div class="separator"></div>
                     <button id="sidenav__events" @click="openEvents()"
                         v-bind:class="{ sidebtn_active: pages.eventsPageVisibility }">
                         <div class="icon-events" v-bind:class="{ iconevents_active: pages.eventsPageVisibility }"></div>
                         <span>События</span>
                     </button>
+                    <!-- Кнопка выхода из бокового меню доступна только в мобильной версии. В десктопной версии выход через раскрывающееся меню в правом верхнем углу экрана -->
                     <button id="sidenav__sidelogout" @click="logOut()">
                         <div class="icon-logout"></div><span>Выход</span>
                     </button>
-                    <!-- <button id="sidenav__commands" @click="openCommands()"
-                        v-bind:class="{ sidebtn_active: pages.commandsPageVisibility }">
-                        <div class="icon-commands" v-bind:class="{ iconcom_active: pages.commandsPageVisibility }">
-                        </div><span>Команды</span>
-                    </button> -->
-                    <!-- <button id="sidenav__reports" @click="openReports()"
-                        v-bind:class="{ sidebtn_active: pages.reportsPageVisibility }">
-                        <div class="icon-reports" v-bind:class="{ iconreports_active: pages.reportsPageVisibility }">
-                        </div><span>Отчёты</span>
-                    </button> -->
                 </nav>
             </div>
+            <!-- Основная страница -->
             <div id="page-content" class="page-content" v-bind:class="{ content_compressed: contentIsCompressed }">
+                <!-- Верхнее меню -->
                 <nav class="top-menu" v-bind:class="{ top_menu_compressed: contentIsCompressed }">
+                    <!-- Раскрывающийся список в правом верхнем углу экрана (Имя Фамилия пользователя). Цвет блока меняется со белого на синий, если пользовател находится в личном кабинете. -->
                     <div class="top-menu__item" @click="openExtraMenu()"
                         v-bind:class="{ personalarea_active: pages.personalAreaPageVisibility }">
                         <div class="top-menu__item-name">
@@ -145,6 +149,7 @@
                             </p>
                         </div>
                         <div class="delta-block">
+                            <!-- Иконка «стрелка вниз/наверх» -->
                             <div class="delta"
                                 v-bind:class="{ inverted_delta: extraMenuIsHidden, white_delta: pages.personalAreaPageVisibility, inverted_white_delta: extraMenuIsHidden && pages.personalAreaPageVisibility }">
                             </div>
@@ -157,21 +162,26 @@
                         </nav>
                     </div>
                 </nav>
+                <!-- Контрольная панель -->
                 <TheControlPage v-if="pages.controlPageVisibility" />
+                <!-- Страница проекта (доступна только пользователям в роли администратора/модератора) -->
                 <TheProjectPage v-if="pages.projectPageVisibility" />
+                <!-- Список пользователей доступен только пользователям в роли администратора/модератора -->
                 <TheUserListPage v-if="pages.listUsersPageVisibility" :saveUserData="saveUserData" :access="access" />
+                <!-- Карта -->
                 <TheMapPage v-if="pages.mapPageVisibility" :saveUserData="saveUserData" :controllerList="controllerList"
                     @openMainControllerPage="openMainControllerPage" />
+                <!-- Список устройств -->
                 <TheListPage v-if="pages.listPageVisibility" @openMainControllerPage="openMainControllerPage"
                     :access="access" :saveUserData="saveUserData" :controllerList="controllerList"
                     @deleteControllerFromMainList="deleteControllerFromMainList"
                     @addControllerToMainList="addControllerToMainList" />
+                <!-- Личный кабинет -->
                 <ThePersonalArea v-if="pages.personalAreaPageVisibility" :saveUserData="saveUserData"
                     @editAuthorizedUser="editAuthorizedUser" />
-                <TheSubscriptionPage v-if="pages.subscriptionPageVisibility" />
+                <!-- Журнал событий -->
                 <TheEventsPage v-if="pages.eventsPageVisibility" />
-                <TheCommandsPage v-if="pages.commandsPageVisibility" />
-                <TheReportsPage v-if="pages.reportsPageVisibility" />
+                <!-- Страница устройства -->
                 <TheControllerPage v-if="pages.controllerPageVisibility" :controllerId="controllerId" :access="access"
                     @deleteControllerFromList="deleteControllerFromList" />
             </div>
@@ -181,36 +191,34 @@
 
 <script>
 
+// Список импортов компонентов в рамках приложения.
+
 import TheMapPage from './components/TheMapPage.vue'
 import ThePersonalArea from './components/ThePersonalArea.vue'
 import TheProjectPage from './components/TheProjectPage.vue'
 import TheUserListPage from './components/pages/TheUserListPage.vue'
 import TheControlPage from './components/TheControlPage.vue'
 import TheListPage from './components/TheListPage.vue'
-import TheSubscriptionPage from './components/TheSubscriptionPage.vue'
 import TheEventsPage from './components/TheEventsPage.vue'
-import TheCommandsPage from './components/TheCommandsPage.vue'
-import TheReportsPage from './components/TheReportsPage.vue'
 import TheControllerPage from './components/TheControllerPage.vue'
 
-import axios from 'axios';
+
+import axios from 'axios'; // Импорт библиотеки axios для выполнения HTTP-запросов.
 
 export default {
-    components: {
+    components: { // Список дочерних компонентов
         TheMapPage,
         ThePersonalArea,
         TheProjectPage,
         TheUserListPage,
         TheControlPage,
         TheListPage,
-        TheSubscriptionPage,
         TheEventsPage,
-        TheCommandsPage,
-        TheReportsPage,
         TheControllerPage
     },
     data() {
         return {
+            // Состояния интерфейса: переменные для управления видимостью различных форм и сообщений об ошибках на экране авторизации
             loginFormVisibility: true,
             regFormVisibility: false,
             resetPasswordVisibility: false,
@@ -224,6 +232,7 @@ export default {
             mainPageVisibility: false, // доступ после авторизации
             loginPageVisibility: true, // страница авторизации
 
+            // Переменные для хранения информации о пользователе при авторизации / регистрации проекта / восстановлении пароля
             userEmail: '',
             userPass: '',
 
@@ -253,21 +262,18 @@ export default {
             listUsersBtnVisibility: false,
             projBtnVisibility: false,
 
-            pages: {
+            pages: { // Свойства для управления видимостью различных страниц внутри приложения
                 personalAreaPageVisibility: false,
                 mapPageVisibility: false,
                 projectPageVisibility: false,
                 controlPageVisibility: false,
                 listPageVisibility: false,
-                subscriptionPageVisibility: false,
                 eventsPageVisibility: false,
-                commandsPageVisibility: false,
-                reportsPageVisibility: false,
                 listUsersPageVisibility: false,
                 controllerPageVisibility: false,
             },
 
-            saveUserData: {
+            saveUserData: { // Хранение данных пользователя (заполняется сразу при авторизации пользователя)
                 "id": null,
                 "email": "",
                 "username": "",
@@ -282,119 +288,60 @@ export default {
                     "account": null
                 }
             },
-            access: true,
-            controllerId: null,
+            access: true, // Идентификатор доступа ко всем страницам (по умолчанию даёт доступ ко всем, но при авторизации наблюдателя переключается на false, скрывая некоторые страницы и элементы)
+            controllerId: null, // Переменная для хранения id устройства, страница которого открыта в данный момент
 
-            controllerList: [],
-            logInIndication: false // индикатор для включения карты
+            controllerList: [], // Список всех устройств (заполняется сразу при авторизации пользователя)
+            logInIndication: false // Индикатор для включения карты
         };
     },
     methods: {
-        RecoverPassword() {
+        RecoverPassword() { // Показать форму для восстановления пароля, скрыть форму авторизации и ошибки
             this.resetPasswordVisibility = true;
             this.loginFormVisibility = false;
             this.errorResetVisibility = false;
         },
-        resetBack() {
+        resetBack() { // Показать форму авторизации, скрыть форму для восстановления пароля
             this.resetPasswordVisibility = false;
             this.loginFormVisibility = true;
         },
-        logRegToggle() {
+        logRegToggle() { // Переключатель между окнами авторизации и регистрации нового проекта
             this.loginFormVisibility = !this.loginFormVisibility;
             this.regFormVisibility = !this.regFormVisibility;
         },
-        createProj() {
-            if (this.projName == undefined || this.projName.trim().length === 0) {
-                this.projNameIsEmpty = true;
-            }
-            else {
-                this.projNameIsEmpty = false;
-            }
-            if (this.projDescription == undefined || this.projDescription.trim().length === 0) {
-                this.projDescriptionIsEmpty = true;
-            }
-            else {
-                this.projDescriptionIsEmpty = false;
-            }
-            if (this.projUserName == undefined || this.projUserName.trim().length === 0) {
-                this.projUserNameIsEmpty = true;
-            }
-            else {
-                this.projUserNameIsEmpty = false;
-            }
-            if (this.projUserSurname == undefined || this.projUserSurname.trim().length === 0) {
-                this.projUserSurnameIsEmpty = true;
-            }
-            else {
-                this.projUserSurnameIsEmpty = false;
-            }
-            if (this.projUserEmail == undefined || this.projUserEmail.trim().length === 0) {
-                this.projUserEmailIsEmpty = true;
-            }
-            else {
-                this.projUserEmailIsEmpty = false;
-            }
-            if (this.projUserLogin == undefined || this.projUserLogin.trim().length === 0) {
-                this.projUserLoginIsEmpty = true;
-            }
-            else {
-                this.projUserLoginIsEmpty = false;
-            }
-            if (this.projUserPass == undefined || this.projUserPass.trim().length === 0) {
-                this.projUserPassIsEmpty = true;
-            }
-            else {
-                this.projUserPassIsEmpty = false;
-            }
-            if (!this.projNameIsEmpty && !this.projDescriptionIsEmpty && !this.projUserNameIsEmpty && !this.projUserSurnameIsEmpty && !this.projUserEmailIsEmpty && !this.projUserLoginIsEmpty && !this.projUserPassIsEmpty) {
-                this.createProjectPost();
-            }
-        },
-        createProjectPost() {
-            axios.post('http://cloud.io-tech.ru/api/accounts/signup/',
-                {
-                    "name": this.projName,
-                    "description": this.projDescription,
-                    "account_type": 0,
-                    "user": {
-                        "email": this.projUserEmail,
-                        "username": this.projUserLogin,
-                        "first_name": this.projUserName,
-                        "last_name": this.projUserSurname,
-                        "password": this.projUserPass,
-                        "profile": {
-                            "role": "User"
-                        }
-                    }
-                }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }).then((response) => { // обработка ошибок
-                if (response.status === 201) {
-                    this.regMessageVisibility = true;
+        createProj() { // Проверка полей перед регистрацией нового проекта
 
-                    this.projName = '';
-                    this.projDescription = '';
-                    this.projUserEmail = '';
-                    this.projUserLogin = '';
-                    this.projUserName = '';
-                    this.projUserSurname = '';
-                    this.projUserPass = '';
-                } else if (response.status === 400) {
-                    this.errorMessageVisibility = true;
-                } else {
-                    this.errorMessageVisibility = true;
-                }
-            }).catch((error) => {
-                console.log(error);
-                this.errorMessageVisibility = true;
+            function isEmpty(value) {// Вспомогательная функция для проверки пустоты строки
+                return value === undefined || value.trim().length === 0;
+            }
+
+            const fields = [ // Массив полей и соответствующих флагов
+                { name: 'projName', flag: 'projNameIsEmpty' },
+                { name: 'projDescription', flag: 'projDescriptionIsEmpty' },
+                { name: 'projUserName', flag: 'projUserNameIsEmpty' },
+                { name: 'projUserSurname', flag: 'projUserSurnameIsEmpty' },
+                { name: 'projUserEmail', flag: 'projUserEmailIsEmpty' },
+                { name: 'projUserLogin', flag: 'projUserLoginIsEmpty' },
+                { name: 'projUserPass', flag: 'projUserPassIsEmpty' }
+            ];
+
+            fields.forEach(field => { // Проверка каждого поля и установка соответствующих флагов
+                this[field.flag] = isEmpty(this[field.name]);
             });
 
-            this.regFormVisibility = false;
-
-            if (this.regMessageVisibility === true) {
-                // очистка полей в регистрации
+            if (!this.projNameIsEmpty && // Проверка, все ли поля заполнены
+                !this.projDescriptionIsEmpty &&
+                !this.projUserNameIsEmpty &&
+                !this.projUserSurnameIsEmpty &&
+                !this.projUserEmailIsEmpty &&
+                !this.projUserLoginIsEmpty &&
+                !this.projUserPassIsEmpty) {
+                this.createProjectPost(); // Если все поля заполнены, отправить информацию
+            }
+        },
+        createProjectPost() { // Отправка информации о новом проекте в БД
+            // Функция для очистки полей
+            const clearFields = () => {
                 this.projName = '';
                 this.projDescription = '';
                 this.projUserEmail = '';
@@ -402,74 +349,101 @@ export default {
                 this.projUserName = '';
                 this.projUserSurname = '';
                 this.projUserPass = '';
-            }
-        },
-        sendEmail() {
-            axios.post('http://cloud.io-tech.ru/api/users/reset_password/',
-                {
-                    "email": this.resetUserEmail
-                }, {
+            };
+
+            // Отправка информации о новом проекте в БД
+            axios.post('http://cloud.io-tech.ru/api/accounts/signup/', {
+                "name": this.projName,
+                "description": this.projDescription,
+                "account_type": 0,
+                "user": {
+                    "email": this.projUserEmail,
+                    "username": this.projUserLogin,
+                    "first_name": this.projUserName,
+                    "last_name": this.projUserSurname,
+                    "password": this.projUserPass,
+                    "profile": {
+                        "role": "User"
+                    }
+                }
+            }, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            }).then((response) => { // обработка ошибок
-                if (response.status === 204) {
-                    this.resetPasswordVisibility = false;
-                    this.errorBtnVisibility = false;
-
-                    this.errorLoginMessage = `На ваш электронный адрес пришла ссылка. Перейдите по ней для ввода нового пароля.`;
-                    this.drawErrorLogIn();
-                } else if (response.status === 400) {
-                    console.log(response.status)
-                    this.resetPasswordVisibility = false;
-                    this.resetUserEmail = '';
-                    this.errorResetVisibility = true; // показать окно с ошибкой восстановления
-                } else {
-                    console.log(response.status)
-                    this.resetPasswordVisibility = false;
-                    this.resetUserEmail = '';
-                    this.errorResetVisibility = true; // показать окно с ошибкой восстановления
+            }).then((response) => { // Обработка ответа
+                if (response.status === 201) { // Если успешно, то показать сообщение об успешной регистрации и очистить поля в форме регистрации проекта
+                    this.regMessageVisibility = true;
+                    clearFields();
+                } else { // Если не успешно, показать страницу с выводом ошибки
+                    this.errorMessageVisibility = true;
                 }
-            }).catch((error) => {
+            }).catch((error) => { // Если не успешно, показать страницу с выводом ошибки
                 console.log(error);
-                this.resetPasswordVisibility = false;
-                this.resetUserEmail = '';
-                this.errorResetVisibility = true; // показать окно с ошибкой восстановления
+                this.errorMessageVisibility = true;
+            });
+
+            this.regFormVisibility = false; // Закрыть окно с формой регистрации проекта
+        },
+        sendEmail() { // Восстановление пароля
+            // Отправка POST-запроса для сброса пароля пользователя
+            axios.post('http://cloud.io-tech.ru/api/users/reset_password/', {
+                // Отправляем адрес электронной почты для сброса пароля
+                "email": this.resetUserEmail
+            }, {
+                // Указываем заголовки запроса
+                headers: {
+                    'Content-Type': 'application/json' // Указываем тип содержимого как JSON
+                }
+            }).then((response) => {
+                this.resetPasswordVisibility = false; // Скрываем форму сброса пароля после запроса
+
+                this.resetUserEmail = ''; // Очищаем поле ввода электронной почты
+
+                switch (response.status) {
+                    case 204:
+                        this.errorBtnVisibility = false; // Скрываем кнопку ошибки
+                        // Уведомляем пользователя о том, что ссылка для сброса пароля отправлена
+                        this.errorLoginMessage = "Мы отправили ссылку на ваш электронный адрес. Перейдите по ней для создания нового пароля.";
+                        this.drawErrorLogIn(); // Вызываем функцию для отображения сообщения
+                        break;
+                    case 400: // Ошибка запроса (неправильные данные)
+                    case 500: // Ошибка сервера
+                    default: // Обработка всех остальных случаев
+                        this.errorResetVisibility = true; // Показываем окно с ошибкой восстановления
+                        break;
+                }
+            }).catch((error) => { // Обработка ошибок, возникших во время запроса
+                console.log(error); // Логируем ошибку в консоль
+                this.resetPasswordVisibility = false; // Скрываем форму сброса пароля
+                this.resetUserEmail = ''; // Очищаем поле ввода электронной почты
+                this.errorResetVisibility = true; // Показываем окно с ошибкой восстановления
             });
         },
-        drawErrorLogIn() {
+        drawErrorLogIn() { // Показать окно с ошибкой при попытке авторизации пользователя
             this.loginFormVisibility = false;
             this.errorLoginVisibility = true;
         },
-        tryLogIn() {
+        tryLogIn() { // Попробовать снова выполнить авторизацию (показать окно авторизации, скрыть окно ошибки)
             this.loginFormVisibility = true;
             this.errorLoginVisibility = false;
         },
-        closeRegMessage() {
+        closeRegMessage() { // Скрыть окно с сообщением об успешной регистрации, показать окно авторизации
             this.regMessageVisibility = false;
             this.loginFormVisibility = true;
             this.regFormVisibility = false;
         },
-        tryRegWindow() {
+        tryRegWindow() { // Скрыть окно с ошибкой при попытке регистрации проекта
             this.errorMessageVisibility = false;
             this.regFormVisibility = true;
         },
-        logIn() {
-            if (this.userEmail == undefined || this.userEmail.trim().length === 0) {
-                this.userEmailIsEmpty = true;
-            }
-            else {
-                this.userEmailIsEmpty = false;
-            }
-            if (this.userPass == undefined || this.userPass.trim().length === 0) {
-                this.userPassIsEmpty = true;
-            }
-            else {
-                this.userPassIsEmpty = false;
-            }
-            if (!this.userEmailIsEmpty && !this.userPassIsEmpty) {
+        logIn() { // Выполнить авторизацию
+            const isEmpty = (value) => value === undefined || value.trim().length === 0; // Функция для проверки, является ли строка пустой или неопределенной
 
-                // проверка полей to do
+            // Проверка полей электронной почты и пароля
+            this.userEmailIsEmpty = isEmpty(this.userEmail);
+            this.userPassIsEmpty = isEmpty(this.userPass);
+
+            if (!this.userEmailIsEmpty && !this.userPassIsEmpty) { // Если оба поля заполнены, выполняем запрос на вход
                 axios.post('http://cloud.io-tech.ru/api/auth/token/login/', {
                     "password": this.userPass,
                     "email": this.userEmail
@@ -478,13 +452,11 @@ export default {
                         'Content-Type': 'application/json; charset=utf-8'
                     }
                 }).then((response) => {
-                    if (response.status === 200) {
+                    if (response.status === 200) { // Обработка ответа сервера
                         sessionStorage.setItem('token', response.data.auth_token);
-                        this.drawLogIn(); // если успешно
-                    } else if (response.status === 400) {
-                        this.drawErrorLogIn();
+                        this.drawLogIn(); // Успешный вход, открыть доступ к приложению
                     } else {
-                        this.drawErrorLogIn();
+                        this.drawErrorLogIn(); // Обработка ошибок 400 и других, показать окно с ошибкой при попытке авторизации пользователя
                     }
                 }).catch((error) => {
                     this.errorLoginMessage = `Ошибка ${error.response.status}`;
@@ -492,40 +464,38 @@ export default {
                 });
             }
         },
-        logOut() {
-            // удалить токен текущего пользователя
-            sessionStorage.removeItem('token');
-
-            this.controllerList = [];
-
+        logOut() { // Выход из учетной записи
+            sessionStorage.removeItem('token'); // Удаляем токен из sessionStorage
+            this.controllerList = []; // Очистить список всех контроллеров
             this.logInIndication = false;
-            clearTimeout(this.getMainData); // остановить запрос по всем устройствам
+            clearTimeout(this.getMainData); // Очищаем таймер получения основных данных
 
+            // Сбрасываем значения email и пароля пользователя
             this.userEmail = '';
             this.userPass = '';
+
+            // Устанавливаем видимость главной страницы и страницы входа
             this.mainPageVisibility = false;
             this.loginPageVisibility = true;
 
-            for (let page in this.pages) {
-                this.pages[page] = false;
-            }
+            Object.keys(this.pages).forEach(page => this.pages[page] = false); // Скрыть все страницы
 
-            document.getElementById('page-content').classList.remove('overflow_hidden');
+            document.getElementById('page-content').classList.remove('overflow_hidden'); // Убираем класс, который запрещает прокрутку
         },
-        drawLogIn() {
+        drawLogIn() { // Выполнение авторизации, доступ к приложению
             this.mainPageVisibility = true;
             this.loginPageVisibility = false;
 
-            // вывести в верхнее меню ИмяФамилию и роль в проекте
             axios.get('http://cloud.io-tech.ru/api/users/me/',
                 {
                     headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
                 }).then((response) => {
                     // обработка успешного запроса
-                    this.saveUserData = response.data;
+                    this.saveUserData = response.data; // Сохранить информацию о пользователе в переменную
 
                     this.getMainData(); // запустить функцию, запрос на все устройства
 
+                    // вывести в верхнее меню ИмяФамилию и роль в проекте
                     if (this.saveUserData.profile.role === 'User') {
                         this.access = false;
                         this.saveUserData.profile.role = 'наблюдатель';
@@ -549,28 +519,28 @@ export default {
                     console.log(error);
                 })
         },
-        getMainData() {
+        getMainData() { // Выполнить GET-запрос для получения списка устройств
             axios.get('http://cloud.io-tech.ru/api/devices/limited/?limit=10000',
                 {
-                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` }
+                    headers: { 'Authorization': `Token ${sessionStorage.getItem('token')}` } // Установка заголовка авторизации с токеном из sessionStorage
                 }).then((response) => {
                     // обработка успешного запроса
-                    this.controllerList = response.data.results;
+                    this.controllerList = response.data.results; // Сохранение результатов запроса в переменной
 
-                    this.controllerList.forEach(el => {
+                    this.controllerList.forEach(el => { // Обновление статусов устройств
                         if (el.status === null) {
-                            el.status = {
+                            el.status = { // Если статус устройства не задан, инициализируем его пустыми значениями
                                 created_at: '-',
                                 bat_v: '-',
                                 dbi: '-',
                                 event_code: '-'
                             }
-                        } else {
+                        } else { // Если статус устройства задан, форматируем дату
                             let date = el.status.measured_at;
                             if (date !== undefined) {
                                 if (date !== null) {
                                     let formatDate = date.split(',');
-                                    el.status.created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3);
+                                    el.status.created_at = formatDate[0] + ' ' + formatDate[1].slice(0, -3); // Обновляем созданную дату устройства в нужном формате
                                 }
                             }
                         }
@@ -586,7 +556,7 @@ export default {
                         return 0;
                     });
 
-                    if (!this.logInIndication) {
+                    if (!this.logInIndication) { // Показываем карту при первом входе
                         this.pages.mapPageVisibility = true; // показать карту (только первый раз);
                         this.logInIndication = true;
                     }
@@ -594,103 +564,79 @@ export default {
                     if (this.mainPageVisibility) { // запустить таймаут пока пользователь авторизован, каждые 5 минут запрос на устройства
                         setTimeout(this.getMainData, 300000);
                     }
-
                 }).catch((error) => {
                     // обработка ошибки
                     console.log(error);
                 });
         },
-        dateFormatting() {
-            // удаление запятой в датах
+        dateFormatting() { // удаление запятой в датах
             this.saveUserData.profile.created = this.saveUserData.profile.created.replace(',', ' ');
             this.saveUserData.profile.updated = this.saveUserData.profile.updated.replace(',', ' ');
         },
-        sidenavToggle() {
+        sidenavToggle() { // скрыть/показать боковое меню
             this.sidenavIsHidden = !this.sidenavIsHidden;
             this.contentIsCompressed = !this.contentIsCompressed;
         },
-        openExtraMenu() {
+        openExtraMenu() { // скрыть/показать пункцты в верхнем меню
             this.extraMenuIsHidden = !this.extraMenuIsHidden;
         },
+        openPage(pageName, id = null) { // Универсальная функция для открытия страниц
+            // Скрываем все страницы
+            for (let page in this.pages) {
+                this.pages[page] = false;
+            }
+
+            // Устанавливаем видимость выбранной страницы на true
+            this.pages[pageName] = true;
+
+            // Устанавливаем ID контроллера, если страница открывается для конкретного контроллера
+            if (id !== null) {
+                this.controllerId = id; // Сохраняем идентификатор контроллера, если передан
+            }
+
+            document.getElementById('page-content').classList.remove('overflow_hidden'); // Разрешить прокрутку страницы
+        },
+
+        // Метод для открытия личного кабинета
         openPersonalArea() {
-            for (let page in this.pages) {
-                this.pages[page] = false;
-            }
-            this.pages.personalAreaPageVisibility = true;
-            document.getElementById('page-content').classList.remove('overflow_hidden');
+            this.openPage('personalAreaPageVisibility'); // Открываем личный кабинет
         },
+
+        // Метод для открытия списка пользователей
         openUserListPage() {
-            for (let page in this.pages) {
-                this.pages[page] = false;
-            }
-            this.pages.listUsersPageVisibility = true;
-            document.getElementById('page-content').classList.remove('overflow_hidden');
+            this.openPage('listUsersPageVisibility'); // Открываем страницу списка пользователей
         },
+
+        // Метод для открытия карты
         openMap() {
-            for (let page in this.pages) {
-                this.pages[page] = false;
-            }
-            this.pages.mapPageVisibility = true;
-            document.getElementById('page-content').classList.remove('overflow_hidden');
+            this.openPage('mapPageVisibility'); // Открываем страницу карты
         },
+
+        // Метод для открытия контрольной панели
         openControl() {
-            for (let page in this.pages) {
-                this.pages[page] = false;
-            }
-            this.pages.controlPageVisibility = true;
-            document.getElementById('page-content').classList.remove('overflow_hidden');
+            this.openPage('controlPageVisibility'); // Открываем страницу управления
         },
+
+        // Метод для открытия страницы проекта
         openProject() {
-            for (let page in this.pages) {
-                this.pages[page] = false;
-            }
-            this.pages.projectPageVisibility = true;
-            document.getElementById('page-content').classList.remove('overflow_hidden');
+            this.openPage('projectPageVisibility'); // Открываем страницу проекта
         },
+
+        // Метод для открытия списка устройств
         openList() {
-            for (let page in this.pages) {
-                this.pages[page] = false;
-            }
-            this.pages.listPageVisibility = true;
-            document.getElementById('page-content').classList.remove('overflow_hidden');
+            this.openPage('listPageVisibility'); // Открываем страницу со списком
         },
-        openSubscription() {
-            for (let page in this.pages) {
-                this.pages[page] = false;
-            }
-            this.pages.subscriptionPageVisibility = true;
-            document.getElementById('page-content').classList.remove('overflow_hidden');
-        },
+
+        // Метод для открытия журнала событий
         openEvents() {
-            for (let page in this.pages) {
-                this.pages[page] = false;
-            }
-            this.pages.eventsPageVisibility = true;
-            document.getElementById('page-content').classList.remove('overflow_hidden');
+            this.openPage('eventsPageVisibility'); // Открываем страницу событий
         },
-        openCommands() {
-            for (let page in this.pages) {
-                this.pages[page] = false;
-            }
-            this.pages.commandsPageVisibility = true;
-            document.getElementById('page-content').classList.remove('overflow_hidden');
+
+        // Метод для открытия страницы отдельного контроллера
+        openMainControllerPage(id) {
+            this.openPage('controllerPageVisibility', id); // Открываем страницу контроллера
         },
-        openReports() {
-            for (let page in this.pages) {
-                this.pages[page] = false;
-            }
-            this.pages.reportsPageVisibility = true;
-            document.getElementById('page-content').classList.remove('overflow_hidden');
-        },
-        openMainControllerPage(id) { // открыть отдельную страницу с контроллером
-            this.controllerId = id;
-            for (let page in this.pages) {
-                this.pages[page] = false;
-            }
-            this.pages.controllerPageVisibility = true;
-            document.getElementById('page-content').classList.remove('overflow_hidden');
-        },
-        editAuthorizedUser(data) {
+        editAuthorizedUser(data) { // Сохраняем обновленные данные пользователя
             this.saveUserData = data;
 
             if (this.saveUserData.profile.role === 'User') {
@@ -701,16 +647,16 @@ export default {
                 this.saveUserData.profile.role = 'модератор';
             }
 
-            this.dateFormatting();
+            this.dateFormatting(); // Форматируем дату
         },
-        deleteControllerFromMainList(id) {
+        deleteControllerFromMainList(id) { // Удалить контроллер из общего списка (id передаётся из компонента Список устройств)
             this.controllerList = this.controllerList.filter((controller) => controller.id !== id);
         },
-        addControllerToMainList() {
+        addControllerToMainList() { // Добавить новый контроллер, остановить обновление данных в Списке устройств и запустить функцию обновления заново.
             clearTimeout(this.getMainData); // остановить запрос по всем устройствам
             this.getMainData();
         },
-        deleteControllerFromList(id) { // удаление контроллера (после нажатия на кнопку «Удалить контроллер» из страницы конкретного контроллера)
+        deleteControllerFromList(id) { // Удаление контроллера (после нажатия на кнопку «Удалить контроллер» из страницы конкретного контроллера)
             this.controllerList = this.controllerList.filter((controller) => controller.id !== id);
             this.openList();
         }
