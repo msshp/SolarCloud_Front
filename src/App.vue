@@ -719,8 +719,8 @@ input::placeholder {
 .login-btn {
     padding: 10px 0;
     border-radius: 8px;
-    color: #0E1626;
-    background-color: #F8F6F4;
+    color: #f8f6f4;
+    background-color: #cc4d3c;
     margin-bottom: 8px;
 }
 
