@@ -363,7 +363,9 @@ export default {
                     "last_name": this.projUserSurname,
                     "password": this.projUserPass,
                     "profile": {
-                        "role": "User"
+                        "role": "User",
+                        "account": null,
+                        "telegram_chat_id": null
                     }
                 }
             }, {
